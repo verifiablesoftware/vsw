@@ -1,0 +1,109 @@
+\" This template provides an example of how to generate a Linux man" pages for a new command
+\"	NAME Section goes here
+\"
+.TH VSW-AUDIT "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
+.SH NAME  
+vsm audit \- Audit SW package in the VS repo
+\"	SYNOPSIS Section goes here
+\"
+.SH SYNOPSIS  
+\fBvsm audit\fR
+[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
+\"
+\"	DESCRIPTION Section goes here
+\"
+.SH DESCRIPTION  
+\" Add detailed description here
+.PP
+\fBvsm audit\fR - vsm audit is used to audit SW packages in the VS software Rep.
+it will scan the project for vulnerabilities and will either attempt to automatically fix any vulnerable dependenies or it will generate a report listing all the vulnerabilites
+.PP
+Mandatory arguments go here...
+.TP
+\fB\-u\fR, \fB\-\-user [DID]\fR 
+Audit DID (Decentralized ID)
+.TP
+\fB\-p\fR, \fB\-\-package\fR [PackageName] 
+Audit a specific Package
+.TP
+\fB\-l\fR, \fB\-\-list\fR 
+list all packages in the Repo
+.TP
+\fB\-x\fR, \fB\-\-fix\fR 
+ run the audit and fix all vulnerablities
+.TP
+\fB\-f\fR, \fB\-\-file\fR FileName
+send output to FileName
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+print help menu
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+1
+if minor problems (e.g., cannot access subdirectory),
+.TP
+2
+if serious trouble (e.g., cannot access command\-line argument).
+
+\"
+\"	FILES Section goes here
+\"
+.SH FILES  
+.TP  
+.I  /etc/vsm_audit.conf  
+.TP  
+.I  /usr/bin/vsm_audit    
+\"
+\"	EXAMPLES Section goes here
+\"
+.SH EXAMPLES  
+.TP  
+\fBvsm audit\~--p\fR\~ PackageName\fB\~ --fix\fR\
+\"
+\"	DIAGNOSTICS Section goes here
+\"
+.SH DIAGNOSTICS  
+.PP
+The activity performed using this utility is logged in the file \fB/var/log/vsm_audit\fR      
+\"
+\"	REPORTING BUGS Section goes here
+\"
+.SH "REPORTING BUGS"
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+.br
+Report ls translation bugs to <http://translationproject.org/team/>
+\"
+\"	AUTHOR Section goes here
+\"
+.SH AUTHOR
+Written by Name1 and Name2, ...
+\"
+\"	COPYRIGHT Section goes here
+\"
+.SH COPYRIGHT
+Copyright \(co 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+\"
+\"	CREDITS Section goes here
+\"
+.SH CREDITS  
+.PP	
+This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
+\"
+\"	SEE ALSO Section goes here
+\"
+.SH SEE ALSO  
+.br
+vsm register(1)  
+.br 
+vsm list(1)  
+.br 
+vsm certify(1)  
+.br 
+vsm publish(1)  
+.br 
+vsm verify(1)  
+.br 

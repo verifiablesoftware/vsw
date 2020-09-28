@@ -1,0 +1,108 @@
+\" This template provides an example of how to generate a Linux man" pages for a new command
+\"	NAME Section goes here
+\"
+.TH VSW-REGISTER "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
+.SH NAME  
+vsw register \- Register a new Developer's Credentials and grant access to Repo
+\"	SYNOPSIS Section goes here
+\"
+.SH SYNOPSIS  
+\fBvsw register\fR
+[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
+\"
+\"	DESCRIPTION Section goes here
+\"
+.SH DESCRIPTION  
+\" Add detailed description here
+.PP
+\fBvsw register\fR - is used to register or verify the credentials
+of a new developer(Issuer) and to grant access and permissions to add software
+pakages to the Verifiabe Software repo. \fBvsw register\fR can also be used to 
+define the scope for the user as well
+.PP
+Mandatory arguments go here...
+.TP
+\fB\-a\fR, \fB\-\-adduser [alias]\fR 
+Developer DID (Decentralized ID)
+.TP
+\fB\-u\fR, \fB\-\-update [DID]\fR 
+other Issuer Credentials
+.TP
+\fB\-l\fR, \fB\-\-list [DID]\fR 
+Check if DID already exists
+.TP
+\fB\-s\fR, \fB\-\-scope [SCOPE] - for future use\fR 
+If specified the DID will be associated with the specified scope
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+print help menu
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+1
+if minor problems (e.g., cannot access subdirectory),
+.TP
+2
+if serious trouble (e.g., cannot access command\-line argument).
+
+\"
+\"	FILES Section goes here
+\"
+.SH FILES  
+.TP  
+.I  /etc/vsw_register.conf  
+.TP  
+.I  /usr/bin/vsw_register    
+\"
+\"	EXAMPLES Section goes here
+\"
+.SH EXAMPLES  
+.TP  
+\fBvsw register\~--adduser\fR\~ DID\fB\~--scope\fR CompanyA
+\"
+\"	DIAGNOSTICS Section goes here
+\"
+.SH DIAGNOSTICS  
+.PP
+The activity performed using this utility is logged in the file \fB/var/log/vsw_register\fR      
+\"
+\"	REPORTING BUGS Section goes here
+\"
+.SH "REPORTING BUGS"
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+.br
+Report ls translation bugs to <http://translationproject.org/team/>
+\"
+\"	AUTHOR Section goes here
+\"
+.SH AUTHOR
+Written by Name1 and Name2, ...
+\"
+\"	COPYRIGHT Section goes here
+\"
+.SH COPYRIGHT
+Copyright \(co 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+\"
+\"	CREDITS Section goes here
+\"
+.SH CREDITS  
+.PP	
+This man page was created .... 09/10/2020
+\"
+\"	SEE ALSO Section goes here
+\"
+.SH SEE ALSO  
+.br 
+vsw audit(1)  
+.br 
+vsw list(1)  
+.br 
+vsw certify(1)  
+.br 
+vsw publish(1)  
+.br 
+vsw verify(1)  
+.br 
