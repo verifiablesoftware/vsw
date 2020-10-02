@@ -1,5 +1,5 @@
-<strong>Oct 02. 2020 Update-1</h1></strong>
-<h2>Abstract</h2>
+<strong>Oct 02. 2020 Update-1</strong>
+<p>Abstract</p>
 
 <ol>
 <li>the man1 directory contains all the man pages for VSW</li>
@@ -17,5 +17,5 @@
 <li> register</li>
 <li> ...etc</li>
 </ul>
-<h1><strong>Oct 02. 2020 Update-2</h1></strong>
+<strong>Oct 02. 2020 Update-2</strong>
 
