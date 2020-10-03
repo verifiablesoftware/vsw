@@ -1,0 +1,6 @@
+#
+# git pull from a brancd including master
+#
+
+git pull origin cli-manpages
+
