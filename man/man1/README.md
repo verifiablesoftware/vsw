@@ -10,12 +10,12 @@
 </ol>
 <p>man vsw [<strong><em>command</strong></em>] where command is:</p>
 <ul>
+<li> attest</li>
 <li> audit</li>
 <li> list</li>
-<li> verify</li>
-<li> attest</li>
+<li> publish</li>
 <li> register</li>
-<li> ...etc</li>
+<li> verify</li>
 </ul>
 <hr />
 <strong>Oct 02. 2020 Update-2</strong>
