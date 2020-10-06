@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/verifiablesoftware/vsw.git"
+    "url": "git+https://github.com/verifiablesoftware/vsw.git",
+    "directory": "vsw"
   },
   "author": "Futurewei Technologies",
   "license": "Apache-2.0",
