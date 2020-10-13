@@ -40,10 +40,10 @@ Resolves #45
 This project uses the standard GitHub mechanism for pull requests. See ["GitHub: Contributing to a Project"](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project) for the basic information on how to fork the repository, create a pull request, etc.
 
 Checklist before opening your PR to save time and avoid unnecessary back and forth:
-[ ] Use [Prettier](https://prettier.io/) to format your code with the standard style for consistency and ease of reading; There is likely a plugin for whatever IDE you may use
-[ ] Run the testsuite locally before opening your PR
-[ ] Squash your commmits into logical units and write properly formatted commit messages (see [Using Git](#using-git) above)
-[ ] Does this changeset include any significant changes? If so, be sure to include a change to *CONTRIBUTING.md* in your branch.
+- [ ] Use [Prettier](https://prettier.io/) to format your code with the standard style for consistency and ease of reading; There is likely a plugin for whatever IDE you may use
+- [ ] Run the testsuite locally before opening your PR
+- [ ] Squash your commmits into logical units and write properly formatted commit messages (see [Using Git](#using-git) above)
+- [ ] Does this changeset include any significant changes? If so, be sure to include a change to *CONTRIBUTING.md* in your branch.
 
 All pull requests must be reviewed and approved by at least one owner before being accepted. Please also review ["Using Git"](using-git) and ensure that your commit messages follow the guidelines laid out there.
 
