@@ -5,12 +5,12 @@ For more information about DIDs and DID method specifications, please see the [D
 (https://w3c-ccg.github.io/did-primer/)
 
 Most of the existing DID methods identify an actor who can exercise control in an ecosystem,
-for example a human or a human organization. In vsw, we need a new type of DID that identifies a
+for example a human or a human organization. In **vsw**, we need a new type of DID that identifies a
 passive object (certain piece of software) that are controlled by an active DID. Software also has
 unique challenges in identifying various degree of specificity to fit dynamic needs that emerge in
 modern software ecosystems.
 
-# Unique Concepts
+# Unique Features
 **vsw** enables developers and other parties to publish verifiable credentials about a piece of software.
 The prerequisite of this is to have a DID uniquely identifying the given piece of software. In common
 software development practice, the concept of a given piece of software is often fluent and vague, however,
@@ -22,13 +22,17 @@ We need to design the **vsw** DID method to accomodate these kinds of variants.
 Knowing who developed a piece of software is a critical factor for a user to decide whether or how much
 to trust this software. In **vsw**, this is represented by the Controller of the vsw DID. This entity (person
 or organization) is identified by another DID using one of the common active DIDs. The **vsw-did**, in contrast,
-is a passive DID.
+is a passive DID. In the next section, we illustrate graphically the controller relationship and the version
+relationship.
 
 # Illustration
 
 # An Example
 
 # Method Name
+The namestring that shall identify this DID method is: `vsw`
+
+A DID that uses this method MUST begin with the following prefix: `did:vsw`. Per the DID specification, this string MUST be in lowercase. The remainder of the DID, after the prefix, is specified below.
 
 # Method Specific Identifier
 
