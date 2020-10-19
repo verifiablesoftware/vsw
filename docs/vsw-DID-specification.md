@@ -1,8 +1,7 @@
 # Introduction
-The **vsw** DID method specification conforms to the requirements specified in the [DID specification]
-(https://w3c-ccg.github.io/did-spec/), currently published by the W3C Credentials Community Group.
-For more information about DIDs and DID method specifications, please see the [DID Primer]
-(https://w3c-ccg.github.io/did-primer/)
+The **vsw** DID method specification conforms to the requirements specified in the [DID Core Spec](https://w3c.github.io/did-core/),
+currently published by the W3C Credentials Community Group.
+For more information about DIDs and DID method specifications, please see the [DID Primer](https://w3c-ccg.github.io/did-primer/).
 
 Most of the existing DID methods identify an actor who can exercise control in an ecosystem (being **active**),
 for example a human or a human organization or an automated system. In **vsw**, we need a new type of DID that identifies a
@@ -15,8 +14,8 @@ modern software ecosystems.
 ## Authenticated Controllers
 Knowing who developed a piece of software is a critical factor for users to decide whether or how much
 to trust this software. In **vsw**, this is represented by the Controller of the vsw DID. This entity (person
-or organization or automated system) is identified by another DID using one of the common active DIDs. The **vsw-did**, in contrast,
-is a passive DID. These concepts are further discussed in [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
+or organization or automated system) is identified by another DID using one of the common active DIDs. The **did:vsw**, in contrast,
+is a **passive** DID. These concepts are further discussed in the [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
 In the diagram below, we illustrate graphically the controller relationship.
 
 ## Semantic Versioning
@@ -38,7 +37,7 @@ The hashlink can be a field in the DID document and a hashlink in the DID URL. D
 is successful only if the referenced file produces an identical hash. With a cryptographic hashlink, a user will know if
 a file has been changed either intentionally or accidentally, or maliciously (e.g. by an attacker).
 In the diagram below, we show an example of **hl** hashlink that, when dereferenced, returns unchanged software image.
-For details of hashlink, please refer to [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
+For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
 
 # Method Name
 The namestring that shall identify this DID method is: `vsw`
