@@ -52,6 +52,14 @@ A DID that uses this method MUST begin with the following prefix: `did:vsw`. Per
 
 # Method Specific Identifier
 
+The **did:vsw:** Method Specific Identifier could be derived from the DID Document content itself excluding the did:vsw ID to avoid recursion. The format is as follows to ensure it is future proof to certain degree.
+
+**base**(<**version**>><**multicodec**><**multihash**>)
+
+This format is following the examples in **IPFS** and **did:peer**. The details for the initial implementation are to be as follows.
+
+To be completed.
+  
 # An Example
 
 # CRUD Operations
