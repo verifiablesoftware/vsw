@@ -33,6 +33,15 @@ In the diagram below, we illustrate graphically the semantic versioning relation
 
 ![Semantic Versioning Relationship](assets/Semantic-versioning.png).
 
+### Sub-Versioning and LATEST
+Semantic Versioning uses X.Y.Z format, where X is a Major release, Y is a Minor release and Z is a Patch release.
+Developers may choose to allocate a **vsw:did** for each Minor release and Major release as shown in the above
+example (or a different variation). A need arises when a user likes to download a specific patch release, e.g. 1.0.1,
+which does not have its own DID. In such cases, the patch versions must be listed in the parent DID Document with a series of
+cryptographic hashlinks (see next section) which can be dereferenced using DID URL. This scheme implies that the DID Document
+will be updated every time that a new patch is produced. This design also supports other naming of versions, e.g.
+LATEST can also be expressed with DID URL path.
+
 ## Cryptographic Hashlink
 In traditional software distribution systems, the software image and its SHA integrity check are often separate.
 It therefore leaves a gap where the hosting system could make changes without the users noticing. A cryptographic hashlink
