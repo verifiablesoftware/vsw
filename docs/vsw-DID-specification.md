@@ -18,6 +18,8 @@ or organization or automated system) is identified by another DID using one of t
 is a **passive** DID. These concepts are further discussed in the [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
 In the diagram below, we illustrate graphically the controller relationship.
 
+![Controller Relationship](assets/Controller-relationship.png).
+
 ## Semantic Versioning
 **vsw** is designed to enable developers and other parties to publish verifiable credentials about a unit of software.
 The prerequisite of achieving this is to have a DID uniquely identifying the given unit of software. In common
@@ -29,6 +31,8 @@ We need to design the **vsw** DID method to accomodate these kinds of variants. 
 the Semantic Versioning functions as defined by [SemVer](https://semver.org).
 In the diagram below, we illustrate graphically the semantic versioning relationship.
 
+![Semantic Versioning Relationship](assets/Semantic-versioning.png).
+
 ## Cryptographic Hashlink
 In traditional software distribution systems, the software image and its SHA integrity check are often separate.
 It therefore leaves a gap where the hosting system could make changes without the users noticing. A cryptographic hashlink
@@ -38,6 +42,8 @@ is successful only if the referenced file produces an identical hash. With a cry
 a file has been changed either intentionally or accidentally, or maliciously (e.g. by an attacker).
 In the diagram below, we show an example of **hl** hashlink that, when dereferenced, returns unchanged software image.
 For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
+
+![Hashlink](assets/Hashlink-DID-URL.png).
 
 # Method Name
 The namestring that shall identify this DID method is: `vsw`
