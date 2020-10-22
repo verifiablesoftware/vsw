@@ -22,7 +22,12 @@ modern software ecosystems.
 a tester, an auditor, and so on. The other type is to identify a unit of software, which we describe in more detail
 below. For both types, we use **did:sov** which is implemented using Indy Node and is compatible with ACA.py agent.
 
+For the DIDs representing participants, there are two sub-types:
+ - Public (write) DIDs: for participants who can issue credentials (write to the ledger)
+ - Peer DIDs: those who do not need to issue credentials by their own DIDs.
+
 To support these 2 types, we will need to design and publish 2 DID schemas. The design of these schemas is **to follow*.
+
 
 ## Authenticated Controllers
 Knowing who developed a piece of software is a critical factor for users to decide whether or how much
@@ -89,9 +94,9 @@ top of the **did:sov** method without causing issues.
 # vsw Schemas
 
 ## vsw Participant Credential Schema
-I believe we should be able to use an existing schema without creating a new one. We only need a generic credential
+We need to be able to issue credentials to participants. This schema is to define data fields for the type of credentials
 that can adequately identify a developer, tester, auditor etc. For example, name, address, and some contact information
-such as email address.
+such as email address. 
 
 ## vsw Software Credential Schema
 We do need to define a schema that supports the **vsw** features defined above.
@@ -114,10 +119,10 @@ We envision that the company (or the department within that company) who develop
 such public DID. In Sovrin network, this DID costs $10 and every rotation of the keys costs another $10. This fee
 reflects the cost of all future verification of identify related to this issuer. 
 
-For participants who do not wish to or need to be a verified issuer, in **vsw**, the vsw-repo has one DID to represent
-the common or the default issuer on behalf of these participants. Some functionalities of **vsw** MAY be lost in this
-case of course. As an enhancement, we may implement a **delegation** mechanism to maintain similar functionalities for these
-developers. This delegation or proxy function is TBD.
+For participants who do not wish to or need to be a verified issuer, in **vsw**, the vsw-repo can represent
+the common or the delegated issuer on behalf of these participants. These participants already have a peer DID and
+has been issued a participant credential which they can use to sign the claims. The vsw-repo can issue the
+software credential with a field that states who is the origin of the claims.
 
 The choice of using one's own issuer DID or the common DID should be enabled by an option in the **vsw register**
 command.
@@ -127,6 +132,7 @@ Before issuing credentials, an issuer must first define credentials using pre-de
 definition only uses claims from a single Schema, but it could also combine claims from multiple schemas.
 
 For the common default issuer **vsw-repo**, it needs to
+  - define a participant credential which the vsw-repo will administer during **vsw register**
   - define a software credential (or software publish claims), see **vsw publish**
   - define a software test credential (or software attest claims), see **vsw attest**
   - others TBD
@@ -139,8 +145,9 @@ This option should also be implemented in **vsw register** command as a subcomma
 
 ## vsw Credential Issuance
 With the credential definitions written to the Sovrin network, an issuer can start issue credentials. This is done by
- - **vsw publish** for developers
- - **vsw attest** for testers/others
+ - **vsw register** for participants
+ - **vsw publish** for software by the developers
+ - **vsw attest** for software by the testers/others
  
  Additional types of credentials are TBD.
  
