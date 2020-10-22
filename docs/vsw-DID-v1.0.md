@@ -36,7 +36,7 @@ or organization or automated system) is identified by the participant DID. The *
 is identified by a **passive** DID. These concepts are further discussed in the [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
 In the diagram below, we illustrate graphically the controller relationship.
 
-![Controller Relationship](assets/Controller-relationship.png).
+![Controller Relationship](assets/Controller-relationship-v1.png).
 
 ## Semantic Versioning
 **vsw** is designed to enable developers and other parties to publish verifiable credentials about a unit of software.
@@ -49,7 +49,7 @@ We need to design the **software DID** to accomodate these kinds of variants. Sp
 the Semantic Versioning functions as defined by [SemVer](https://semver.org).
 In the diagram below, we illustrate graphically the semantic versioning relationship.
 
-![Semantic Versioning Relationship](assets/Semantic-versioning.png).
+![Semantic Versioning Relationship](assets/Semantic-versioning-v1.png).
 
 ### Sub-Versioning
 Semantic Versioning uses X.Y.Z format, where X is a Major release, Y is a Minor release and Z is a Patch release.
@@ -86,7 +86,7 @@ a file has been changed either intentionally or accidentally, or maliciously (e.
 In the diagram below, we show an example of **hl** hashlink that, when dereferenced, returns unchanged software image.
 For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
 
-![Hashlink](assets/Hashlink-DID-URL.png).
+![Hashlink](assets/Hashlink-DID-URL-v1.png).
 
 Hashlink and hashlink dereferencing does not involve DID resoltion, so this feature can be implemented in **vsw** on
 top of the **did:sov** method without causing issues.
