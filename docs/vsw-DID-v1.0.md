@@ -144,6 +144,7 @@ With the credential definitions written to the Sovrin network, an issuer can sta
  
  Additional types of credentials are TBD.
  
-
+## vsw Credential Revocation
+TBD
 
 # References
