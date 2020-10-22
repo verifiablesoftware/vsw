@@ -1,9 +1,16 @@
 # Introduction
 For **vsw** v1, our implementation relies on [ACA-py agent](https://github.com/hyperledger/aries-cloudagent-python)
 which currently does not support cross ledger. In this specification, we design an approach that can be implemented
-leveraging an existing verifiable credential registry Sovrin network.
+leveraging the existing verifiable credential registry Sovrin network.
 
-# vsw v1 Features
+Sovrin network consists of 3 instances of networks running in Indy Node.
+ - BuilderNet: for developerment testing (aka Sandbox)
+ - StagingNet: for deployment testing (aka POC)
+ - MainNet: for operational deployment
+ 
+Our development work can use the two testing networks.
+
+# vsw v1 DID and Credential Features
 Most of the existing DID methods identify an actor who can exercise control in an ecosystem (being **active**),
 for example a human or a human organization or an automated system. In **vsw**, we need a new type of DID that identifies a
 passive object (i.e. a unit of software) that is controlled by an active DID. Software also has
@@ -39,7 +46,7 @@ In the diagram below, we illustrate graphically the semantic versioning relation
 
 ![Semantic Versioning Relationship](assets/Semantic-versioning.png).
 
-### Sub-Versioning and LATEST
+### Sub-Versioning
 Semantic Versioning uses X.Y.Z format, where X is a Major release, Y is a Minor release and Z is a Patch release.
 Developers may choose to allocate a **software DID** for each Minor release and Major release as shown in the above
 example (or a different variation). A need arises when a user likes to download a specific patch release, e.g. 1.0.1,
@@ -51,13 +58,15 @@ will be updated every time that a new patch is produced.
 above procedure can be implemented by first DID resolution (locating the DID Document), then parse the DID Document to
 locate the field which contains the list of patches.
 
-## LATEST
+### LATEST
 This above design also supports other naming of versions, e.g. LATEST can also be expressed with DID URL path.
-LATEST is defined as the last patch in the DID Document's patch list.
+LATEST is defined as the last patch in the DID Document's patch list. The concept of LATEST is fined to the
+current minor or major release that the DID identifies. In other words, it does not go up to a parent (see below).
 
-### Predecessor and Parent
-A user (consumer of software) who knows the DID of HappyBird 1.1.0 may want to find out information about its
-predecessor HappyBird 1.0.0. [SemVer](https://semver.org) defines predecessor ordering.
+### Predecessor, Successor and Parent
+A user (consumer of software) who knows the DID of HappyBird 1.1 may want to find out information about its
+predecessor HappyBird 1.0. [SemVer](https://semver.org) defines predecessor ordering. Similarly, one may want to
+know the successor version of the software identified by the DID, which is HappyBird 1.2.
 
 **vsw** also defines superset (**parent**) relationship. For example, HappyBird 1.1.0's **parent** is *HappyBird 1*, whose
 **parent** is in turn *HappyBird*.
@@ -77,10 +86,64 @@ For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.or
 Hashlink and hashlink dereferencing does not involve DID resoltion, so this feature can be implemented in **vsw** on
 top of the **did:sov** method without causing issues.
 
-# vsw Participant Credential Schema
+# vsw Schemas
 
-# vsw Software Credential Schema
+## vsw Participant Credential Schema
+I believe we should be able to use an existing schema without creating a new one. We only need a generic credential
+that can adequately identify a developer, tester, auditor etc. For example, name, address, and some contact information
+such as email address.
 
-# vsw Credential Issuance
+## vsw Software Credential Schema
+We do need to define a schema that supports the **vsw** features defined above.
+
+## vsw Software Test Credential Schema
+We also need to define a schema that supports software test credentials.
+
+## Publish Schema
+The **vsw-repo** acts on behalf of the ecosystem to define and publish schema, as defined above. In Sovrin network,
+publishing a schema costs $50 one time fee. 
+
+# vsw Credentials
+
+## Issuer DID (aka Write DID)
+In **vsw** v1, the **vsw-repo** is an issuer of credentials. Other
+participants may become an issuer themselves or delegate the issuance to **vsw-repo**.
+
+To become an issuer of software credentials, the participant must register a public DID (in Sovrin ledger). 
+We envision that the company (or the department within that company) who develops HappyBird would have one
+such public DID. In Sovrin network, this DID costs $10 and every rotation of the keys costs another $10. This fee
+reflects the cost of all future verification of identify related to this issuer. 
+
+For participants who do not wish to or need to be a verified issuer, in **vsw**, the vsw-repo has one DID to represent
+the common or the default issuer on behalf of these participants. Some functionalities of **vsw** MAY be lost in this
+case of course. As an enhancement, we may implement a **delegation** mechanism to maintain similar functionalities for these
+developers. This delegation or proxy function is TBD.
+
+The choice of using one's own issuer DID or the common DID should be enabled by an option in the **vsw register**
+command.
+
+## vsw Credential Definition
+Before issuing credentials, an issuer must first define credentials using pre-defined schemas, In simple cases, a credential
+definition only uses claims from a single Schema, but it could also combine claims from multiple schemas.
+
+For the common default issuer **vsw-repo**, it needs to
+  - define a software credential (or software publish claims), see **vsw publish**
+  - define a software test credential (or software attest claims), see **vsw attest**
+  - others TBD
+
+All participants who are also issuers have similar requirements to define all credentials they wish to issue individually.
+For example, a developer will need to define a software credential. A tester will need to define a test result credential.
+**note**: to confirm.
+
+This option should also be implemented in **vsw register** command as a subcommand.
+
+## vsw Credential Issuance
+With the credential definitions written to the Sovrin network, an issuer can start issue credentials. This is done by
+ - **vsw publish** for developers
+ - **vsw attest** for testers/others
+ 
+ Additional types of credentials are TBD.
+ 
+
 
 # References
