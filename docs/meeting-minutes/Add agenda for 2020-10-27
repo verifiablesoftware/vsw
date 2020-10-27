@@ -1,0 +1,14 @@
+# Weekly Meeting - 2020-10-27
+
+## Agenda
+
+1. Action item followup
+   * [X] Review the M1 issues and prepare questions and comments for a meeting later this week - Eric
+   * [X] Setup AWS parent account for use by all parties - Wenjing
+   * [X] Budget for AWS usage - Wenjing
+   * [ ] Give Juha T. access for AWS - Wenjing
+2. Discuss / Walkthrough Sequential Diagram - All
+3. Present CI/CD plan for M1 (AWS CodeBuild/GitHub Actions) - Symbio (Tero)
+3. Discuss open questions / issues
+
+## Minutes
