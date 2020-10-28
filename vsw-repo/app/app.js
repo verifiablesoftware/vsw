@@ -4,7 +4,7 @@ const app = express()
 const port = process.env.PORT || 3000
 app.get('/', (req, res) => {
  
- const aca = exec('python3 $agent_home/bin/aca-py start', function (error, stdout, stderr) {
+ const aca = exec('python3 /home/indy/bin/aca-py start', function (error, stdout, stderr) {
     if (error) {
       console.log(error.stack);
       console.log('Error code: '+error.code);
@@ -22,4 +22,9 @@ app.get('/', (req, res) => {
   });
  
 })
+
+app.get('/health_check', (req, res) => {
+  res.send("up");
+});
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

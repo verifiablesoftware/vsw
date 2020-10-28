@@ -1,25 +1,19 @@
-FROM node:15.0.1-alpine3.10
+FROM ericw16/aries-cloudagent-python:latest
 
-LABEL maintainer=yeak2001@gmail.com
+ENV PORT=8000
 
-ARG homeDir=/root
-ARG user=vsw-repo
-ARG appDir=/root/vsw-repo
+COPY ./app/ ./
 
-ENV PORT 8000
-ENV agent_home=/root/agent
-
-RUN mkdir $appDir
-RUN mkdir $agent_home
-
-COPY ./app/ $appDir/
-#COPY ../../aries-cloudagent-python/ $agent_home/
-
-RUN apk add python3 && apk add py3-pip
-
-WORKDIR $appDir
 EXPOSE $PORT
+USER root
+RUN apt-get update && apt-get install nodejs -y && apt-get install npm -y
+
 RUN npm i
 
-#ENTRYPOINT ["bash", "-c"]
+HEALTHCHECK --interval=1m --timeout=3s \
+  CMD curl \
+      --fail \
+      http://localhost:$PORT/health_check || \
+      exit 1
+
 CMD node app.js
