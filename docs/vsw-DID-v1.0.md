@@ -1,16 +1,17 @@
 # Introduction
 For **vsw** v1, our implementation relies on [ACA-py agent](https://github.com/hyperledger/aries-cloudagent-python)
 which currently does not support cross ledger. In this specification, we design an approach that can be implemented
-leveraging the existing verifiable credential registry Sovrin network.
+leveraging the existing verifiable credential registry [Sovrin network](https://sovrin.org/developers/).
 
 Sovrin network consists of 3 instances of networks running in Indy Node.
- - BuilderNet: for developerment testing (aka Sandbox)
+ - BuilderNet: for development testing (aka Sandbox)
  - StagingNet: for deployment testing (aka POC)
  - MainNet: for operational deployment
  
-Our development work can use the two testing networks.
+Our development work can use the two testing networks, using the BuilderNet for development and the StagingNet for
+Proof of Concept deployment.
 
-# vsw v1 DID and Credential Features
+# vsw v1 DID and Verifiable Credential Features
 Most of the existing DID methods identify an actor who can exercise control in an ecosystem (being **active**),
 for example a human or a human organization or an automated system. In **vsw**, we need a new type of DID that identifies a
 passive object (i.e. a unit of software) that is controlled by an active DID. Software also has
@@ -18,21 +19,42 @@ unique challenges in identifying various degree of specificity and complex depen
 modern software ecosystems.
 
 ## DIDs used in vsw
-**vsw** v1 uses 2 types of DIDs. One is to identify an active participant in the **vsw** ecosystem, e.g. a developer,
+**vsw** v1 uses various types of DIDs. One is to identify an active participant in the **vsw** ecosystem, e.g. a developer,
 a tester, an auditor, and so on. The other type is to identify a unit of software, which we describe in more detail
 below. For both types, we use **did:sov** which is implemented using Indy Node and is compatible with ACA.py agent.
 
-For the DIDs representing participants, there are two sub-types:
- - Public (write) DIDs: for participants who can issue credentials (write to the ledger)
- - Peer DIDs: those who do not need to issue credentials by their own DIDs.
+For the DIDs representing participants who issue credentials, they need Public DIDs (aka Write DIDs) to write to the ledger.
+For example, suppose a company Happy Software, Inc. publishes a game HappyBird. The company will need a public DID to issue
+credentials about the software HappyBird. Suppose an independent testing organization Games Unlimited wants to publish its
+evaluation of HappyBird, it will also be issuing credentials and need a public DID. General game players will not need a public
+DID as they only verify credentials presented by the registry.
 
-To support these 2 types, we will need to design and publish 2 DID schemas. The design of these schemas is **to follow*.
+In the ACA-py agent, Peer DIDs are used for those who do not need to issue credentials by their own public DIDs. Ordinary
+consumers of software, e.g. the game players, do not necessary need a public DID. Peer DIDs are used to facilitate the 
+credential verification process (request for proof, and presentation of proof). If an individual software developers wants
+to publish credentials about any software, then he or she is acting as a credential issuer and will need a public DID.
 
+## vsw Repository Roles
+The **vsw** repository may play multiple roles. It is important that we differentiate these roles. The most important role
+it plays is as the **holder** of verifiable credentials issued. As a holder, it can interact with a consumer answering his/her
+proof request with a presentation of proof. The consumer can accept the proof as if it is from the issuer (**transitive trust**).
+In this role, the **vsw** repository is a convenient digital **registry** where consumers can request for verifiable information.
+Note that the role of a verifiable credential registry does not imply a "centralized" authority because the trust rests with
+the issuers, not the holder.
+
+During the transition period until public DIDs are widely available and adopted, we may provide a convenience utility to
+allow individual developers to rely on **vsw** to issue credentials on their behalf as a proxy. In this role, we will allocate
+a commonly known public DID for **vsw** to issue these credentials. With the credentials, the developer of the software is
+identified as the true developer, by name and email address, for instance. 
+
+Finally, **vsw** may also serve as the storage system for the published software where consumers can verify its credentials
+as well as downloading safely using hashlink to ensure its integrity. This role can be played by other storage systems as
+well.
 
 ## Authenticated Controllers
 Knowing who developed a piece of software is a critical factor for users to decide whether or how much
-to trust this software. In **vsw**, this is represented by the Controller of the vsw DID. This entity (person
-or organization or automated system) is identified by the participant DID. The **software**, in contrast,
+to trust this software. In **vsw**, this is represented by the **Controller** of the software's DID. This entity (person
+or organization or automated system) is identified by the active participant DID. The **software**, in contrast,
 is identified by a **passive** DID. These concepts are further discussed in the [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
 In the diagram below, we illustrate graphically the controller relationship.
 
@@ -94,57 +116,73 @@ top of the **did:sov** method without causing issues.
 # vsw Schemas
 
 ## vsw Participant Credential Schema
-We need to be able to issue credentials to participants. This schema is to define data fields for the type of credentials
-that can adequately identify a developer, tester, auditor etc. For example, name, address, and some contact information
-such as email address. 
+**vsw** **MAY** need to be able to issue credentials to participants. This schema is to define data fields for the type of credentials
+that can adequately identify a developer, tester, auditor etc. For example, name and some contact information
+such as email address. This credential links an email address and a name to a user who does not have to be an issuer, i.e. 
+general users or consumers.
+
+Note that since it is a very basic schema, there should have a published schema already. **vsw-repo** writes a credential definition
+using its public DID to the ledger.
 
 ## vsw Software Credential Schema
 We do need to define a schema that supports the **vsw** features defined above.
+See Issue [#4](https://github.com/verifiablesoftware/vsw/issues/4).
+**vsw-repo** publishes at least one software credential schema (or multiples eventually) to the ledger using its public DID.
+Other developers may use their own credential schema as well.
 
 ## vsw Software Test Credential Schema
 We also need to define a schema that supports software test credentials.
+See Issue [#40](https://github.com/verifiablesoftware/vsw/issues/40)
+**vsw-repo** publishes at least one software credential schema (or multiples eventually) to the ledger using its public DID.
+Other testers may use their own credential schema as well.
 
 ## Publish Schema
-The **vsw-repo** acts on behalf of the ecosystem to define and publish schema, as defined above. In Sovrin network,
-publishing a schema costs $50 one time fee. 
+The **vsw-repo** acts on behalf of the ecosystem to define and publish schema, as defined above.  
+Others can define and publish additional schema as well. This is typically done as a common act of the ecosystem, so it's a good
+practice for **vsw-repo** do publish standard ones.
 
 # vsw Credentials
 
 ## Issuer DID (aka Write DID)
-In **vsw** v1, the **vsw-repo** is an issuer of credentials. Other
-participants may become an issuer themselves or delegate the issuance to **vsw-repo**.
+In **vsw** v1, there are many issuer of software credentials, e.g. developers, testers.
 
 To become an issuer of software credentials, the participant must register a public DID (in Sovrin ledger). 
 We envision that the company (or the department within that company) who develops HappyBird would have one
-such public DID. In Sovrin network, this DID costs $10 and every rotation of the keys costs another $10. This fee
-reflects the cost of all future verification of identify related to this issuer. 
+such public DID. (In Sovrin network, this DID costs $10 and every rotation of the keys costs another $10. This fee
+reflects the cost of all future verification of identify related to this issuer. )
 
-For participants who do not wish to or need to be a verified issuer, in **vsw**, the vsw-repo can represent
-the common or the delegated issuer on behalf of these participants. These participants already have a peer DID and
-has been issued a participant credential which they can use to sign the claims. The vsw-repo can issue the
-software credential with a field that states who is the origin of the claims.
+For participants who do not wish to or do not need to be an issuer, in **vsw**, the vsw repository can proxy as a
+common issuer on behalf of these participants. These participants already have a peer DID and may
+have been issued a participant credential which they can use to prove their identify (i.e. the name and email address
+information contained in the credential). The vsw-repo can issue the
+software credential with a field that states who is the origin of the claims (i.e. the name and email address etc.)
 
-The choice of using one's own issuer DID or the common DID should be enabled by an option in the **vsw register**
-command.
+The choice of using one's own issuer DID or the common proxy should be enabled by an option in the **vsw register**
+command. Note that the default case is when one has a public DID to issue these credentials. If a participant chooses
+to use the proxy, the credential will lose some trust level because the consumer must now trust the proxy. On the other
+hand, in an open and transparent software ecosystem, the particpant can check the proxy's honesty by
+verifying the credential he/she asks the proxy to issue.
 
 ## vsw Credential Definition
 Before issuing credentials, an issuer must first define credentials using pre-defined schemas, In simple cases, a credential
 definition only uses claims from a single Schema, but it could also combine claims from multiple schemas.
 
+Each issuer has to do this step using their own public DID.
+
 For the common default issuer **vsw-repo**, it needs to
   - define a participant credential which the vsw-repo will administer during **vsw register**
-  - define a software credential (or software publish claims), see **vsw publish**
+  - define a software credential, see **vsw publish**
   - define a software test credential (or software attest claims), see **vsw attest**
   - others TBD
 
 All participants who are also issuers have similar requirements to define all credentials they wish to issue individually.
 For example, a developer will need to define a software credential. A tester will need to define a test result credential.
-**note**: to confirm.
+These definitions uses a schema and binds with the issuer's DID.
 
 This option should also be implemented in **vsw register** command as a subcommand.
 
 ## vsw Credential Issuance
-With the credential definitions written to the Sovrin network, an issuer can start issue credentials. This is done by
+With the credential definitions written to the ledger, an issuer can start issue credentials. This is done by
  - **vsw register** for participants
  - **vsw publish** for software by the developers
  - **vsw attest** for software by the testers/others
