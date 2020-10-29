@@ -24,7 +24,7 @@ function get_agent_args() {
     let wallet_name = 'Repo.Agent' + Math.random();
     let args = {
         '--endpoint': `http://${DEFAULT_EXTERNAL_HOST}:{HTTP_PORT}`,
-        '--label': 'vsw-repo',
+        '--label': 'Repo.Agent',
         '--admin-insecure-mode': '',
         '--inbound-transport': 'http 0.0.0.0 8060',
         '--outbound-transport': 'http ',

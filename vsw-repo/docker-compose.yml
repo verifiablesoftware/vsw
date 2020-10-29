@@ -5,6 +5,8 @@ services:
     image: vsw-repo:latest
     stdin_open: true
     tty: true
+    environment:
+      - DOCKERHOST=${DOCKERHOST}
     ports:
       - "8000:8000"
       - "8060:8060"
