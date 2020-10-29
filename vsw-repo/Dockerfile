@@ -1,13 +1,12 @@
 FROM verifiablesoftware/aries-cloudagent-python:latest
 
 ENV PORT=8000
-
-COPY ./app/ ./
-
 EXPOSE $PORT
 USER root
-RUN apt-get update && apt-get install nodejs -y && apt-get install npm -y
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+  apt-get install nodejs -y
 
+COPY ./app/ ./
 RUN npm i
 
 HEALTHCHECK --interval=1m --timeout=3s \

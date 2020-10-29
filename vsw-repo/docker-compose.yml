@@ -1,0 +1,14 @@
+version: '3'
+services:
+  vsw-repo:
+    container_name: vsw-repo
+    image: vsw-repo:latest
+    stdin_open: true
+    tty: true
+    ports:
+      - "8000:8000"
+      - "8060:8060"
+      - "8061:8061"
+    restart: always
+    cap_drop:
+      - ALL

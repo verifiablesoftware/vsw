@@ -9,4 +9,4 @@ if [ !"$(docker ps -qq -f name=${NAME})" ]; then
 fi
 
 docker build -t ${NAME} .
-docker run -d --name ${NAME} -p 8000:8000 ${NAME}
+docker-compose up &
