@@ -1,4 +1,4 @@
-FROM ericw16/aries-cloudagent-python:latest
+FROM verifiablesoftware/aries-cloudagent-python:latest
 
 ENV PORT=8000
 
