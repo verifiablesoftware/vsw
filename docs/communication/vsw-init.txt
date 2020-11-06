@@ -1,0 +1,18 @@
+title vsw init
+
+actor #green Alice
+fontawesome f120 vsw #green
+fontawesome f085 vsw Agent #green
+fontawesome f0c1 Ledger
+
+activate Ledger
+Alice->vsw:vsw init 
+activate vsw
+vsw->vsw Agent:POST /wallet/did/create
+activate vsw Agent
+vsw Agent->Ledger:Get new DID
+Ledger-->vsw Agent:DID and keys
+vsw Agent-->vsw:Result
+abox over vsw:Create wallet with\nthis DID and keys
+vsw-->Alice:DID
+deactivate vsw

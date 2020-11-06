@@ -1,0 +1,33 @@
+title vsw register
+
+actor #green Alice
+fontawesome f120 vsw #green
+fontawesome f085 vsw Agent #green
+fontawesome f085 repo Agent #blue
+fontawesome f1c0 repo #blue
+
+activate repo Agent
+activate repo
+activate vsw Agent
+Alice->vsw:vsw register <repo-did>\n    \--email=alice@example.com
+activate vsw
+vsw->vsw Agent:POST /connections/{conn_id}/send-message
+deactivate vsw
+vsw Agent->>repo Agent:Message
+repo Agent->repo:POST /webhooks/topic/basicmessage
+repo-#blue>Alice:Verifiation email with code
+Alice->vsw:vsw register \--verify <code>
+activate vsw
+vsw->vsw Agent:POST /connections/{conn_id}/send-message
+vsw Agent->>repo Agent:Message
+repo Agent->repo:POST /webhooks/topic/basicmessage
+abox over repo:Issue email credential
+repo->repo Agent:POST /issue-credential/create
+repo Agent->vsw Agent:
+box over vsw Agent,repo Agent:Credential issuing process\nbetween agents
+repo Agent-->repo:Response
+repo->repo Agent:POST /connections/{conn_id}/send-message
+repo Agent->vsw Agent:Message
+vsw Agent->vsw:POST /webhooks/topic/basicmessage
+vsw-->Alice:Success
+deactivate vsw
