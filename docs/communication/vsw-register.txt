@@ -11,6 +11,11 @@ activate repo
 activate vsw Agent
 Alice->vsw:vsw register <repo-did>\n    \--email=alice@example.com
 activate vsw
+vsw->vsw Agent:POST /connections/receive-invitation
+vsw Agent->>repo Agent:
+box over vsw Agent,repo Agent:handshake
+repo Agent->>vsw Agent:
+vsw Agent-->vsw:connection
 vsw->vsw Agent:POST /connections/{conn_id}/send-message
 deactivate vsw
 vsw Agent->>repo Agent:Message
