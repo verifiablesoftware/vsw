@@ -1,0 +1,27 @@
+title vsw install foo
+
+actor #green Alice
+fontawesome f120 vsw #green
+fontawesome f085 vsw Agent #green
+fontawesome f085 repo Agent #blue
+fontawesome f1c0 repo #blue
+
+activate repo Agent
+activate repo
+activate vsw Agent
+Alice->vsw:vsw install foo
+activate vsw
+box over vsw:- Search cache for foo\n- Select repo
+vsw->vsw Agent:POST /present-proof/send-request
+vsw Agent->>repo Agent:
+repo Agent->repo:POST /webhooks/topic/present_proof
+repo->repo Agent:GET /present-proof/records/xxx/credentials
+repo Agent-->repo:credentials
+repo->repo Agent:POST /present-proof/records/\n    xxx/send-presentation
+repo Agent->>vsw Agent:
+vsw Agent->vsw: POST /webhooks/topic/present_proof
+vsw->vsw Agent:POST /present-proof/records/\n   xxx/verify-presentation
+vsw Agent-->vsw:proof
+box over vsw:* Download from URL\n* Verify digest\n* Install
+vsw-->Alice:Success
+deactivate vsw

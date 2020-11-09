@@ -11,16 +11,23 @@ activate repo
 activate vsw Agent
 Alice->vsw:vsw publish
 activate vsw
-vsw->vsw Agent:POST /present-proof/send-request
+box over vsw:Generate credential\nfrom package config file
+vsw->vsw Agent:POST /issue-credential/send-offer
 vsw Agent->>repo Agent:
-repo Agent->repo:POST /webhooks/topic/present_proof
-repo->repo Agent:GET /present-proof/records/xxx/credentials
-repo Agent-->repo:credentials
-repo->repo Agent:POST /present-proof/records/\n    xxx/send-presentation
+repo Agent->repo:POST /webhooks/topic/issue_credential
+repo->repo Agent:POST /issue-credential/\n  records/xxx/send-request
 repo Agent->>vsw Agent:
-vsw Agent->vsw: POST /webhooks/topic/present_proof
-vsw->vsw Agent:POST /present-proof/records/\n   xxx/verify-presentation
-vsw Agent-->vsw:proof
-box over vsw:* Download from URL\n* Verify digest\n* Install
-vsw-->Alice:Success
+vsw Agent->vsw:POST /webhooks/topic/issue_credential
+vsw->vsw Agent:POST /issue-credential/records/xxx/issue
+vsw Agent->>repo Agent:
+repo Agent->>vsw Agent:
+parallel
+repo Agent->repo:POST /webhooks/topic/issue_credential
+vsw Agent->vsw:POST /webhooks/topic/issue_credential
+parallel off
+parallel
+repo->repo Agent:GET /credential/yyy
+vsw-->Alice:success
+parallel off
 deactivate vsw
+repo Agent-->repo:credential
