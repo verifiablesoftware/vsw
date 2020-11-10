@@ -219,6 +219,28 @@ With the credential definitions written to the ledger, an issuer can start issue
  Additional types of credentials are TBD.
  
 ## vsw Credential Revocation
-TBD
+Indy uses the concept of cryptographic accumulator to support an issuer's ability to immediately and globally revoke a
+credential. For additional introduction of Indy's implementation, see [Indy Cred Revocation]{https://github.com/hyperledger/indy-sdk/blob/master/docs/concepts/revocation/cred-revocation.md}.
+
+In order to enable revocation capability, the issuer of a credential type must create a **revocation registery** for each
+Credential Definition. This registry tells which **accumulator** the given credential definition will use and points to its
+associated **tails file**. The issuer then maintains the accumulator every time it revokes a credential of this type.
+
+The prover, or holder, i.e. **vsw-repo**, will need to present additional proof that the credentials it uses for proof are
+not revoked. This is the proof of **non-revocation**. The verifier, also verifies this additional proof. In the Indy's
+accumulator method, the issuer's burden is maintaining the registry, the holder/prover adjusting to the accumulator every
+time the registry has new revocations, but the verifier has very simple verification procedure. The issuer has complete freedom
+to revoke whenever it wishes without contacting anyone. The revocations are irreversible. The holder/prover's job is more burdensome
+as it must check and update the tails file if it has been changed, every time it presents a proof. Since we are implementing
+the holder in a server, this step can be a background process to remove latency in presenting a proof.
+
+For an issuer (software developer or tester, e.g.) to revoke a previous issued credential, use
+ -- **vsw revoke**
+The procedures for the prover and verifier are implicit. If a credential type has a **revocation registry** defined, then
+they must present non-revocation proof or verify that proof respectively.
+
+Furhter implementation detail TBD.
+
+
 
 # References
