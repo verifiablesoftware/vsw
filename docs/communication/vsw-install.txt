@@ -2,15 +2,15 @@ title vsw install foo
 
 actor #green Alice
 fontawesome f120 vsw #green
-fontawesome f085 vsw Agent #green
-fontawesome f085 repo Agent #blue
+fontawesome f085 vsw Agent #lightgreen
+fontawesome f085 repo Agent #lightblue
 fontawesome f1c0 repo #blue
 
-activate repo Agent
-activate repo
-activate vsw Agent
+activate repo Agent #lightblue
+activate repo #blue
+activate vsw Agent #lightgreen
 Alice->vsw:vsw install foo
-activate vsw
+activate vsw #green
 box over vsw:- Search cache for foo\n- Select repo
 vsw->vsw Agent:POST /present-proof/send-request
 vsw Agent->>repo Agent:

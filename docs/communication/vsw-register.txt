@@ -2,15 +2,15 @@ title vsw register
 
 actor #green Alice
 fontawesome f120 vsw #green
-fontawesome f085 vsw Agent #green
-fontawesome f085 repo Agent #blue
+fontawesome f085 vsw Agent #lightgreen
+fontawesome f085 repo Agent #lightblue
 fontawesome f1c0 repo #blue
 
-activate repo Agent
-activate repo
-activate vsw Agent
+activate repo Agent #lightblue
+activate repo #blue
+activate vsw Agent #lightgreen
 Alice->vsw:vsw register <repo-did>\n    \--email=alice@example.com
-activate vsw
+activate vsw #green
 vsw->vsw Agent:POST /connections/receive-invitation
 vsw Agent->>repo Agent:
 box over vsw Agent,repo Agent:handshake
@@ -20,9 +20,9 @@ vsw->vsw Agent:POST /connections/{conn_id}/send-message
 deactivate vsw
 vsw Agent->>repo Agent:Message
 repo Agent->repo:POST /webhooks/topic/basicmessage
-repo-#blue>Alice:Verifiation email with code
+repo-#blue>>Alice:Verifiation email with code
 Alice->vsw:vsw register \--verify <code>
-activate vsw
+activate vsw #green
 vsw->vsw Agent:POST /connections/{conn_id}/send-message
 vsw Agent->>repo Agent:Message
 repo Agent->repo:POST /webhooks/topic/basicmessage

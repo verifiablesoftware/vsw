@@ -2,15 +2,15 @@ title vsw publish
 
 actor #green Alice
 fontawesome f120 vsw #green
-fontawesome f085 vsw Agent #green
-fontawesome f085 repo Agent #blue
+fontawesome f085 vsw Agent #lightgreen
+fontawesome f085 repo Agent #lightblue
 fontawesome f1c0 repo #blue
 
-activate repo Agent
-activate repo
-activate vsw Agent
+activate repo Agent #lightblue
+activate repo #blue
+activate vsw Agent #lightgreen
 Alice->vsw:vsw publish
-activate vsw
+activate vsw #green
 box over vsw:Generate credential\nfrom package config file
 vsw->vsw Agent:POST /issue-credential/send-offer
 vsw Agent->>repo Agent:

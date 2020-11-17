@@ -1,0 +1,26 @@
+title vsw-repo (First Run)
+
+fontawesome f120 repo #blue
+fontawesome f085 repo Agent #lightblue
+fontawesome f0c1 Ledger
+
+activate Ledger #gray
+repo->Ledger:POST /register
+activate repo #blue
+activate repo Agent #lightblue
+Ledger-->repo:Nym info
+loop #ff00ff Repeat for each schema
+repo->repo Agent:POST /schemas
+repo Agent->>Ledger:Publish schema
+Ledger-->>repo Agent:Schema ID
+repo Agent-->repo:Schema ID
+end
+loop #ff00ff Repeat for each credential to be issued by the repo
+repo->repo Agent:POST /credential-definitions
+repo Agent->>Ledger:Publish credential definition
+Ledger-->>repo Agent:Credential definition ID
+repo Agent-->repo:Credential definition ID
+end
+repo->repo Agent:POST /connections/create-invitation?\n    multi_use=true&public=true
+repo Agent-->repo:Connection
+box over repo:Publish invitation somewhere
