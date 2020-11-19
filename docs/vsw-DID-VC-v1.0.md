@@ -239,7 +239,7 @@ For an issuer (software developer or tester, e.g.) to revoke a previous issued c
 The procedures for the prover and verifier are implicit. If a credential type has a **revocation registry** defined, then
 they must present non-revocation proof or verify that proof respectively.
 
-Furhter implementation detail TBD.
+Further implementation detail TBD.
 
 
 
