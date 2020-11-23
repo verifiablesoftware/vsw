@@ -1,3 +1,4 @@
+<pre>
 command: vsw register
 
 
@@ -37,4 +38,5 @@ Example of relative and absolute DID URL:
 }
 
 In the example above, the relative DID URL value will be transformed to an absolute DID URL value of did:example:123456789abcdefghi#key-1. 
+</pre>
 
