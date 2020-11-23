@@ -1,3 +1,4 @@
+<pre>
 name: create vsw package.json
 
 Description:
@@ -47,3 +48,4 @@ package.json
       "url": ".MyWallet"
   }
 }
+</pre>
