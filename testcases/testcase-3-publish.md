@@ -1,3 +1,4 @@
+<pre>
 command: vsw publish
 
 
@@ -22,4 +23,5 @@ Execution Steps:
 Expected output:
 
 a confirmation message indicating that my package has been successfully stored in the vsw Repo
+</pre>
 
