@@ -15,7 +15,7 @@ Proof of Concept deployment.
 Sovrin networks are no longer using token payments. We will not use any token payment capabilities in **vsw**. All ledger
 transactions will be done through **endorsers** (aka **Trust Anchors**). More in the next section on this point.
 
-# vsw v1 DID and Verifiable Credential Features
+# vsw DIDs and Verifiable Credentials
 Most of the existing DID methods identify an actor who can exercise control in an ecosystem (being **active**),
 for example a human or a human organization or an automated system. In **vsw**, we also need another type of DID that identifies a
 passive object (i.e. a unit of software) that is **controlled by an active DID**. Software also has
@@ -241,6 +241,15 @@ they must present non-revocation proof or verify that proof respectively.
 
 Further implementation detail TBD.
 
+# Integrating vsw with an Operational Ledger
+
+In this section, we desribe how **vsw** connects with an operational ledger (as compared to a testing Indy pool). We use Sovrin
+networks for v1. As described in the **Introduction**, Sovrin community runs three instances of Indy ledgers: (1) BuilderNet for
+developer testing, (2) StagingNet for production staging, and (3) MainNet for production deployment.
+
+The following diagram illustrates the approach **vsw** will take to integrate with Sovrin networks.
+
+![Integrating with an Indy ledger](assets/Integrating-Indy-ledger-v1.png).
 
 
 # References
