@@ -1,0 +1,5 @@
+{
+    "name": "user-github",
+    "version": "0.1",
+    "attributes": ["id", "githubId"]
+}

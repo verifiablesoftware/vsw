@@ -1,0 +1,5 @@
+{
+    "name": "user-email",
+    "version": "0.1",
+    "attributes": ["id", "email"]
+}

@@ -1,0 +1,5 @@
+{
+    "name": "user-domain",
+    "version": "0.1",
+    "attributes": ["id", "domain"]
+}
