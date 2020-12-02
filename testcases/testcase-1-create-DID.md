@@ -2,7 +2,7 @@
 command: vsw register
 
 
-name: create a new DID
+Synopsis: create a new DID
 
 Description:
 
