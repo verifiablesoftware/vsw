@@ -1,100 +1,49 @@
-\" This template provides an example of how to generate a Linux man" pages for a new command
-\"	NAME Section goes here
-\"
 .TH VSW-PUBLISH "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
 .SH NAME  
-vsw-publish \- Publish SW package to the VS repo
-\"	SYNOPSIS Section goes here
-\"
+vsw-publish \- Publish a software package to the VSW repo
 .SH SYNOPSIS  
-\fBvsw publish\fR
-[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
-\"
-\"	DESCRIPTION Section goes here
-\"
+.B vsw publish
+[\fI\,OPTION\/\fR]... [\fI\,path\/\fR]
 .SH DESCRIPTION  
-\" Add detailed description here
 .PP
-\fBvsw publish\fR - is used to publish SW packages in the VS software Depo by 
-the Developer so it can be intalled by name. All files in the package are
- included.
-.br
- By default vsw publish should publish to the public SW Repo
+\fBvsw publish\fR - is used to publish software packages to the VSW repo. All
+information about the package should be defined in a file called vsw.json. If
+.I path
+is specified, find vsw.json in that directory, else, look in the current
+directory.
 .PP
-Mandatory arguments go here...
+The options are as follows:
 .TP
-\fB\-u\fR, \fB\-\-user [DID|Alias] - Optional\fR 
-Holder DID (Decentralized ID)
-.TP
-\fB\-p\fR, \fB\-\-package\fR [packageName] 
-Name of the Package
-.TP
-\fB\-d\fR, \fB\-\-dir\fR [DirName] 
-Name of Directory conataining the Package
+.BI "\-u, \-\-user " DID|alias
+Specify the identity with which to publish this package. If omitted, use the
+default identity.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
-print help menu
+Print help menu.
 .SS "Exit status:"
 .TP
 0
-if OK,
+if successful
 .TP
 1
-if minor problems (e.g., cannot access subdirectory),
+if conflict is reported by repo
 .TP
 2
-if serious trouble (e.g., cannot access command\-line argument).
-
-\"
-\"	FILES Section goes here
-\"
-.SH FILES  
-.TP  
-.I  /etc/vsm_publish.conf  
-.TP  
-.I  /usr/bin/vsm_publish    
-.TP  
-.I  .config
-\"
-\"	EXAMPLES Section goes here
-\"
+if unable to communicate with the repo
 .SH EXAMPLES  
 .TP  
-\fBvsw publish\~--type\fR\~ edu\fB\~ --issuer\fR\~ issuer_credentials
-(Run vsw publish with my_arg2 value for team2 value)      
-\"
-\"	DIAGNOSTICS Section goes here
-\"
-.SH DIAGNOSTICS  
-.PP
-The activity performed using this utility is logged in the file \fB/var/log/vsm_publish\fR      
-\"
-\"	REPORTING BUGS Section goes here
-\"
+\fBvsw publish\~--user\fR\~ user1\f
 .SH "REPORTING BUGS"
-GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
-.br
-Report ls translation bugs to <http://translationproject.org/team/>
-\"
-\"	AUTHOR Section goes here
-\"
+Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
 .SH AUTHOR
-Written by Name1 and Name2, ...
-\"
-\"	COPYRIGHT Section goes here
-\"
+Written by C. T. Al-Hakim and B. Dobry
 .SH COPYRIGHT
-Copyright \(co 2017 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-\"
-\"	CREDITS Section goes here
-\"
+Copyright \(co 2020 Futurewei Technologies, Inc.
+.br
+License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
 .SH CREDITS  
 .PP	
 This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
-\"
-\"	SEE ALSO Section goes here
-\"
 .SH SEE ALSO  
 .br
 vsw register(1)  

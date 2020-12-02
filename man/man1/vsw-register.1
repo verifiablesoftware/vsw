@@ -1,99 +1,56 @@
-\" This template provides an example of how to generate a Linux man" pages for a new command
-\"	NAME Section goes here
-\"
 .TH VSW-REGISTER "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
 .SH NAME  
-vsw register \- Register a new Developer's Credentials and grant access to Repo
-\"	SYNOPSIS Section goes here
-\"
+vsw register \- Register a developerwith the repo
 .SH SYNOPSIS  
 \fBvsw register\fR
-[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
-\"
-\"	DESCRIPTION Section goes here
-\"
+[\fI\,OPTION\/\fR]... \fI\,username\/\fR
 .SH DESCRIPTION  
-\" Add detailed description here
 .PP
-\fBvsw register\fR - is used to register or verify the credentials
-of a new developer(Issuer) and to grant access and permissions to add software
-pakages to the Verifiabe Software repo. \fBvsw register\fR can also be used to 
-define the scope for the user as well
+\fBvsw register\fR - is used to register a new developer with the repo. This
+links the specified username to the developer's DID and optionally associates
+other externally identifiable information about the developer.
 .PP
-Mandatory arguments go here...
+The options are as follows:
 .TP
-\fB\-a\fR, \fB\-\-adduser [alias]\fR 
-Developer DID (Decentralized ID)
+.BI "\-\-did " DID
+Specify which DID to register. If omitted, the default DID will be used.
 .TP
-\fB\-u\fR, \fB\-\-update [DID]\fR 
-other Issuer Credentials
+.BI "\-\-domain " domain
+Specify a domain name to associate with this user. If this flag is passed,
+directions will be provided to prove ownership of the domain.
 .TP
-\fB\-l\fR, \fB\-\-list [DID]\fR 
-Check if DID already exists
+.BI "\-\-email " email
+Specify an email address to associate with this user. If this flag is passed,
+directions will be provided to prove ownership of the email address.
 .TP
-\fB\-s\fR, \fB\-\-scope [SCOPE] - for future use\fR 
-If specified the DID will be associated with the specified scope
+.BI "\-\-github " github-username
+Specify a GitHub username to associate with this user. If this flag is passed,
+directions will be provided to prove ownership of the GitHub account.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 print help menu
 .SS "Exit status:"
 .TP
 0
-if OK,
+if registration is successful
 .TP
 1
-if minor problems (e.g., cannot access subdirectory),
+if username is in use
 .TP
 2
-if serious trouble (e.g., cannot access command\-line argument).
+if unable to communicate with the repo
 
-\"
-\"	FILES Section goes here
-\"
-.SH FILES  
-.TP  
-.I  /etc/vsw_register.conf  
-.TP  
-.I  /usr/bin/vsw_register    
-\"
-\"	EXAMPLES Section goes here
-\"
 .SH EXAMPLES  
 .TP  
-\fBvsw register\~--adduser\fR\~ DID\fB\~--scope\fR CompanyA
-\"
-\"	DIAGNOSTICS Section goes here
-\"
-.SH DIAGNOSTICS  
-.PP
-The activity performed using this utility is logged in the file \fB/var/log/vsw_register\fR      
-\"
-\"	REPORTING BUGS Section goes here
-\"
+\fBvsw register\~--email\fR\ user@example.com vswuser1
 .SH "REPORTING BUGS"
-GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
-.br
-Report ls translation bugs to <http://translationproject.org/team/>
-\"
-\"	AUTHOR Section goes here
-\"
+Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
 .SH AUTHOR
-Written by Name1 and Name2, ...
-\"
-\"	COPYRIGHT Section goes here
-\"
+Written by C. T. Al-Hakim and B. Dobry
 .SH COPYRIGHT
-Copyright \(co 2017 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-\"
-\"	CREDITS Section goes here
-\"
-.SH CREDITS  
-.PP	
-This man page was created .... 09/10/2020
-\"
-\"	SEE ALSO Section goes here
-\"
+Copyright \(co 2020 Futurewei Technologies, Inc.
+.br
+License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
 .SH SEE ALSO  
 .br 
 vsw audit(1)  

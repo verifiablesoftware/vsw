@@ -1,94 +1,58 @@
-\" This template provides an example of how to generate a Linux man" pages for a new command
-\"	NAME Section goes here
-\"
-.TH VSW-VERTIFY "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
+.TH VSW-VERIFY "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
 .SH NAME  
-vsw verify \- Verify SW package in the VS repo
-\"	SYNOPSIS Section goes here
-\"
+vsw verify \- Verify a software package in the VS repo
 .SH SYNOPSIS  
 \fBvsw verify\fR
-[\fI\,OPTION\/\fR]... [\fI\,FILE\/\fR]...
-\"
-\"	DESCRIPTION Section goes here
-\"
+[\fI\,OPTION\/\fR]... \fI\,packageName\/\fR
 .SH DESCRIPTION  
-\" Add detailed description here
 .PP
-\fBvsw verify\fR - vsw verify is used to verify SW packages in the VS software Depo by the Depo Holder
+\fBvsw verify\fR - vsw verify is used to verify a software package in the VSW
+repo. The tool will request to verify the package identified by
+.I packageName
+. If no policy is specified, then it will simply verify that a package with the
+given name is published and can be validated. If 
+.B --policy
+is passed, then more complex verification policies will be applied.
 .PP
-Mandatory arguments go here...
+The options are as follows:
 .TP
-\fB\-u\fR, \fB\-\-user [DID]\fR - optional 
-Holder DID (Decentralized ID)
+.BI "\-o " file
+Send output to the specified file.
 .TP
-\fB\-p\fR, \fB\-\-package\fR [PackageName] 
-Name of Package being verify
-.TP
-\fB\-f\fR, \fB\-\-file\fR FileName
-send output to FileName
+.BI "\-p, \-\-policy " policy
+Apply the policy defined in 
+.I policy
+to the specified package.
 .TP
 \fB\-h\fR, \fB\-\-help\fR
 print help menu
 .SS "Exit status:"
 .TP
 0
-if OK,
+if the software package verifies successfully.
 .TP
 1
-if minor problems (e.g., cannot access subdirectory),
+if the software package does not verify.
 .TP
 2
-if serious trouble (e.g., cannot access command\-line argument).
+if unable to communicate with the repo.
 
-\"
-\"	FILES Section goes here
-\"
-.SH FILES  
-.TP  
-.I  /etc/vsw verify.conf  
-.TP  
-.I  /usr/bin/vsw verify    
-\"
-\"	EXAMPLES Section goes here
-\"
 .SH EXAMPLES  
 .TP  
-\fBvsw verify\~--type\fR\~ edu\fB\~ --issuer\fR\~ issuer_credentials
-(Run vsw verify with my_arg2 value for team2 value)      
-\"
-\"	DIAGNOSTICS Section goes here
-\"
-.SH DIAGNOSTICS  
-.PP
-The activity performed using this utility is logged in the file \fB/var/log/vsm_verify\fR      
-\"
-\"	REPORTING BUGS Section goes here
-\"
+\fBvsw verify\~--policy\fR\~ mypolicy.json\f\~ foo
+(Run vsw verify with mypolicy.json against the package foo)
 .SH "REPORTING BUGS"
-GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
-.br
-Report ls translation bugs to <http://translationproject.org/team/>
-\"
-\"	AUTHOR Section goes here
-\"
+Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
 .SH AUTHOR
-Written by Name1 and Name2, ...
-\"
-\"	COPYRIGHT Section goes here
-\"
+Written by C. T. Al-Hakim and B. Dobry
 .SH COPYRIGHT
-Copyright \(co 2017 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-\"
-\"	CREDITS Section goes here
-\"
+Copyright \(co 2020 Futurewei Technologies, Inc.
+.br
+License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
 .SH CREDITS  
 .PP	
 This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
-\"
-\"	SEE ALSO Section goes here
-\"
+
 .SH SEE ALSO  
 .br
 vsw register(1)  
