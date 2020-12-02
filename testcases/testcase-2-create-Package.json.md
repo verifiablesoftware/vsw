@@ -1,7 +1,7 @@
 <pre>
 name: create vsw package.json
 
-Description:
+Synopsis: Initialize vsw env
 
 this test case will  be used to create the package.json file based on the user input only if the package.json file does not exist in the current directory. this command should prompt the user to enter the following fields if the the package.json file does not exist:
 Package name:
