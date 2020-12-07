@@ -1,0 +1,5 @@
+{
+    "name": "software-provenance",
+    "version": "0.1",
+    "attributes": ["did", "sources", "dependencies", "command"]
+}
