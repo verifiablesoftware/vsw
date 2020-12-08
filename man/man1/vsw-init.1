@@ -1,0 +1,95 @@
+\" This template provides an example of how to generate a Linux man" pages for a new command
+\"	NAME Section goes here
+\"
+.TH VSW-INIT "1" "December 2020" "C. T. Al-Hakim" "Verifiable Software"
+.SH NAME  
+vsw init \- vsw init create a vsw_package.json file
+\"	SYNOPSIS Section goes here
+\"
+.SH SYNOPSIS  
+\fBvsw init\fR  -y|--yes
+\"
+\"	DESCRIPTION Section goes here
+\"
+.SH DESCRIPTION  
+\" Add detailed description here
+.PP
+\fBvsw init\fR - vsw init is used to create or update a \fBvsw_package.json\fR file
+it will strictly keep any fields or values that were already set. you can also use \fB-y\fR or \fB--yes\fR to skip the prompting altogether
+.TP
+\fB\-u\fR, \fB\-\-yes\fR 
+do not prompt, create a default vsw_pckage.json
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+1
+if minor problems (e.g., cannot access subdirectory),
+.TP
+2
+if serious trouble (e.g., cannot access command\-line argument).
+
+\"
+\"	FILES Section goes here
+\"
+.SH FILES  
+.TP  
+.I  vsw_package.json  
+.TP
+vsw_package.json
+{
+  "name": "testpckg",
+  "version": "1.0.0",
+  "description": "test package"
+  },
+  "repository": {
+    "type": "git",
+    "url": "local file"
+  },
+  "keywords": [
+    "testpckg",
+    "testpackage"
+  ],
+  "author": "your name",
+  "license": "Apache",
+  "DID": "did:example:123456"
+  }
+}
+
+.SH "REPORTING BUGS"
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+.br
+Report ls translation bugs to <http://translationproject.org/team/>
+\"
+\"	AUTHOR Section goes here
+\"
+.SH AUTHOR
+Written by Name1 and Name2, ...
+\"
+\"	COPYRIGHT Section goes here
+\"
+.SH COPYRIGHT
+Copyright \(co 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+\"
+\"	CREDITS Section goes here
+\"
+.SH CREDITS  
+.PP	
+This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
+\"
+\"	SEE ALSO Section goes here
+\"
+.SH SEE ALSO  
+.br
+vsw register(1)  
+.br 
+vsw list(1)  
+.br 
+vsw certify(1)  
+.br 
+vsw publish(1)  
+.br 
+vsw verify(1)  
+.br 
