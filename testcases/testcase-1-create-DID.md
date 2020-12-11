@@ -13,11 +13,11 @@ can be used to sign and encrypt transactions.
 
 Execution Steps:
 	1- mkdir ~/myproject
-	2- cd ~/myprojeect
+	2- cd ~/myproject
 	3- vsw register
 
 Expected output:
-.MyWallet
+export $MYWALLET=$HOME/.MyWallet
 
 Example of relative and absolute DID URL:
 
