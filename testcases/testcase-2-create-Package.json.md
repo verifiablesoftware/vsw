@@ -27,7 +27,7 @@ Execution Steps:
 
 Expected output:
 
-package.json
+vsw_package.json
 {
   "name": "testpckg",
   "version": "1.0.0",
@@ -36,6 +36,7 @@ package.json
   "repository": {
     "type": "git",
     "url": "local file"
+    "sha": "sha-reference"
   },
   "keywords": [
     "testpckg",
@@ -43,9 +44,6 @@ package.json
   ],
   "author": "your name",
   "license": "Apache",
-  "DID": {
-     "type": "DID ledger type",
-      "url": ".MyWallet"
-  }
+  "DID":  "did:example:12345"
 }
 </pre>
