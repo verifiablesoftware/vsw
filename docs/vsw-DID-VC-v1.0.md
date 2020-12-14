@@ -22,9 +22,9 @@ passive object (i.e. a unit of software) that is **controlled by an active DID**
 unique challenges in identifying various degree of specificity and complex dependencies to meet dynamic needs that emerge in
 modern software ecosystems.
 
-## DIDs used in vsw
-**vsw** v1 uses various types of DIDs. One is to identify an active participant in the **vsw** ecosystem, e.g. a developer,
-a tester, an auditor, and so on. The other type is to identify a unit of software, which we describe in more detail
+## Active DIDs used in vsw
+**vsw** v1 uses various types of DIDs. One is to identify an **active** participant in the **vsw** ecosystem, e.g. a developer,
+a tester, an auditor, and so on. The other type is to identify a unit of software (**passive**), which we describe in more detail
 below. For both types, we use **did:sov** which is implemented using Indy Node and is compatible with ACA.py agent which
 uses Indy SDK to interact with an Indy Node based network.
 
@@ -55,97 +55,78 @@ As a general rule, we suppose all users of **vsw** to have their DIDs, either as
 Note any entity could play more than one roles at the same time.
 
 To uniquely identify a unit of software, the developer will allocate a non-privileged DID for the software, then issue
-credentials for that DID. 
+credentials for that DID. We describe these passive DIDs later.
 
 ## vsw Repository Roles
-The **vsw** repository plays multiple roles. It is important that we differentiate these roles. The most important role
-it plays is as the **holder** of verifiable credentials issued. As a holder, it can interact with a consumer answering his/her
+The **vsw-repo** repository plays multiple roles. It is important that we differentiate these roles. The first role
+it plays is as the **holder** of verifiable credentials issued. For this role, it has a public active DID (say, DID-holder).
+As a holder, it can interact with a consumer answering his/her
 proof request with a presentation of proof. The consumer can accept the proof as if it is from the issuer (**transitive trust**).
-In this role, the **vsw** repository is a convenient digital **registry** where consumers can request for verifiable information.
+In this role, the **vsw-repo** repository is a convenient digital **registry** where consumers can request for verifiable information.
 Note that the role of a verifiable credential registry does not imply a "centralized" authority because the trust rests with
 the issuers, not the holder. And the same credentials can be issued to another registry by the issuers.
 
-In earlier discussions, we thought there might be a need for some users not having any unique DID (other than the peer DID).
-In such circumstances, the **vsw-repo** might play the role of a proxy to issue credentials on behalf of these users.
-There is some uncertainty if that is needed. Until further clarification, we would suppose there is no such need. So consider
-this role as TBD.
+Its second role is to be the **endorser** to write ledger transaction on behalf of the software developers who are not endorsers.
+We consider this scenario as common circumstances so that regular users (e.g. individual developers) do not need to involve
+payment and other logistics of using the ledger service. The **vsw-repo** writes ledger transactions on behalf of these users.
+Examples of such transactions include credential definitions, NYM transactions for passive DIDs. For this role, the vsw-repo
+uses an endorser DID (say, DID-endorser).
 
-Finally, **vsw** may also serve as the storage system for the published software where consumers can verify its credentials
+The vsw-repo also plays a third role using the DID-endorser identity to publish schemas which in effect sets standard formats
+of verifiable information. See more details on the types of schemas we will initially support in the later section.
+
+Finally, **vsw-repo** may also serve as the storage system for the published software where consumers can verify its credentials
 as well as downloading safely using hashlink to ensure its integrity. This role can be played by other storage systems as
 well.
 
-## Authenticated Controllers
-Knowing who developed a piece of software is a critical factor for users to decide whether or how much
+## Passive DIDs and Authenticated Controllers
+**vsw** uses passive DIDs to identify software and other digital assets. These DIDs are called passive because they
+do not represent an active agent who can sign documents, for instance.
+Knowing who developed or controlled a piece of software is a critical factor for users to decide whether or how much
 to trust this software. In **vsw**, this is represented by the **Controller** of the software's DID. This entity (person
-or organization or automated system) is identified by the active participant DID. The **software**, in contrast,
+or organization or automated system) is identified by the active DID. The **software**, in contrast,
 is identified by a **passive** DID. These concepts are further discussed in the [Proposed DID Core Appendix](https://github.com/w3c/did-core/issues/373).
 In the diagram below, we illustrate graphically the controller relationship.
 
 ![Controller Relationship](assets/Controller-relationship-v1.png).
 
-(**Note**: needs clarification on how to set Controller DID in Indy SDK and in ACA-py.)
-
-## Semantic Versioning
-**vsw** is designed to enable developers and other parties to publish verifiable credentials about a unit of software.
-The prerequisite of achieving this is to have a DID uniquely identifying the given unit of software. In common
-software development practice, the concept of a unit of software is often fluent and vague, however,
-with various degree of specificity. For example, when a child says, "I love to play HappyBird.", she is refering
-generally about the App named "HappyBird". While a software tester says, "HappyBird 1.0.1 build
-is broken", she is refering to a specific version's the software bearing the name "HappyBird".
-We need to design the **software DID** to accomodate these kinds of variants. Specifically, we are to support
-the Semantic Versioning functions as defined by [SemVer](https://semver.org).
-In the diagram below, we illustrate graphically the semantic versioning relationship.
-
-![Semantic Versioning Relationship](assets/Semantic-versioning-v1.png).
-
-### Sub-Versioning
-Semantic Versioning uses X.Y.Z format, where X is a Major release, Y is a Minor release and Z is a Patch release.
-Developers may choose to allocate a **software DID** for each Minor release and Major release as shown in the above
-example (or a different variation). A need arises when a user likes to download a specific patch release, e.g. 1.0.1,
-which does not have its own DID. In such cases, the patch versions must be listed in the parent DID Document with a series of
-cryptographic hashlinks (see next section) which can be dereferenced using DID URL. This scheme implies that the DID Document
-will be updated every time that a new patch is produced. 
-
-**Implementation note**: I'm not certain if ACA-py or Indy Node currently supports DID URL dereferencing. If not, then the
-above procedure can be implemented by first DID resolution (locating the DID Document), then parse the DID Document to
-locate the field which contains the list of patches.
-
-### LATEST
-This above design also supports other naming of versions, e.g. LATEST can also be expressed with DID URL path.
-LATEST is defined as the last patch in the DID Document's patch list. The concept of LATEST is fined to the
-current minor or major release that the DID identifies. In other words, it does not go up to a parent (see below).
-
-### Predecessor, Successor and Parent
-A user (consumer of software) who knows the DID of HappyBird 1.1 may want to find out information about its
-predecessor HappyBird 1.0. [SemVer](https://semver.org) defines predecessor ordering. Similarly, one may want to
-know the successor version of the software identified by the DID, which is HappyBird 1.2.
-
-**vsw** also defines superset (**parent**) relationship. For example, HappyBird 1.1.0's **parent** is *HappyBird 1*, whose
-**parent** is in turn *HappyBird*.
-
-## Cryptographic Hashlink
-In traditional software distribution systems, the software image and its SHA integrity check are often separate.
-It therefore leaves a gap where the hosting system could make changes without the users noticing. A cryptographic hashlink
-is designed close this gap and, at the same time, allow flexibility in repository systems where the software image is hosted. 
-The hashlink can be a field in the DID document and a hashlink in the DID URL. Dereferencing operation of this DID URL
-is successful only if the referenced file produces an identical hash. With a cryptographic hashlink, a user will know if
-a file has been changed either intentionally or accidentally, or maliciously (e.g. by an attacker).
-In the diagram below, we show an example of **hl** hashlink that, when dereferenced, returns unchanged software image.
-For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
-
-![Hashlink](assets/Hashlink-DID-URL-v1.png).
-
-Hashlink and hashlink dereferencing does not involve DID resoltion, so this feature can be implemented in **vsw** on
-top of the **did:sov** method without causing issues.
+In Indy SDK and ACA-py, we can use NYM ATTRIB transaction to write the information in the above graph into the ledger.
+(Note that this is the equivalent of the "DID Document" in the DID Core standard.) The process works like this:
+  - The developer creates a passive DID with null privilege
+  - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID (NYM)
+  - The vsw-repo publishes the software's DID in the ledger
+  - The developer creates a NYM ATTRIB transaction with **raw** attribute which allows any JSON definition
+  - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID's attributes (NYM ATTRIB)
+  - The vsw-repo publishes the software DID's attributes in the ledger (a hash in actual implementation)
+  - From there, any user can retrieve the attributes from the public ledger with the software's DID
+  
+An example of the software DID's attribute:
+  {
+      "controller": 
+          {
+              "did": "XD7vh3QA2SgYMJdNyzEwvv"
+          }
+  }
+  
+Note: a common question asks why this information can't just be another meta-information in the credential itself.
+The essential difference is that NYM ATTRIB (or DID document) is published in the ledger while credentials are issued
+to a holder. The issuers may issue conflicting claims to the same software DID. NYM ATTRIB (DID document) removes these
+contentions. In addition, a holder may not make this information public.
+  
+Additional information may be added to the NYM ATTRIB shown in the above example.
 
 # vsw Schemas
+As discussed earlier, we need to publish a standard set of schemas for interoperability. The **vsw-repo** will play
+this role in default using the DID-endorser. Others can also publish schemas of course, and as long as the same
+standard set of schemas are adopted for interoperability, it does not matter who author these schemas. We can also
+reuse any schemas that are previously published in the ledger.
 
 ## vsw Participant Credential Schemas
 **vsw** **MAY** need to be able to issue credentials to participants. These schemas are to define data fields for the type of credentials
 that can adequately identify a developer, tester, auditor etc. to facilitate trusted exchange. There may be more than one such schemas
 as needs arise.
 
-For every adopted schema, the **vsw-repo** writes a credential definition using its public DID to the ledger. For the minimum,
+For every adopted schema, the **vsw-repo** writes a credential definition using its public endorser-DID to the ledger. For the minimum,
 the **vsw-repo** issues a simple credential to identify any user as a registered user of **vsw** during **vsw register**.
 
 ## vsw Software Credential Schema
@@ -153,7 +134,7 @@ We do need to define a schema that supports the **vsw** features defined above.
 See Issue [#4](https://github.com/verifiablesoftware/vsw/issues/4).
 **vsw-repo** publishes at least one software credential schema (and multiples eventually) to the ledger using its public DID.
 Other developers may publish their own credential schemas as well, but standard **vsw** features require the standard schemas published
-by **vsw-repo**.
+by **vsw-repo**, or adopted commonly.
 
 ## vsw Software Test Credential Schema
 We also need to define a schema that supports software test credentials.
@@ -239,7 +220,7 @@ For an issuer (software developer or tester, e.g.) to revoke a previous issued c
 The procedures for the prover and verifier are implicit. If a credential type has a **revocation registry** defined, then
 they must present non-revocation proof or verify that proof respectively.
 
-Further implementation detail TBD.
+**Further implementation detail TBD. This is an open work item. **
 
 # Integrating vsw with an Operational Ledger
 
@@ -251,5 +232,60 @@ The following diagram illustrates the approach **vsw** will take to integrate wi
 
 ![Integrating with an Indy ledger](assets/Integrating-Indy-ledger-v1.png).
 
+# Additional Features
+We list these additional features that are very important to a software repository but may not completely fit into the
+minimum set.
+## Semantic Versioning
+**vsw** is designed to enable developers and other parties to publish verifiable credentials about a unit of software.
+The prerequisite of achieving this is to have a DID uniquely identifying the given unit of software. In common
+software development practice, the concept of a unit of software is often fluent and vague, however,
+with various degree of specificity. For example, when a child says, "I love to play HappyBird.", she is refering
+generally about the App named "HappyBird". While a software tester says, "HappyBird 1.0.1 build
+is broken", she is refering to a specific version's the software bearing the name "HappyBird".
+We need to design the **software DID** to accomodate these kinds of variants. Specifically, we are to support
+the Semantic Versioning functions as defined by [SemVer](https://semver.org).
+In the diagram below, we illustrate graphically the semantic versioning relationship.
+
+![Semantic Versioning Relationship](assets/Semantic-versioning-v1.png).
+
+### Sub-Versioning
+Semantic Versioning uses X.Y.Z format, where X is a Major release, Y is a Minor release and Z is a Patch release.
+Developers may choose to allocate a **software DID** for each Minor release and Major release as shown in the above
+example (or a different variation). A need arises when a user likes to download a specific patch release, e.g. 1.0.1,
+which does not have its own DID. In such cases, the patch versions must be listed in the parent DID Document with a series of
+cryptographic hashlinks (see next section) which can be dereferenced using DID URL. This scheme implies that the DID Document
+will be updated every time that a new patch is produced. 
+
+**Implementation note**: I'm not certain if ACA-py or Indy Node currently supports DID URL dereferencing. If not, then the
+above procedure can be implemented by first DID resolution (locating the DID Document), then parse the DID Document to
+locate the field which contains the list of patches.
+
+### LATEST
+This above design also supports other naming of versions, e.g. LATEST can also be expressed with DID URL path.
+LATEST is defined as the last patch in the DID Document's patch list. The concept of LATEST is fined to the
+current minor or major release that the DID identifies. In other words, it does not go up to a parent (see below).
+
+### Predecessor, Successor and Parent
+A user (consumer of software) who knows the DID of HappyBird 1.1 may want to find out information about its
+predecessor HappyBird 1.0. [SemVer](https://semver.org) defines predecessor ordering. Similarly, one may want to
+know the successor version of the software identified by the DID, which is HappyBird 1.2.
+
+**vsw** also defines superset (**parent**) relationship. For example, HappyBird 1.1.0's **parent** is *HappyBird 1*, whose
+**parent** is in turn *HappyBird*.
+
+## Cryptographic Hashlink
+In traditional software distribution systems, the software image and its SHA integrity check are often separate.
+It therefore leaves a gap where the hosting system could make changes without the users noticing. A cryptographic hashlink
+is designed close this gap and, at the same time, allow flexibility in repository systems where the software image is hosted. 
+The hashlink can be a field in the DID document and a hashlink in the DID URL. Dereferencing operation of this DID URL
+is successful only if the referenced file produces an identical hash. With a cryptographic hashlink, a user will know if
+a file has been changed either intentionally or accidentally, or maliciously (e.g. by an attacker).
+In the diagram below, we show an example of **hl** hashlink that, when dereferenced, returns unchanged software image.
+For details of hashlink, please refer to this [IETF Draft](https://tools.ietf.org/html/draft-sporny-hashlink-05).
+
+![Hashlink](assets/Hashlink-DID-URL-v1.png).
+
+Hashlink and hashlink dereferencing does not involve DID resoltion, so this feature can be implemented in **vsw** on
+top of the **did:sov** method without causing issues.
 
 # References
