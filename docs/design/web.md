@@ -25,9 +25,21 @@ repo and search through these listings.
 ## Rest API
 
 A REST API should provide programmatic access to the same information provided
-on the website:
+on the website. The base address for these endpoints is https://REPO_URL/api/v1/.
 
 - Retrieve repo's public DID
+  ```
+  GET /did
+  ```
 - Retrieve repo's invitation
+  ```
+  GET /invitation
+  ```
 - Retrieve a list of packages available in the repo
+  ```
+  GET /packages
+  ```
 - Search packages in the repo
+  ```
+  GET /packages?s=search+terms
+  ```
