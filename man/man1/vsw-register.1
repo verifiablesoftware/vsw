@@ -1,6 +1,6 @@
 .TH VSW-REGISTER "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
 .SH NAME  
-vsw register \- Register a developerwith the repo
+vsw register \- Register with the repo
 .SH SYNOPSIS  
 \fBvsw register\fR
 [\fI\,OPTION\/\fR]... \fI\,username\/\fR
@@ -8,7 +8,9 @@ vsw register \- Register a developerwith the repo
 .PP
 \fBvsw register\fR - is used to register a new developer with the repo. This
 links the specified username to the developer's DID and optionally associates
-other externally identifiable information about the developer.
+other externally identifiable information about the developer. If no options or
+username are specified, then the command will prompt the user through the
+possible options.
 .PP
 The options are as follows:
 .TP
@@ -41,8 +43,22 @@ if username is in use
 if unable to communicate with the repo
 
 .SH EXAMPLES  
-.TP  
-\fBvsw register\~--email\fR\ user@example.com vswuser1
+.P
+Register as a developer with interactive prompts
+.P
+.RS 2
+.nf
+$ vsw register
+.fi
+.RE
+.P
+Register as vswuser1 and verify an email address
+.P
+.RS 2
+.nf
+$ vsw register \-\-email user@example.com vswuser1
+.fi
+.RE
 .SH "REPORTING BUGS"
 Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
 .SH AUTHOR
@@ -51,15 +67,21 @@ Written by C. T. Al-Hakim and B. Dobry
 Copyright \(co 2020 Futurewei Technologies, Inc.
 .br
 License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
-.SH SEE ALSO  
-.br 
-vsw audit(1)  
-.br 
-vsw list(1)  
-.br 
-vsw certify(1)  
-.br 
-vsw publish(1)  
-.br 
-vsw verify(1)  
-.br 
+.SH SEE ALSO
+.br
+vsw setup(1)
+.br
+vsw init(1)
+.br
+vsw install(1)
+.br
+vsw publish(1)
+.br
+vsw list(1)
+.br
+vsw attest(1)
+.br
+vsw verify(1)
+.br
+vsw audit(1)
+.br

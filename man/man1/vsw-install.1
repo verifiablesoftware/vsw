@@ -1,0 +1,78 @@
+.TH VSW-INSTALL "1" "September 2020" "C. T. Al-Hakim" "Verifiable Software"
+.SH NAME  
+vsw install \- Install a software package from the repo
+.SH SYNOPSIS  
+.B vsw install
+[\fI\,OPTION\/\fR]... \fI\,PACKAGE\/\fR
+.SH DESCRIPTION  
+.PP
+\fBvsw install\fR - vsw install is used to install a software package from the
+repo. By default, the package will install locally into a sub-directory of the
+current directory, called vsw_packages/. The installation handles validating
+the author and the signature of the package.
+.PP
+The options are as follows:
+.TP
+.BI "\-g, \-\-global "
+Install the package globally, to /usr/local/lib/vsw_packages/ or a path
+specified by the VSW_PATH environment variable. If omitted, the package is
+installed locally, to ./vsw_packages.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help menu.
+.SS "Exit status:"
+.TP
+0
+if successful
+.TP
+1
+if there is some error with the package
+.TP
+2
+if unable to communicate with the repo
+.SH EXAMPLES  
+.P
+Install the package foo from developer example locally:
+.P
+.RS 2
+.nf
+$ vsw install example/foo
+.fi
+.RE
+.P
+Install the package bar from developer example globally:
+.P
+.RS 2
+.nf
+$ vsw install \-g example/foo
+.fi
+.RE
+.SH "REPORTING BUGS"
+Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
+.SH AUTHOR
+Written by C. T. Al-Hakim and B. Dobry
+.SH COPYRIGHT
+Copyright \(co 2020 Futurewei Technologies, Inc.
+.br
+License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
+.SH CREDITS  
+.PP	
+This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
+.SH SEE ALSO  
+.br
+vsw setup(1)
+.br
+vsw init(1)
+.br
+vsw register(1)
+.br
+vsw publish(1)
+.br
+vsw list(1)
+.br
+vsw attest(1)
+.br
+vsw verify(1)
+.br
+vsw audit(1)
+.br

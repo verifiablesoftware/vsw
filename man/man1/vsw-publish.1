@@ -3,13 +3,14 @@
 vsw-publish \- Publish a software package to the VSW repo
 .SH SYNOPSIS  
 .B vsw publish
-[\fI\,OPTION\/\fR]... [\fI\,path\/\fR]
+[\fI\,OPTION\/\fR]... [\fI\,PATH\/\fR]
 .SH DESCRIPTION  
 .PP
-\fBvsw publish\fR - is used to publish software packages to the VSW repo. All
-information about the package should be defined in a file called vsw.json. If
-.I path
-is specified, find vsw.json in that directory, else, look in the current
+\fBvsw publish\fR - is used to publish a software packages to the repo. All
+information about the package should be defined in a file called
+vsw_package.json. If
+.I PATH
+is specified, find vsw_package.json in that directory, else, look in the current
 directory.
 .PP
 The options are as follows:
@@ -31,8 +32,22 @@ if conflict is reported by repo
 2
 if unable to communicate with the repo
 .SH EXAMPLES  
-.TP  
-\fBvsw publish\~--user\fR\~ user1\f
+.P
+Publish the current directory as a new package
+.P
+.RS 2
+.nf
+$ vsw publish
+.fi
+.RE
+.P
+Publish a different directory
+.P
+.RS 2
+.nf
+$ vsw publish path/to/my/package/
+.fi
+.RE
 .SH "REPORTING BUGS"
 Open issues at: <https://github.com/verifiablesoftware/vsw/issues>
 .SH AUTHOR
@@ -44,15 +59,21 @@ License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/maste
 .SH CREDITS  
 .PP	
 This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
-.SH SEE ALSO  
+.SH SEE ALSO
 .br
-vsw register(1)  
-.br 
-vsw list(1)  
-.br 
-vsw certify(1)  
-.br 
-vsw publish(1)  
-.br 
-vsw verify(1)  
-.br 
+vsw setup(1)
+.br
+vsw init(1)
+.br
+vsw install(1)
+.br
+vsw register(1)
+.br
+vsw list(1)
+.br
+vsw attest(1)
+.br
+vsw verify(1)
+.br
+vsw audit(1)
+.br

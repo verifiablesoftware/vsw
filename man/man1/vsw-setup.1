@@ -1,0 +1,60 @@
+.TH VSW-SETUP "1" "December 2020" "B. Dobry" "Verifiable Software"
+.SH NAME
+vsw setup \- generate a vsw wallet
+.SH SYNOPSIS  
+\fBvsw setup
+.SH DESCRIPTION  
+.PP
+\fBvsw setup\fR - vsw setup simply creates a new wallet to be used for
+subsequent vsw commands. It will generate a file named _.vsw_wallet_ in the
+user's home directory.
+.SS "Exit status:"
+.TP
+0
+on successful wallet creation,
+.TP
+1
+on failure to create the file,
+.TP
+2
+on failure to communicate with the ledger.
+
+.SH EXAMPLES
+.P
+Setup vsw:
+.P
+.RS 2
+.nf
+$ vsw setup
+.fi
+.RE
+.SH "REPORTING BUGS"
+Create an issue on GitHub at <https://github.com/verifiablesoftware/vsw/issues>
+.SH AUTHOR
+Written by C. T. Al-Hakim and B. Dobry
+.SH COPYRIGHT
+Copyright \(co 2020 Futurewei Technologies, Inc.
+.br
+License Apache-2.0 License <https://github.com/verifiablesoftware/vsw/blob/master/LICENSE>.
+.SH CREDITS  
+.PP	
+This man page was created only for demonstration purpose by Chaker Al-Hakim on 09/10/2020
+
+.SH SEE ALSO  
+.br
+vsw init(1)
+.br
+vsw install(1)
+.br
+vsw register(1)
+.br
+vsw publish(1)
+.br
+vsw list(1)
+.br
+vsw attest(1)
+.br
+vsw verify(1)
+.br
+vsw audit(1)
+.br
