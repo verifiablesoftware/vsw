@@ -90,31 +90,32 @@ In the diagram below, we illustrate graphically the controller relationship.
 
 ![Controller Relationship](assets/Controller-relationship-v1.png).
 
-In Indy SDK and ACA-py, we can use NYM ATTRIB transaction to write the information in the above graph into the ledger.
-(Note that this is the equivalent of the "DID Document" in the DID Core standard.) The process works like this:
-  - The developer creates a passive DID with null privilege
+In Indy SDK and ACA-py, we can use standard NYM transaction to write the information in the above graph into the ledger.
+(Note that this is the equivalent of the "DID Document" in the DID Core standard. The "controller" is called the "owner" in Indy.)
+The process works like this:
+  - The developer has its standard active DID with null privilege. Set to use this DID_1 as its identity.
+  - The developer creates a new DID with null privilege. We will use this DID_2 for software.
   - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID (NYM)
-  - The vsw-repo publishes the software's DID in the ledger
-  - The developer creates a NYM ATTRIB transaction with **raw** attribute which allows any JSON definition
-  - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID's attributes (NYM ATTRIB)
-  - The vsw-repo publishes the software DID's attributes in the ledger (a hash in actual implementation)
-  - From there, any user can retrieve the attributes from the public ledger with the software's DID
-  
-An example of the software DID's attribute:
-  {
-      "controller": 
-          {
-              "did": "XD7vh3QA2SgYMJdNyzEwvv"
-          }
-  }
+  - The vsw-repo publishes/endorses the software's DID in the ledger
+  - The developer (still in DID_1) can read back from ledger DID_2 showing that DID_1 is the owner (aka Identifier in Data and Metadata).
   
 Note: a common question asks why this information can't just be another meta-information in the credential itself.
 The essential difference is that NYM ATTRIB (or DID document) is published in the ledger while credentials are issued
 to a holder. The issuers may issue conflicting claims to the same software DID. NYM ATTRIB (DID document) removes these
 contentions. In addition, a holder may not make this information public.
   
-Additional information may be added to the NYM ATTRIB shown in the above example.
-
+Sometimes, additional information may be added to DID_2 document in the above example. These can be done by NYM ATTRIB.
+For example, we may want to make the download link to the software also public in the ledger (as compared to being known
+only through a credential). One may implement that like this:
+  - The developer has its standard active DID with null privilege. Set to use this DID_1 as its identity.
+  - The developer has DID_2 for software.
+  - The developer creates a NYM ATTRIB transaction with **raw** attribute which allows any JSON definition
+  - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID's attributes (NYM ATTRIB)
+  - The vsw-repo publishes the software DID's attributes in the ledger (a hash in actual implementation)
+  - From there, any user can retrieve the attributes from the public ledger with the software's DID
+  
+An example of the software DID's attribute:{"endpoint":{"hl":"http://example.org/sw.pkg?hl=zQmWvQxTqbG2Z9HPJgG57jjwR154cKhbtJenbyYTWkjgF3e"}}
+  
 # vsw Schemas
 As discussed earlier, we need to publish a standard set of schemas for interoperability. The **vsw-repo** will play
 this role in default using the DID-endorser. Others can also publish schemas of course, and as long as the same
