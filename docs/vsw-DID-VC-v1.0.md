@@ -100,8 +100,8 @@ The process works like this:
   - The developer (still in DID_1) can read back from ledger DID_2 showing that DID_1 is the owner (aka Identifier in Data and Metadata).
   
 Note: a common question asks why this information can't just be another meta-information in the credential itself.
-The essential difference is that NYM ATTRIB (or DID document) is published in the ledger while credentials are issued
-to a holder. The issuers may issue conflicting claims to the same software DID. NYM ATTRIB (DID document) removes these
+The essential difference is that NYM (or DID document) is published in the ledger while credentials are issued
+to a holder. The issuers may issue conflicting claims to the same software DID. NYM (DID document) removes these
 contentions. In addition, a holder may not make this information public.
   
 Sometimes, additional information may be added to DID_2 document in the above example. These can be done by NYM ATTRIB.
@@ -111,10 +111,13 @@ only through a credential). One may implement that like this:
   - The developer has DID_2 for software.
   - The developer creates a NYM ATTRIB transaction with **raw** attribute which allows any JSON definition
   - The developer asks **vsw-repo** (DID-endorser) to endorse the new software DID's attributes (NYM ATTRIB)
-  - The vsw-repo publishes the software DID's attributes in the ledger (a hash in actual implementation)
+  - The vsw-repo publishes the software DID's attributes in the ledger
   - From there, any user can retrieve the attributes from the public ledger with the software's DID
   
 An example of the software DID's attribute:{"endpoint":{"hl":"http://example.org/sw.pkg?hl=zQmWvQxTqbG2Z9HPJgG57jjwR154cKhbtJenbyYTWkjgF3e"}}
+
+The ATTRIB data is stored differently in the ledger than the NYM, but regardless, both are accessible from the ledger
+as compared to credentials which are accessible through a holder.
   
 # vsw Schemas
 As discussed earlier, we need to publish a standard set of schemas for interoperability. The **vsw-repo** will play
