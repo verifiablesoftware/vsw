@@ -1,24 +1,23 @@
-import argparse
 from typing import List
+
+import requests
+
+import src.utils
+from src.log import Log
+
+logger = Log().logger
 
 
 def main(args: List[str]) -> bool:
-    parser = argparse.ArgumentParser(prog="vsw check")
-    # parser.add_argument(
-    #     "dists",
-    #     nargs="+",
-    #     metavar="dist",
-    #     help="The distribution files to check, usually dist/*",
-    # )
-    # parser.add_argument(
-    #     "--strict",
-    #     action="store_true",
-    #     default=False,
-    #     required=False,
-    #     help="Fail on warnings",
-    # )
+    retrieve_DID()
 
-    parsed_args = parser.parse_args(args)
 
-    # TODO
-    print('call init method')
+def retrieve_DID():
+    try:
+        vsw_agent_host = src.utils.get_vsw_agent_host()
+        response = requests.post(vsw_agent_host + "/wallet/did/create")
+        logger.info(response.text)
+    except:
+        logger.error('init failed')
+    else:
+        logger.info('init successfully!')
