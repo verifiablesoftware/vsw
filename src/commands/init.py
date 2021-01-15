@@ -5,7 +5,7 @@ import requests
 import src.utils
 from src.log import Log
 
-logger = Log().logger
+logger = Log(__name__).logger
 
 
 def main(args: List[str]) -> bool:

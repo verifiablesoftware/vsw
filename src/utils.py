@@ -4,7 +4,7 @@ from typing import Union
 from src import env
 from src.log import Log
 
-logger = Log().logger
+logger = Log(__name__).logger
 
 
 class ConfigReader:
