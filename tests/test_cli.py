@@ -1,8 +1,8 @@
 import pkg_resources
 import pretend
 
-from src import cli
-from src.commands import publish
+from vsw import cli
+from vsw.commands import publish
 
 class Resouce:
     def __init__(self, version):

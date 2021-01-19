@@ -2,7 +2,7 @@
 import sys
 from typing import Any
 
-from src import cli
+from vsw import cli
 
 
 def main() -> Any:

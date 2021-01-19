@@ -1,6 +1,6 @@
 import os
 
-from src.env import Env, getenv
+from vsw.env import Env, getenv
 
 
 def test_getenv():

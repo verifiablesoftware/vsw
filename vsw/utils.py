@@ -1,8 +1,8 @@
 from configparser import RawConfigParser
 from pathlib import Path
 from typing import Union
-from src import env
-from src.log import Log
+from vsw import env
+from vsw.log import Log
 
 logger = Log(__name__).logger
 
