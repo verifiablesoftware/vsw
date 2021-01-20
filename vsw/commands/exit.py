@@ -1,23 +1,17 @@
-import argparse
+import asyncio
 from typing import List
+import psutil
 
+from vsw.log import Log
+
+logger = Log(__name__).logger
 
 def main(args: List[str]) -> bool:
-    parser = argparse.ArgumentParser(prog="vsw check")
-    # parser.add_argument(
-    #     "dists",
-    #     nargs="+",
-    #     metavar="dist",
-    #     help="The distribution files to check, usually dist/*",
-    # )
-    # parser.add_argument(
-    #     "--strict",
-    #     action="store_true",
-    #     default=False,
-    #     required=False,
-    #     help="Fail on warnings",
-    # )
-    parsed_args = parser.parse_args(args)
+    asyncio.get_event_loop().stop()
+    kill()
 
-    # TODO
-    print('call exit method')
+
+def kill():
+    for proc in psutil.process_iter():
+        if 'python' in proc.name():
+            proc.kill()
