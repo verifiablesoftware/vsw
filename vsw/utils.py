@@ -1,7 +1,6 @@
 from configparser import RawConfigParser
 from pathlib import Path
 from typing import Union
-from vsw import env
 from vsw.log import Log
 
 logger = Log(__name__).logger
@@ -25,8 +24,7 @@ class ConfigReader:
 
 
 def get_repo_host():
-    environment = env.getenv()
-    config_path = Path(__file__).parent.joinpath("conf/vsw-" + environment + ".ini").resolve()
+    config_path = Path(__file__).parent.joinpath("conf/vsw-prod.ini").resolve()
     config_reader = ConfigReader(config_path)
     config_dict = config_reader.to_dict('vsw-repo')
     repo_endpoint = config_dict.get("host")
@@ -34,11 +32,10 @@ def get_repo_host():
     return repo_endpoint
 
 
-def get_vsw_agent_host():
-    environment = env.getenv()
-    config_path = Path(__file__).parent.joinpath("conf/vsw-" + environment + ".ini").resolve()
+def get_vsw_agent():
+    config_path = Path(__file__).parent.joinpath("conf/vsw-prod.ini").resolve()
+    logger.info(config_path)
     config_reader = ConfigReader(config_path)
     config_dict = config_reader.to_dict('vsw-agent')
-    vsw_agent_endpoint = config_dict.get("host")
-    logger.info("vsw_agent_endpoint: " + vsw_agent_endpoint)
-    return vsw_agent_endpoint
+    logger.info(config_dict)
+    return config_dict

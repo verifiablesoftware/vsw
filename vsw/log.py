@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -15,7 +16,9 @@ class Log:
             datefmt="%Y-%m-%d %H:%M:%S"
         )
         log_dir = log_dir or Path(__file__).parent.parent.resolve()
-        file_path = Path(log_dir).joinpath(f"{name}.log").resolve()
+        if not os.path.exists(str(log_dir)+"/logs/"):
+            os.makedirs(str(log_dir)+"/logs/")
+        file_path = Path(log_dir).joinpath(f"logs/{name}.log").resolve()
 
         file_handler = logging.FileHandler(file_path, encoding='utf-8')
         file_handler.setFormatter(formatter)

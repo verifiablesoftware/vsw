@@ -6,3 +6,4 @@ vsw.egg-info
 **/*.log
 .pytest_cache
 **/**/_pycache_/*
+logs/
