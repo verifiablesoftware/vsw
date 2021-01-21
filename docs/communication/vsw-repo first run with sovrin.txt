@@ -1,0 +1,36 @@
+title vsw-repo (First Run with using Sovrin Ledger)
+
+fontawesome f120 admin #blue
+fontawesome f085 repo #blue
+fontawesome f085 repo Agent #lightblue
+fontawesome f0c1 Ledger
+
+activate Ledger #gray
+admin->repo :provision repo
+activate repo #blue
+box over repo: provision aca-py  
+Ledger->repo: TAA to be agreed
+
+repo->Ledger: DID and verkey to https://selfserve.sovrin.org/
+box over repo: agree the TAA in terminal
+repo->admin: provision done and repo registered
+deactivate repo
+admin->repo: start repo
+activate repo #blue
+activate repo Agent #lightblue
+
+loop #ff00ff Repeat for each schema
+repo->repo Agent:POST /schemas
+repo Agent->>Ledger:Publish schema
+Ledger-->>repo Agent:Schema ID
+repo Agent-->repo:Schema ID
+end
+loop #ff00ff Repeat for each credential to be issued by the repo
+repo->repo Agent:POST /credential-definitions
+repo Agent->>Ledger:Publish credential definition
+Ledger-->>repo Agent:Credential definition ID
+repo Agent-->repo:Credential definition ID
+end
+repo->repo Agent:POST /connections/create-invitation?\n    multi_use=true&public=true
+repo Agent-->repo:Connection
+box over repo:Publish invitation somewhere
