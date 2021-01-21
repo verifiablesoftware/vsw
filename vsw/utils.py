@@ -24,7 +24,7 @@ class ConfigReader:
 
 
 def get_repo_host():
-    config_path = Path(__file__).parent.joinpath("conf/vsw-prod.ini").resolve()
+    config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
     config_reader = ConfigReader(config_path)
     config_dict = config_reader.to_dict('vsw-repo')
     repo_endpoint = config_dict.get("host")
@@ -33,7 +33,7 @@ def get_repo_host():
 
 
 def get_vsw_agent():
-    config_path = Path(__file__).parent.joinpath("conf/vsw-prod.ini").resolve()
+    config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
     logger.info(config_path)
     config_reader = ConfigReader(config_path)
     config_dict = config_reader.to_dict('vsw-agent')

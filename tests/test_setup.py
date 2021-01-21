@@ -1,7 +1,10 @@
-import vsw.commands.setup
+from vsw.commands import setup
 
 def test_retrieve_DID():
-    vsw.commands.setup.retrieve_DID()
+    setup.retrieve_DID()
 
 def test_start_agent():
-    vsw.commands.setup.start_agent()
+    setup.start_agent()
+
+def test_get_seed():
+    setup.get_seed()
