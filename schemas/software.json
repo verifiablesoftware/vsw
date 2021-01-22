@@ -1,5 +1,5 @@
 {
-    "name": "software",
+    "name": "software certificate",
     "version": "0.1",
-    "attributes": ["did", "name"]
+    "attributes": ["software-did", "software-name", "software-version", "developer-did"]
 }
