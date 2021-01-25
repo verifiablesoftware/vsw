@@ -8,3 +8,6 @@ def test_start_agent():
 
 def test_get_seed():
     setup.get_seed()
+
+def test_provision():
+    setup.provision("test")
