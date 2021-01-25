@@ -1,0 +1,50 @@
+title vsw Overall Workflow Illustration (limited to M2 features)
+
+
+participant some-ledger-user
+
+participant vsw-user-publisher
+
+participant vsw-repo-holder-prover
+
+participant vsw-user-verifier
+
+participant the-indy-ledger
+
+some-ledger-user-->the-indy-ledger:Write standard credential schemas.
+
+note over some-ledger-user, the-indy-ledger:Schemas can be published by anyone. It is a prerequisite that they exist in the ledger before \nthe respective credential\-definitions can be created, or credentials issued.
+
+note over vsw-repo-holder-prover:vsw-repo starting up code
+vsw-repo-holder-prover<->the-indy-ledger:Set up wallet, create & register public DID\n(init code by vsw-repo)
+
+note right of the-indy-ledger: The repo is up before any vsw user.
+
+note over vsw-user-publisher:vsw setup (first time)
+vsw-user-publisher<->the-indy-ledger:Set up wallet, create & register public DID ("vsw setup" first time run)
+note right of the-indy-ledger:During the first run of "vsw setup", wallet\nand DID are created. In subsequent runs,\nthey are retrieved from the wallet.
+note over vsw-user-publisher:vsw setup \-\-schema\n(writes schema def)
+
+vsw-user-publisher<->the-indy-ledger:Create and write credential-definition for a given schema\n(run "vsw setup \-\-schema" once for each new schema)
+note right of the-indy-ledger:This can be run later for each new\nschema that the publisher wishes to issue\ncredentials. It is a prerequisite that an\nissuer/publisher writes a credential definition\nfor a given schema prior to issue the\nrespective credentials.
+
+note over vsw-user-verifier:vsw setup
+
+vsw-user-verifier<->the-indy-ledger:Set up wallet, create & \nregister public DID
+note over vsw-user-publisher, the-indy-ledger:The above **setup** procedures must be done before the normal operations below.
+
+note over vsw-user-publisher:vsw publish
+
+vsw-user-publisher->vsw-repo-holder-prover:Offer a credential\nciting a credential-definition
+vsw-repo-holder-prover->vsw-user-publisher:Request credential
+vsw-user-publisher->vsw-repo-holder-prover:Issue credential
+note over vsw-user-publisher,vsw-repo-holder-prover:A given credential must be issued aka **published**\nbefore a proof can be given.
+
+note over vsw-user-verifier:vsw verify
+
+vsw-user-verifier->vsw-repo-holder-prover:Presentation Request with\na hard-coded proof request
+vsw-repo-holder-prover->vsw-user-verifier:Present proof\nof the hard-coded question
+
+note over vsw-user-verifier:Veifies the proof.\nNon-revoked proof unused.
+note over vsw-repo-holder-prover,vsw-user-verifier:The proof's content is hard-coded\nfor now & should contain at least\nthe software's "name","version",\n"developer-did".
+
