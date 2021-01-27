@@ -1,56 +1,82 @@
-title vsw Overall Workflow Illustration (limited to M2 features)
+title vsw publish
 
+actor #green Alice
+fontawesome f120 vsw cli #green
+fontawesome f085 vsw controller #lightgreen
+fontawesome f085 vsw Agent #lightgreen
+fontawesome f085 repo Agent #lightblue
+fontawesome f1c0 repo #blue
 
-participant some-ledger-user
+activate vsw controller #lightblue
+activate repo Agent #lightblue
+activate repo #blue
+activate vsw Agent #lightgreen
+note right of repo Agent:public DID: D1SisLp186a5cwvoJHRNxk 
+note left of vsw Agent:public DID: AYiFytkWzEk26AKYtesZeP 
+Alice->vsw cli: vsw publish <file url>
+activate vsw cli #gray
+box over vsw cli: check <file url> and <SHA2>
+box over vsw cli:get the invitation json \n (assuming there is an invitation already)\n
+vsw cli->vsw controller: POST create connection
+box over vsw controller: POST PAYLOAD (using invitation) \n {"@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connections/1.0/invitation",\n "@id": "b4b4c85a-2cc9-40d2-a01b-ab017a45353d",\n "serviceEndpoint": "http://192.168.65.3:8060",\n "recipientKeys": ["H2FYfyiSdFSVr95iqxfmyhehiTXji5uPmJvB6Jo49jkK"],\n"label": "Repo.Agent"}
+vsw controller->vsw Agent: POST /connections/receive-invitation
+vsw Agent->repo Agent: 
+repo Agent->repo:webhook (invitation) 
+repo Agent->vsw Agent:
+vsw Agent->vsw controller:webhook: handle_connections (invitation)
+vsw Agent->vsw controller:webhook: handle_connections (request)
+vsw Agent->repo Agent:
+repo Agent->repo: webhook (request)
+vsw Agent-->vsw controller: response to /connections/receive-invitation (request)
+box over vsw controller: POST Invitation response:\n{"invitation_mode": "once",\n "routing_state": "none",\n "updated_at": "2021-01-21 14:49:00.655215Z",\n "connection_id": "56bf6d04-f542-4a74-b7fc-af4ec60abce3",\n "request_id": "45f25311-4e2f-4466-b015-a8b90168fedb",\n "initiator": "external",\n "their_label": "Repo.Agent",\n "invitation_key": "BdBjvUDoaA4KsMsU9uqhAg9eezHP1S8KaQ9dd9c6c7sK",\n "accept": "auto",\n "state": "request",\n"my_did": "HjjTx7xvwM5LPf8ubBvSEV",\n"created_at": "2021-01-21 14:49:00.606252Z"}
+repo Agent->vsw Agent:
+repo Agent->repo: webhook (response)
+vsw Agent->vsw controller:webhook: handle_connections (response)
+vsw Agent->repo Agent: 
+repo Agent->repo: webhook (active)
+repo Agent->vsw Agent:
+vsw Agent->vsw controller:webhook: handle_connections (active)
+box over vsw controller: PAYLOAD {"updated_at": "2020-12-01 14:28:48.308328Z",\n "invitation_mode": "once",\n "my_did": "PtRprhobcbqYV9Sg4fJoEL",\n "their_label": "Repo.Agent", "state": "request",\n"invitation_key": "H2FYfyiSdFSVr95iqxfmyhehiTXji5uPmJvB6Jo49jkK",\n"request_id": "5bba01d6-2b62-436a-b491-082648eaec31",\n"routing_state": "none",\n"connection_id": "351ddab2-d3d9-458c-8b34-0b99d51392ad",\n"created_at": "2020-12-01 14:28:48.251933Z",\n"initiator": "external",\n"accept": "auto"}
+vsw controller-->vsw cli: response to create connection (connected)
+box over vsw cli: connected
+vsw cli->vsw controller: credential-definitions request
+box over vsw controller: NOTE:client has to know the schema\n {"schema_id": "D1SisLp186a5cwvoJHRNxk:2:vsw schema:0.2",\n "support_revocation": false,\n "revocation_registry_size": 100 }
+vsw controller->vsw Agent: POST /credential-definitions request
+vsw Agent->repo Agent:
+repo Agent->repo: webhook: handle_issue_credential
+repo Agent->vsw Agent:
+vsw Agent-->vsw controller: response POST /credential-definitions\nCred def ID: AYiFytkWzEk26AKYtesZeP:3:CL:203:default\n(cli DID as part)
+vsw controller-->vsw cli: response credential-definitions
+vsw cli->vsw controller:POST send-offer request (URL, SHA2 digest, name)
+box over vsw controller:{"connection_id": "56bf6d04-f542-4a74-b7fc-af4ec60abce3",\n"cred_def_id": "AYiFytkWzEk26AKYtesZeP:3:CL:203:default",\n"comment": "Offer on cred def id AYiFytkWzEk26AKYtesZeP:3:CL:203:default",\n"auto_remove": false,\n"credential_preview": {"@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",\n"attributes": [{"name": "name","value": "Screen1"},\n{"name": "url", "value": \n "https://raw.githubusercontent.com/tervoju/urobo_mapper/master/src/images/Screenshot%20from%202020-05-15%2013-44-06.png"},\n{"name": "digest",\n"value": "80da584735d94d5948bc5b450e6fdb837afae78d2a27682d095e9b9b576cf95e"},\n{"name": "timestamp","value": "1611240545"}]\n},"trace": false}
+vsw controller->vsw Agent: POST /issue-credential/send-offer request
 
-participant vsw-user-publisher
+vsw Agent->>repo Agent:
+repo Agent->repo: webhooks: /handle_issue_credential (offer received)\n  "schema_id": "D1SisLp186a5cwvoJHRNxk:2:vsw schema:0.2",\n"cred_def_id": "AYiFytkWzEk26AKYtesZeP:3:CL:203:default"\n(using repo schema, cli cred_def_id)
 
-participant vsw-repo-holder-prover
+repo->repo Agent:POST /issue-credential/\n  records/xxx/send-request (request_sent)
+repo Agent->>vsw Agent:
 
-participant vsw-user-verifier
+vsw Agent->>repo Agent:
+repo Agent->>vsw Agent:
 
-participant the-indy-ledger
+vsw Agent->vsw controller: webhook: handle_issue_credential
+vsw Agent-->vsw controller: response POST /issue-credential/send-offer
+vsw Agent->vsw controller: webhook: handle_issue_credential (request received)
+vsw controller-->vsw cli: response POST send-offer request\n (Credential: state = request_received,\n credential_exchange_id = 4e79937c-2fd5-4cfb-9e38-3cca00c1d9ca)
+vsw cli->vsw controller: 
+vsw controller->vsw Agent: POST /issue-credential/records/<record id>/issue \n record_id=4e79937c-2fd5-4cfb-9e38-3cca00c1d9ca
+vsw Agent->>repo Agent:
+repo Agent->>vsw Agent:
+parallel 
+vsw Agent->vsw controller: webhook: handle_issue_credential (credential_issued)
+repo Agent->repo: /webhooks/topic/issue_credential
+parallel off
 
-some-ledger-user-->the-indy-ledger:Write standard credential schemas.
-
-note over some-ledger-user, the-indy-ledger:Schemas can be published by anyone. It is a prerequisite that they exist in the ledger before \nthe respective credential\-definitions can be created, or credentials issued.
-
-note over vsw-repo-holder-prover:vsw-repo starting up code
-vsw-repo-holder-prover<->the-indy-ledger:Set up wallet, create & register public DID\n(init code by vsw-repo)
-
-note right of the-indy-ledger: The repo is up before any vsw user.
-
-note over vsw-user-publisher:vsw setup (first time)
-vsw-user-publisher<->the-indy-ledger:Set up wallet, create & register public DID ("vsw setup" first time run)
-note right of the-indy-ledger:During the first run of "vsw setup", wallet\nand DID are created. In subsequent runs,\nthey are retrieved from the wallet.
-note over vsw-user-publisher:vsw setup \-\-schema\n(writes schema def)
-
-vsw-user-publisher<->the-indy-ledger:Create and write credential-definition for a given schema\n(run "vsw setup \-\-schema" once for each new schema)
-note right of the-indy-ledger:This can be run later for each new\nschema that the publisher wishes to issue\ncredentials. It is a prerequisite that an\nissuer/publisher writes a credential definition\nfor a given schema prior to issue the\nrespective credentials.
-
-note over vsw-user-verifier:vsw setup
-
-vsw-user-verifier<->the-indy-ledger:Set up wallet, create & \nregister public DID
-note over vsw-user-publisher, the-indy-ledger:The above **setup** procedures must be done before the normal operations below.
-
-note over vsw-user-publisher:vsw publish
-
-vsw-user-publisher<-->vsw-repo-holder-prover:Establish connection
-
-vsw-user-publisher->vsw-repo-holder-prover:Offer a credential\nciting a credential-definition
-vsw-repo-holder-prover->vsw-user-publisher:Request credential
-vsw-user-publisher->vsw-repo-holder-prover:Issue credential
-vsw-user-publisher<-->vsw-repo-holder-prover:Tear down connection
-
-note over vsw-user-publisher,vsw-repo-holder-prover:A given credential must be issued aka **published**\nbefore a proof can be given.
-
-note over vsw-user-verifier:vsw verify
-
-vsw-repo-holder-prover<-->vsw-user-verifier:Establish connection
-
-vsw-user-verifier->vsw-repo-holder-prover:Presentation Request with\na hard-coded proof request
-vsw-repo-holder-prover->vsw-user-verifier:Present proof\nof the hard-coded question
-vsw-repo-holder-prover<-->vsw-user-verifier:Tear down connection
-
-note over vsw-user-verifier:Veifies the proof.\nNon-revoked proof unused.
-note over vsw-repo-holder-prover,vsw-user-verifier:The proof's content is hard-coded\nfor now & should contain at least\nthe software's "name","version",\n"developer-did".
+vsw Agent-->vsw controller: response POST /issue-credential/records/<record id>/issue
+vsw Agent->vsw controller: webhook: handle_issue_credential
+repo->repo Agent:GET /credential/yyy
+vsw controller->vsw cli: publish done
+vsw cli-->Alice: publish success
+repo Agent-->repo:credential
+deactivate vsw cli
