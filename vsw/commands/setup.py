@@ -9,7 +9,6 @@ import configparser
 
 import requests
 from aries_cloudagent_vsw.commands import run_command
-from pip._vendor.distlib.compat import raw_input
 
 import vsw.utils
 from vsw import utils
@@ -35,7 +34,7 @@ def main(args: List[str]) -> bool:
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=False, help="The wallet name")
-    parser.add_argument("--provision", type=bool, required=False, help="The wallet name")
+    parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 
 def provision(wallet_key, args):
