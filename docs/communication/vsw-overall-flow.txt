@@ -35,16 +35,22 @@ note over vsw-user-publisher, the-indy-ledger:The above **setup** procedures mus
 
 note over vsw-user-publisher:vsw publish
 
+vsw-user-publisher<-->vsw-repo-holder-prover:Establish connection
+
 vsw-user-publisher->vsw-repo-holder-prover:Offer a credential\nciting a credential-definition
 vsw-repo-holder-prover->vsw-user-publisher:Request credential
 vsw-user-publisher->vsw-repo-holder-prover:Issue credential
+vsw-user-publisher<-->vsw-repo-holder-prover:Tear down connection
+
 note over vsw-user-publisher,vsw-repo-holder-prover:A given credential must be issued aka **published**\nbefore a proof can be given.
 
 note over vsw-user-verifier:vsw verify
 
+vsw-repo-holder-prover<-->vsw-user-verifier:Establish connection
+
 vsw-user-verifier->vsw-repo-holder-prover:Presentation Request with\na hard-coded proof request
 vsw-repo-holder-prover->vsw-user-verifier:Present proof\nof the hard-coded question
+vsw-repo-holder-prover<-->vsw-user-verifier:Tear down connection
 
 note over vsw-user-verifier:Veifies the proof.\nNon-revoked proof unused.
 note over vsw-repo-holder-prover,vsw-user-verifier:The proof's content is hard-coded\nfor now & should contain at least\nthe software's "name","version",\n"developer-did".
-
