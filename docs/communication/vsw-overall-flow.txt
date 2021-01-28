@@ -22,35 +22,43 @@ note right of the-indy-ledger: The repo is up before any vsw user.
 
 note over vsw-user-publisher:vsw setup (first time)
 vsw-user-publisher<->the-indy-ledger:Set up wallet, create & register public DID ("vsw setup" first time run)
+vsw-user-publisher<->vsw-repo-holder-prover:Connection creation
+note over vsw-user-publisher,vsw-repo-holder-prover:Additional identity exchange will be added later.
 note right of the-indy-ledger:During the first run of "vsw setup", wallet\nand DID are created. In subsequent runs,\nthey are retrieved from the wallet.
 note over vsw-user-publisher:vsw setup \-\-schema\n(writes schema def)
 
 vsw-user-publisher<->the-indy-ledger:Create and write credential-definition for a given schema\n(run "vsw setup \-\-schema" once for each new schema)
 note right of the-indy-ledger:This can be run later for each new\nschema that the publisher wishes to issue\ncredentials. It is a prerequisite that an\nissuer/publisher writes a credential definition\nfor a given schema prior to issue the\nrespective credentials.
 
-note over vsw-user-verifier:vsw setup
+note over vsw-user-verifier:vsw setup (first time)
 
 vsw-user-verifier<->the-indy-ledger:Set up wallet, create & \nregister public DID
-note over vsw-user-publisher, the-indy-ledger:The above **setup** procedures must be done before the normal operations below.
+vsw-user-verifier<->vsw-repo-holder-prover:Connection creation
+note over vsw-user-verifier,vsw-repo-holder-prover:Additional identity exchange will be added later.
 
-note over vsw-user-publisher:vsw publish
+note over vsw-user-publisher, the-indy-ledger:The above **setup** procedures must be done before the normal operations below.\nAll users have also created connections with the repo. They can exchange secure messages now.
 
-vsw-user-publisher<-->vsw-repo-holder-prover:Establish connection
+note over vsw-user-publisher:vsw publish (issue credential)
+
 
 vsw-user-publisher->vsw-repo-holder-prover:Offer a credential\nciting a credential-definition
 vsw-repo-holder-prover->vsw-user-publisher:Request credential
 vsw-user-publisher->vsw-repo-holder-prover:Issue credential
-vsw-user-publisher<-->vsw-repo-holder-prover:Tear down connection
+
 
 note over vsw-user-publisher,vsw-repo-holder-prover:A given credential must be issued aka **published**\nbefore a proof can be given.
 
-note over vsw-user-verifier:vsw verify
+note over vsw-user-verifier:vsw verify (present proof)
 
-vsw-repo-holder-prover<-->vsw-user-verifier:Establish connection
+
 
 vsw-user-verifier->vsw-repo-holder-prover:Presentation Request with\na hard-coded proof request
 vsw-repo-holder-prover->vsw-user-verifier:Present proof\nof the hard-coded question
-vsw-repo-holder-prover<-->vsw-user-verifier:Tear down connection
+
 
 note over vsw-user-verifier:Veifies the proof.\nNon-revoked proof unused.
 note over vsw-repo-holder-prover,vsw-user-verifier:The proof's content is hard-coded\nfor now & should contain at least\nthe software's "name","version",\n"developer-did".
+
+note over vsw-user-publisher: vsw exit
+note over vsw-user-verifier: vsw exit
+note over vsw-repo-holder-prover: The repo is a continuous cloud service.\nIt may restart for maintenance.
