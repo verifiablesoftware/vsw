@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import uuid
 import getpass
@@ -23,24 +24,25 @@ def main(args: List[str]) -> bool:
     args = parse_args(args)
     if(args.provision):
         logger.info('provision agent')
-        provision(wallet_key, args)
+        provision(wallet_key, args.name)
     else:
         logger.info("start agent")
-        start_agent(wallet_key, args)
+        start_agent(wallet_key, args.name)
 
-    retrieve_DID()
+    connection_repo()
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=False, help="The wallet name")
+    parser.add_argument("--schema", required=False, help="The schema")
     parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 
-def provision(wallet_key, args):
+def provision(wallet_key, name):
     wallet_name = 'default'
-    if args.name:
-        wallet_name = args.name
+    if name:
+        wallet_name = name
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     logger.info('genesis_file: ' + str(config_path))
@@ -48,18 +50,19 @@ def provision(wallet_key, args):
                           '--endpoint', configuration.get("endpoint"),
                           '--seed', get_seed(wallet_name),
                           '--genesis-file', str(config_path),
+                          '--accept-taa', '1',
                           '--wallet-type', 'indy',
                           '--wallet-name', wallet_name,
                           '--wallet-key', wallet_key
                           ])
 
-def start_agent(wallet_key, args):
+def start_agent(wallet_key, name):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     wallet_name = 'default'
     logger.info('genesis_file: ' + str(config_path))
-    if args.name:
-        wallet_name = args.name
+    if name:
+        wallet_name = name
     run_command('start', ['--admin', configuration.get("admin_host"), configuration.get("admin_port"),
                           '--inbound-transport', configuration.get("inbound_transport_protocol"),
                           configuration.get("inbound_transport_host"), configuration.get("inbound_transport_port"),
@@ -69,6 +72,7 @@ def start_agent(wallet_key, args):
                           '--seed', get_seed(wallet_name),
                           '--genesis-file', str(config_path),
                           '--webhook-url', configuration.get("webhook_url"),
+                          '--accept-taa', '1',
                           '--wallet-type', 'indy',
                           '--wallet-name', wallet_name,
                           '--wallet-key', wallet_key,
@@ -84,19 +88,30 @@ def start_agent(wallet_key, args):
                           '--admin-insecure-mode'])
 
 
-def retrieve_DID():
+def connection_repo():
     try:
-        vsw_agent_host = vsw.utils.get_vsw_agent_host()
-        response = requests.post(vsw_agent_host + "/wallet/did/create")
-        logger.info(response.text)
-    except:
-        logger.error('init failed')
-    else:
-        logger.info('init successfully!')
+        vsw_config = vsw.utils.get_vsw_agent()
+
+        local= f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/create-invitation'
+        response = requests.post(local, {
+            "alias": vsw_config.get("label"),
+            "auto_accept": True,
+            # "public": True,
+            # "multi_use": False
+        })
+        res = json.loads(response.text)
+        logger.info(res)
+
+        vsw_repo_config = vsw.utils.get_repo_host()
+        vsw_repo_url = f'http://{vsw_repo_config.get("host")}/connections/receive-invitation)'
+        receive_res = requests.post(vsw_repo_url, res["invitation"])
+        logger.info(json.loads(receive_res.text))
+    except Exception as err:
+        logger.error('connection vsw-repo failed', err)
 
 
 def get_seed(wallet_name):
-    key_folder = expanduser("~") + '/.indy-client/wallet'
+    key_folder = expanduser("~") + '/.indy_client/wallet'
     key_path = key_folder + '/key.ini'
     is_exist = os.path.exists(key_path)
 
@@ -109,7 +124,8 @@ def get_seed(wallet_name):
         except:
             logger.warn('not found seed')
     else:
-        os.makedirs(key_folder)
+        if os.path.exists(key_folder) is False:
+            os.makedirs(key_folder)
     if seed is None:
         seed = uuid.uuid4().hex
         config = configparser.ConfigParser()
