@@ -21,14 +21,12 @@ logger = Log(__name__).logger
 def main(args: List[str]) -> bool:
     wallet_key = getpass.getpass('Please enter wallet key: ')
     args = parse_args(args)
+    kill()
     if args.provision:
-        kill()
         provision(wallet_key, args.name)
     else:
-        kill()
-        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-            start_agent(wallet_key, args.name)
-
+        # with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
+        start_agent(wallet_key, args.name)
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
@@ -81,14 +79,19 @@ def start_agent(wallet_key, name):
                           '--debug',
                           '--log-config', logger.aries_config_path,
                           '--log-file', logger.aries_log_file,
+                          '--debug-credentials',
                           '--auto-accept-invites',
                           '--auto-accept-requests',
                           '--auto-ping-connection',
                           '--auto-respond-messages',
                           '--auto-connect-repo',
+                          '--auto-respond-credential-proposal',
                           '--auto-respond-credential-offer',
+                          '--auto-respond-credential-request',
+                          '--auto-store-credential',
                           '--auto-respond-presentation-request',
                           '--auto-verify-presentation',
+                          '--auto-respond-presentation-proposal',
                           '--admin-insecure-mode'])
 
 

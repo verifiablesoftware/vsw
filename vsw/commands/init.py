@@ -30,7 +30,7 @@ def do_schema(schema):
     schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/schemas'
     response = requests.post(schema_url, json={
         "schema_version": "1.0",
-        "attributes": ["score"],
+        "attributes": ["developer-did","software-version","software-name","software-did"],
         "schema_name": schema
     })
     schema_res = json.loads(response.text)
@@ -57,11 +57,11 @@ def connection_repo():
         response = requests.post(local, {
             "alias": vsw_config.get("label"),
             "auto_accept": True,
-            # "public": True,
-            # "multi_use": False
+            "public": True
+            # "multi_use": True
         })
         res = json.loads(response.text)
-        logger.info(res)
+        print(res)
 
         vsw_repo_config = vsw.utils.get_repo_host()
         vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/receive-invitation?alias={vsw_config.get("label")}'
@@ -73,8 +73,8 @@ def connection_repo():
             "recipientKeys": invitation["recipientKeys"],
             "@id": invitation["@id"]
         }
-        receive_res = requests.post(vsw_repo_url, json=body)
-        print('receive_res:', receive_res.__dict__)
-        logger.info(receive_res)
+        ss = requests.post(vsw_repo_url, json=body)
+        print(ss)
+        logger.info('Created connection with Repo')
     except Exception as err:
         logger.error('connection vsw-repo failed', err)

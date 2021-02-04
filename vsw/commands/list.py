@@ -55,10 +55,10 @@ def parse_args(args):
 
 
 def get_credential_definition(vsw_config):
-    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions'
+    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
+    print(res)
 
 
 def get_credentials(vsw_config):
@@ -86,7 +86,7 @@ def get_schema(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/schemas/created'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
+    print(res)
 
 
 def get_wallet(vsw_config):

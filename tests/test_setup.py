@@ -4,7 +4,7 @@ def test_retrieve_DID():
     setup.retrieve_DID()
 
 def test_start_agent():
-    setup.start_agent("felix3", "felix3")
+    setup.start_agent("default", "default")
 
 def test_get_seed():
     setup.get_seed()
