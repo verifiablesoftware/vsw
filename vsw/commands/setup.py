@@ -70,7 +70,6 @@ def start_agent(wallet_key, name):
                           '--seed', get_seed(wallet_name),
                           '--genesis-file', str(config_path),
                           '--webhook-url', configuration.get("webhook_url"),
-                          '--repo-url', repo_config.get("host"),
                           '--accept-taa', '1',
                           '--wallet-type', 'indy',
                           '--wallet-name', wallet_name,
