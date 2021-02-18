@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 import uuid
 import getpass
 from pathlib import Path
@@ -28,6 +27,7 @@ def main(args: List[str]) -> bool:
         # with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
         start_agent(wallet_key, args.name)
 
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=False, help="The wallet name")
@@ -54,7 +54,6 @@ def provision(wallet_key, name):
 
 
 def start_agent(wallet_key, name):
-    repo_config = utils.get_repo_host()
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     wallet_name = 'default'
@@ -75,15 +74,12 @@ def start_agent(wallet_key, name):
                           '--wallet-name', wallet_name,
                           '--wallet-key', wallet_key,
                           '--public-invites',
-                          '--debug',
                           '--log-config', logger.aries_config_path,
                           '--log-file', logger.aries_log_file,
-                          '--debug-credentials',
                           '--auto-accept-invites',
                           '--auto-accept-requests',
                           '--auto-ping-connection',
                           '--auto-respond-messages',
-                          '--auto-connect-repo',
                           '--auto-respond-credential-proposal',
                           '--auto-respond-credential-offer',
                           '--auto-respond-credential-request',

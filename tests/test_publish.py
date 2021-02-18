@@ -213,3 +213,7 @@ def test_send():
         "schema_version": "1.0"
     })
     print(json.loads(res.text))
+
+
+def test_generate_digest():
+    publish.generate_digest("http://images.pccoo.cn/bar/2012426/20124261343081s.jpg")

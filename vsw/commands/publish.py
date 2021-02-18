@@ -19,18 +19,21 @@ logger = Log(__name__).logger
 
 
 def main(args: List[str]) -> bool:
+    args = parse_args(args)
     software_name = input('Please enter software name: ')
     software_version = input('Please enter software version: ')
     software_did = input('Please enter software did: ')
     software_url = input('Please enter software package url: ')
-    software_alt_url1 = input('Please enter software optional package url1: ')
-    software_alt_url2 = input('Please enter software optional package url2: ')
-    args = parse_args(args)
+    software_alt_url1 = args.alt_url1
+    software_alt_url2 = args.alt_url2
+
     issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2)
+
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--url", required=True, help="The uploaded file url")
+    parser.add_argument("--alt-url1", required=False, help="The software optional package url1")
+    parser.add_argument("--alt-url2", required=False, help="The software optional package url2")
     return parser.parse_args(args)
 
 
@@ -59,22 +62,33 @@ def get_credential_definition():
     return res2["credential_definition"]
 
 
-def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_did, software_url,
-                  software_alt_url1, software_alt_url2):
+def generate_digest(software_url):
     with urllib.request.urlopen(software_url) as response:
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             shutil.copyfileobj(response, tmp_file)
-    sha256_hash = hashlib.sha256()
-    with open(tmp_file, "rb") as f:
-        # Read and update hash string value in blocks of 4K
-        for byte_block in iter(lambda: f.read(4096), b""):
-            sha256_hash.update(byte_block)
-        print(sha256_hash.hexdigest())
-    multi_codec = add_prefix('sha2-256', sha256_hash.hexdigest())
-    package_hash = encode('base58btc', multi_codec)
+            sha256_hash = hashlib.sha256()
+            # Read and update hash string value in blocks of 4K
+            for byte_block in iter(lambda: tmp_file.file.read(4096), b""):
+                sha256_hash.update(byte_block)
+            hex_digest = sha256_hash.hexdigest()
+            print(f'sha256 hash: {hex_digest}')
+            multi_codec = add_prefix('sha2-256', str.encode(hex_digest))
+            print(f'multi_codec:{multi_codec}')
+            digest = encode('base58btc', multi_codec)
+            return digest.decode()
+
+
+def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_did, software_url,
+                  software_alt_url1, software_alt_url2):
+    if software_alt_url1 is None:
+        software_alt_url1 = ""
+    if software_alt_url2 is None:
+        software_alt_url2 = ""
+    digest = generate_digest(software_url)
+    print(f'digest: {digest}')
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
-        "comment": "Felix Test",
+        "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,
         "connection_id": repo_conn_id,
@@ -111,7 +125,7 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
                 },
                 {
                     "name": "hash",
-                    "value": package_hash
+                    "value": digest
                 }
             ]
         },
