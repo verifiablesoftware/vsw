@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 from aries_cloudagent_vsw.config.logging import DEFAULT_LOGGING_CONFIG_PATH
 
+
 class Log:
 
     def __init__(self, name: str = 'vsw', log_dir: str = None, level=logging.INFO):

@@ -8,23 +8,14 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
-local_conn_id="b8b03463-3a76-453a-8cee-ac82778b3fd3"
-repo_conn_id="31a6152b-5c39-4924-895d-b6bc0afa1917"
-credential_definition_id="CqdPVBFnDs6uUzrrd8Prmw:3:CL:2918:default"
-cred_ex_id="151c7bfb-a672-4507-99eb-aabd9bb3a494"
+local_conn_id = "69fa2db4-0d97-4f95-a930-3453adb09406"
+repo_conn_id = "ba57a775-fded-431f-b212-170bef334b47"
+credential_definition_id = "CqdPVBFnDs6uUzrrd8Prmw:3:CL:2950:default"
+cred_ex_id = "151c7bfb-a672-4507-99eb-aabd9bb3a494"
 
 
 def test_parse_args():
     publish.parse_args()
-
-
-def test_get_connections():
-    publish.get_connections()
-
-
-def test_get_credential_definitions():
-    publish.get_credential_definition()
-
 
 def test_list_issue_records():
     list.get_issue_credential_records()
@@ -36,7 +27,7 @@ def test_send_proposal():
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
         # "schema_id": "CqdPVBFnDs6uUzrrd8Prmw:2:software-certificate:1.0",  # TODO
-        "comment": "Felix Test",
+        "comment": "Felix Debug Test",
         # "schema_issuer_did": "WgWxqztrNooG92RXvxSTWv",  # TODO
         "auto_remove": False,
         "trace": True,
@@ -61,6 +52,26 @@ def test_send_proposal():
                 {
                     "name": "software-did",
                     "value": "80da584735d94d5948bc5b450e6fdb837afae78d2a27682d095e9b9b576cf95e"
+                },
+                {
+                    "name": "url",
+                    "value": "http://images.pccoo.cn/bar/2012426/20124261343081s.jpg"
+                },
+                {
+                    "name": "alt-url1",
+                    "value": ""
+                },
+                {
+                    "name": "alt-url2",
+                    "value": ""
+                },
+                {
+                    "name": "hash",
+                    "value": "digest"
+                },
+                {
+                    "name": "alt-hash",
+                    "value": "digest"
                 }
             ]
         },
@@ -215,5 +226,47 @@ def test_send():
     print(json.loads(res.text))
 
 
-def test_generate_digest():
-    publish.generate_digest("http://images.pccoo.cn/bar/2012426/20124261343081s.jpg")
+def test_get_credentail_records():
+    publish.get_credential_record("d073e5f4-b825-4cae-8d65-1ec62ba4d448")
+
+
+def test_clean_all_records():
+    local = f'{vsw_url_host}/issue-credential/records'
+    response = requests.get(local)
+    results = json.loads(response.text)["results"]
+    if len(results) > 0:
+        for result in results:
+            credential_exchange_id = result["credential_exchange_id"]
+            url = f'{vsw_url_host}/issue-credential/records/{credential_exchange_id}/remove'
+            res = requests.post(url)
+            print(f'Removed credential records {credential_exchange_id}')
+
+    local = f'{vsw_url_host}/present-proof/records'
+    response = requests.get(local)
+    results = json.loads(response.text)["results"]
+    if len(results) > 0:
+        for result in results:
+            presentation_exchange_id = result["presentation_exchange_id"]
+            url = f'{vsw_url_host}/present-proof/records/{presentation_exchange_id}/remove'
+            res = requests.post(url)
+            print(f'Removed present proof records {presentation_exchange_id}')
+
+    repo = f'{repo_url_host}/issue-credential/records'
+    response = requests.get(repo)
+    results = json.loads(response.text)["results"]
+    if len(results) > 0:
+        for result in results:
+            credential_exchange_id = result["credential_exchange_id"]
+            url = f'{repo_url_host}/issue-credential/records/{credential_exchange_id}/remove'
+            res = requests.post(url)
+            print(f'Removed credential records {credential_exchange_id}')
+
+    repo = f'{repo_url_host}/present-proof/records'
+    response = requests.get(repo)
+    results = json.loads(response.text)["results"]
+    if len(results) > 0:
+        for result in results:
+            presentation_exchange_id = result["presentation_exchange_id"]
+            url = f'{repo_url_host}/present-proof/records/{presentation_exchange_id}/remove'
+            res = requests.post(url)
+            print(f'Removed present proof records {presentation_exchange_id}')

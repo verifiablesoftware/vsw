@@ -2,9 +2,11 @@ import argparse
 import json
 from typing import List
 from uuid import uuid4
+from urllib.parse import urljoin
 
 import requests
-import vsw
+import vsw.utils
+import time
 from vsw.log import Log
 
 vsw_config = vsw.utils.get_vsw_agent()
@@ -17,20 +19,72 @@ logger = Log(__name__).logger
 def main(args: List[str]) -> bool:
     parser = argparse.ArgumentParser(prog="vsw verify")
     parser.add_argument("--software-name", required=True, help="The software name")
-    parser.add_argument("--software-did", required=True, help="The software did")
+    parser.add_argument("--software-did", required=False, help="The software did")
+    parser.add_argument("--url", required=True, help="The software download url")
     parser.add_argument("--issuer-did", required=True, help="The issuer did")
-    parser.add_argument("--developer-did", required=True, help="The developer did")
+    parser.add_argument("--developer-did", required=False, help="The developer did")
     parsed_args = parser.parse_args(args)
-    connection = get_repo_connection()
-    # 1. Request Proof
-    proof_response = send_request(connection["connection_id"], parsed_args.software_name, parsed_args.issuer_did)
-    # 2. Present Proof
-    present_proof_response = send_presentation_proof(proof_response)
-    # 3. Verify Proof
-    verify_presentation_proof(present_proof_response)
+    execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url)
 
 
-def send_request(repo_conn_id, software_name, issuer_did):
+def execute(software_name, issuer_did, download_url):
+    connection = get_client_connection()
+    logger.info("Executing verify, please wait for response...")
+    proof_response = send_request(connection["connection_id"], software_name, issuer_did)
+    presentation_exchange_id = proof_response["presentation_exchange_id"]
+    logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
+    times = 0
+    while times <= 10:
+        presentation_proof_result = retrieve_result(presentation_exchange_id)
+        state = presentation_proof_result["state"]
+        if state == "verified":
+            pres_req = presentation_proof_result["presentation_request"]
+            pres = presentation_proof_result["presentation"]
+            is_proof_of_software_certificate = (
+                    pres_req["name"] == "Proof of Software Certificate"
+            )
+            if is_proof_of_software_certificate:
+                # check claims
+                proof_dict = {}
+                for (referent, attr_spec) in pres_req["requested_attributes"].items():
+                    proof_dict[attr_spec['name']] = pres['requested_proof']['revealed_attrs'][referent]['raw']
+                    logger.info(
+                        f"{attr_spec['name']}: "
+                        f"{pres['requested_proof']['revealed_attrs'][referent]['raw']}"
+                    )
+                credential_hash = proof_dict['hash']
+                url = proof_dict['url']
+                if credential_hash is None or url is None:
+                    logger.error("Verified error, hash or url in request proof is None")
+                elif url != download_url:
+                    logger.error("Verified error, the url is not matched")
+                elif vsw.utils.generate_digest(download_url) != credential_hash:
+                    logger.error("Verified error, the digest is not matched")
+                else:
+                    logger.info('Congratulation! verified successfully!')
+            else:
+                logger.error("Verified error, the name in presentation request is wrong")
+            break;
+        else:
+            times += 1
+
+    if times > 10:
+        logger.error("verified error, presentation proof result is not verified!")
+
+
+def retrieve_result(presentation_exchange_id):
+    time.sleep(5)  # wait communicate complete automatically between agents
+    presentation_proof_result = get_vsw_proof(presentation_exchange_id)
+    return presentation_proof_result
+
+
+def get_vsw_proof(pres_ex_id):
+    vsw_url = urljoin(vsw_url_host, f"/present-proof/records/{pres_ex_id}")
+    res = requests.get(vsw_url)
+    return json.loads(res.text)
+
+
+def send_request(client_conn_id, software_name, issuer_did):
     """
     Verifier sends request (prover receives request)
     Request Proof (from verifier to prover, required)
@@ -85,96 +139,15 @@ def send_request(repo_conn_id, software_name, issuer_did):
         "requested_predicates": {}
     }
     proof_request_web_request = {
-        "connection_id": repo_conn_id,
+        "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
-    res = requests.post(vsw_url, proof_request_web_request)
+    res = requests.post(vsw_url, json=proof_request_web_request)
     return json.loads(res.text)
 
 
-def send_presentation_proof(message):
-    """Prover sends presentation proof (verifier receives presentation proof)"""
-    state = message["state"]
-    presentation_exchange_id = message["presentation_exchange_id"]
-    presentation_request = message["presentation_request"]
-    present_proof_response = {}
-
-    if state == "request_received":
-        # include self-attested attributes (not included in credentials)
-        credentials_by_reft = {}
-        revealed = {}
-        self_attested = {}
-        predicates = {}
-
-        # select credentials to provide for the proof
-        credentials = requests.get(f"{repo_url_host}/present-proof/records/{presentation_exchange_id}/credentials")
-        if credentials:
-            for row in sorted(
-                    credentials,
-                    key=lambda c: int(c["cred_info"]["attrs"]["timestamp"]),
-                    reverse=True,
-            ):
-                for referent in row["presentation_referents"]:
-                    if referent not in credentials_by_reft:
-                        credentials_by_reft[referent] = row
-
-        for referent in presentation_request["requested_attributes"]:
-            if referent in credentials_by_reft:
-                revealed[referent] = {
-                    "cred_id": credentials_by_reft[referent]["cred_info"][
-                        "referent"
-                    ],
-                    "revealed": True,
-                }
-            else:
-                self_attested[referent] = "my self-attested value"
-
-        for referent in presentation_request["requested_predicates"]:
-            if referent in credentials_by_reft:
-                predicates[referent] = {
-                    "cred_id": credentials_by_reft[referent]["cred_info"][
-                        "referent"
-                    ]
-                }
-
-        request = {
-            "requested_predicates": predicates,
-            "requested_attributes": revealed,
-            "self_attested_attributes": self_attested,
-        }
-        res = requests.post(f"{repo_url_host}/present-proof/records/{presentation_exchange_id}/send-presentation", request)
-        present_proof_response = json.loads(res.text)
-
-    return present_proof_response
-
-
-def verify_presentation_proof(message):
-    """
-    Verify Proof
-    Verifier verifies presentation proof
-    """
-    state = message["state"]
-
-    presentation_exchange_id = message["presentation_exchange_id"]
-    if state == "presentation_received":
-        response = requests.post(f"{vsw_url_host}/present-proof/records/{presentation_exchange_id}/verify-presentation")
-        msg = json.loads(response.text)
-        pres_req = msg["presentation_request"]
-        pres = msg["presentation"]
-        is_proof_of_software_certificate = (
-                pres_req["name"] == "Proof of Software Certificate"
-        )
-        if is_proof_of_software_certificate:
-            # check claims
-            for (referent, attr_spec) in pres_req["requested_attributes"].items():
-                logger.info(
-                    f"{attr_spec['name']}: "
-                    f"{pres['requested_proof']['revealed_attrs'][referent]['raw']}"
-                )
-
-
-def get_repo_connection():
-    connection_response = requests.get(f'{repo_url_host}/connections')
+def get_client_connection():
+    connection_response = requests.get(f'{vsw_url_host}/connections')
     res = json.loads(connection_response.text)
     connections = res["results"]
     return connections[-1]

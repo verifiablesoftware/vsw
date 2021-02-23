@@ -115,11 +115,11 @@ def get_connections(vsw_config):
 
 
 def print_connection_table(results):
-    data = [["initiator", "accept", "created_at", "invitation_key", "connection_id", "routing_state", "state"]]
+    data = [["their_label", "my_did", "their_did", "connection_id", "routing_state", "created_at", "state"]]
     for row in results:
         data.append(
-            [row["initiator"], row["accept"], row["created_at"], row["invitation_key"],
-             row["connection_id"], row["routing_state"], row["state"]]
+            [row["their_label"], row["my_did"], row["their_did"],
+             row["connection_id"], row["routing_state"], row["created_at"], row["state"]]
         )
     table = AsciiTable(data)
     table.title = "Connection Records"

@@ -53,14 +53,9 @@ def connection_repo():
     try:
         vsw_config = vsw.utils.get_vsw_agent()
         vsw_repo_config = vsw.utils.get_repo_host()
-        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation'
+        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true&public=true'
         logger.info(f'Create invitation to: {vsw_repo_url}')
-        response = requests.post(vsw_repo_url, {
-            "alias": vsw_config.get("label"),
-            "auto_accept": True,
-            "public": True
-            # "multi_use": True
-        })
+        response = requests.post(vsw_repo_url)
         res = json.loads(response.text)
         print(res)
 
@@ -69,12 +64,12 @@ def connection_repo():
         invitation = res["invitation"]
         body = {
             "label": invitation["label"],
-            "serviceEndpoint": invitation["serviceEndpoint"],
-            "recipientKeys": invitation["recipientKeys"],
+            "did": invitation["did"],
+            "@type": invitation["@type"],
             "@id": invitation["@id"]
         }
         ss = requests.post(local_url, json=body)
-        print(ss)
+        print(json.loads(ss.text))
         logger.info('Created connection with Repo')
     except Exception as err:
         logger.error('connection vsw-repo failed', err)

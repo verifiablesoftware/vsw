@@ -1,7 +1,8 @@
+from vsw.commands import verify
+
+
 def test_main():
-    # 1. Prover sends proposal (verifier receives proposal) (this step is optional)
-    # 2. Verifier sends request (prover receives request)
-    # 3. Prover sends presentation proof (verifier receives presentation proof)
-    # 4. Verifier verifies presentation proof
-    # 5. Verifier sends presentation proof acknowledgement (prover receives presentation proof acknowledgement)
-    print('')
+    verify.execute("HappyBirds", "sldfjsldkfj2332", "http://images.pccoo.cn/bar/2012426/20124261343081s.jpg")
+
+def test_retrieve_results():
+    verify.retrieve_result("01168b93-ea56-452e-b7ca-e14d4be1bfca")

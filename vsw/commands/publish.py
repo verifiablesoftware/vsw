@@ -1,13 +1,9 @@
 import argparse
-import hashlib
 import json
-import shutil
-import tempfile
-import urllib
+import time
 from typing import List
-from multicodec import add_prefix
-from multibase import encode, decode
 from vsw.log import Log
+from urllib.parse import urljoin
 import vsw.utils
 import requests
 
@@ -38,9 +34,30 @@ def parse_args(args):
 
 
 def issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2):
+    logger.info("executing publish, please waiting for response")
     connection = get_repo_connection()
-    send_proposal(connection["connection_id"], connection["their_did"], software_name,
-                  software_version, software_did, software_url, software_alt_url1, software_alt_url2)
+    proposal_response = send_proposal(connection["connection_id"], connection["their_did"], software_name,
+                                      software_version, software_did, software_url, software_alt_url1,
+                                      software_alt_url2)
+    credential_exchange_id = proposal_response["credential_exchange_id"]
+    logger.info(f'credential_exchange_id: {credential_exchange_id}')
+
+    times = 0
+    while times <= 10:
+        res = retrieve_result(credential_exchange_id)
+        if res["state"] == "credential_acked":
+            logger.info("Congratulation, execute publish successfully!")
+            break;
+        else:
+            times += 1;
+    if times > 10:
+        logger.error("Sorry, there might be some issue during publishing")
+
+
+def retrieve_result(credential_exchange_id):
+    time.sleep(3)  # wait communicate complete automatically between agents
+    res = get_credential_record(credential_exchange_id)
+    return res
 
 
 def get_repo_connection():
@@ -50,32 +67,11 @@ def get_repo_connection():
     return connections[-1]
 
 
-def get_credential_definition():
-    local_agent = vsw.utils.get_vsw_agent()
-    local_url = f'http://{local_agent.get("admin_host")}:{local_agent.get("admin_port")}'
-    credential_definitions_response = requests.get(f'{local_url}/credential-definitions/created')
-    res = json.loads(credential_definitions_response.text)
-    credential_definition_ids = res["credential_definition_ids"]
-    cred_def_id = credential_definition_ids[-1]
-    cred_def_response = requests.get(f'{local_url}/credential-definitions/{cred_def_id}')
-    res2 = json.loads(cred_def_response.text)
-    return res2["credential_definition"]
-
-
-def generate_digest(software_url):
-    with urllib.request.urlopen(software_url) as response:
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            shutil.copyfileobj(response, tmp_file)
-            sha256_hash = hashlib.sha256()
-            # Read and update hash string value in blocks of 4K
-            for byte_block in iter(lambda: tmp_file.file.read(4096), b""):
-                sha256_hash.update(byte_block)
-            hex_digest = sha256_hash.hexdigest()
-            print(f'sha256 hash: {hex_digest}')
-            multi_codec = add_prefix('sha2-256', str.encode(hex_digest))
-            print(f'multi_codec:{multi_codec}')
-            digest = encode('base58btc', multi_codec)
-            return digest.decode()
+def get_credential_record(cred_ex_id):
+    url = urljoin(repo_url_host, f"/issue-credential/records/{cred_ex_id}")
+    credential_response = requests.get(url)
+    res = json.loads(credential_response.text)
+    return res
 
 
 def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_did, software_url,
@@ -84,8 +80,7 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
         software_alt_url1 = ""
     if software_alt_url2 is None:
         software_alt_url2 = ""
-    digest = generate_digest(software_url)
-    print(f'digest: {digest}')
+    digest = vsw.utils.generate_digest(software_url)
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
         "comment": "execute vsw publish cli",
@@ -93,7 +88,7 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
         "trace": True,
         "connection_id": repo_conn_id,
         "credential_proposal": {
-            "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",  # TODO
+            "@type": f"did:sov:{developer_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [
                 {
                     "name": "developer-did",
@@ -126,8 +121,12 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
                 {
                     "name": "hash",
                     "value": digest
+                },
+                {
+                    "name": "alt-hash",
+                    "value": ""
                 }
             ]
         },
     })
-    print(json.loads(res.text))
+    return json.loads(res.text)

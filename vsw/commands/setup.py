@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import uuid
 import getpass
 from pathlib import Path
@@ -13,6 +14,7 @@ from aries_cloudagent_vsw.commands import run_command
 
 from vsw import utils
 from vsw.log import Log
+from vsw.utils import ConfigReader
 
 logger = Log(__name__).logger
 
@@ -24,13 +26,15 @@ def main(args: List[str]) -> bool:
     if args.provision:
         provision(wallet_key, args.name)
     else:
-        # with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-        start_agent(wallet_key, args.name)
+        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
+            start_agent(wallet_key, args.name)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=False, help="The wallet name")
+    parser.add_argument("--admin-port", required=False, help="The admin port")
+    parser.add_argument("--transport-port", required=False, help="The transport port")
     parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 
@@ -57,12 +61,14 @@ def start_agent(wallet_key, name):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     wallet_name = 'default'
+    admin_port = configuration.get("admin_port")
+    transport_port = configuration.get("inbound_transport_port")
     logger.info('genesis_file: ' + str(config_path))
     if name:
         wallet_name = name
-    run_command('start', ['--admin', configuration.get("admin_host"), configuration.get("admin_port"),
+    run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
                           '--inbound-transport', configuration.get("inbound_transport_protocol"),
-                          configuration.get("inbound_transport_host"), configuration.get("inbound_transport_port"),
+                          configuration.get("inbound_transport_host"), transport_port,
                           '--outbound-transport', configuration.get('outbound_transport_protocol'),
                           '--endpoint', configuration.get("endpoint"),
                           '--label', configuration.get("label"),
