@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from aries_cloudagent_vsw.config.logging import DEFAULT_LOGGING_CONFIG_PATH
 
 
 class Log:
@@ -17,10 +16,10 @@ class Log:
             datefmt="%Y-%m-%d %H:%M:%S"
         )
         log_dir = log_dir or Path(__file__).parent.parent.resolve()
+        aries_config_path = str(Path(__file__).parent.joinpath("conf/aries_logging_config.ini").resolve())
         if not os.path.exists(str(log_dir)+"/logs/"):
             os.makedirs(str(log_dir)+"/logs/")
         file_path = Path(log_dir).joinpath(f"logs/{name}.log").resolve()
-        aries_config_path = DEFAULT_LOGGING_CONFIG_PATH
         aries_log_file = str(Path(log_dir).joinpath("logs/aries.log").resolve())
 
         file_handler = logging.FileHandler(file_path, encoding='utf-8')
