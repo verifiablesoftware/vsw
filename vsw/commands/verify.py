@@ -3,6 +3,7 @@ import json
 from typing import List
 from uuid import uuid4
 from urllib.parse import urljoin
+from urllib.parse import urlencode
 
 import requests
 import vsw.utils
@@ -30,46 +31,51 @@ def main(args: List[str]) -> bool:
 def execute(software_name, issuer_did, download_url):
     connection = get_client_connection()
     logger.info("Executing verify, please wait for response...")
-    proof_response = send_request(connection["connection_id"], software_name, issuer_did)
-    presentation_exchange_id = proof_response["presentation_exchange_id"]
-    logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
-    times = 0
-    while times <= 10:
-        presentation_proof_result = retrieve_result(presentation_exchange_id)
-        state = presentation_proof_result["state"]
-        if state == "verified":
-            pres_req = presentation_proof_result["presentation_request"]
-            pres = presentation_proof_result["presentation"]
-            is_proof_of_software_certificate = (
-                    pres_req["name"] == "Proof of Software Certificate"
-            )
-            if is_proof_of_software_certificate:
-                # check claims
-                proof_dict = {}
-                for (referent, attr_spec) in pres_req["requested_attributes"].items():
-                    proof_dict[attr_spec['name']] = pres['requested_proof']['revealed_attrs'][referent]['raw']
-                    logger.info(
-                        f"{attr_spec['name']}: "
-                        f"{pres['requested_proof']['revealed_attrs'][referent]['raw']}"
-                    )
-                credential_hash = proof_dict['hash']
-                url = proof_dict['url']
-                if credential_hash is None or url is None:
-                    logger.error("Verified error, hash or url in request proof is None")
-                elif url != download_url:
-                    logger.error("Verified error, the url is not matched")
-                elif vsw.utils.generate_digest(download_url) != credential_hash:
-                    logger.error("Verified error, the digest is not matched")
+    credentials = check_credential(issuer_did, software_name)
+    if len(credentials) == 0:
+        logger.error("Not found credential, please check if the conditions is correct.")
+    else:
+        proof_response = send_request(connection["connection_id"], software_name, issuer_did)
+        presentation_exchange_id = proof_response["presentation_exchange_id"]
+        logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
+        times = 0
+        while times <= 10:
+            presentation_proof_result = retrieve_result(presentation_exchange_id)
+            state = presentation_proof_result["state"]
+            print(f"waiting state update, current state is: {state}")
+            if state == "verified":
+                pres_req = presentation_proof_result["presentation_request"]
+                pres = presentation_proof_result["presentation"]
+                is_proof_of_software_certificate = (
+                        pres_req["name"] == "Proof of Software Certificate"
+                )
+                if is_proof_of_software_certificate:
+                    # check claims
+                    proof_dict = {}
+                    for (referent, attr_spec) in pres_req["requested_attributes"].items():
+                        proof_dict[attr_spec['name']] = pres['requested_proof']['revealed_attrs'][referent]['raw']
+                        logger.info(
+                            f"{attr_spec['name']}: "
+                            f"{pres['requested_proof']['revealed_attrs'][referent]['raw']}"
+                        )
+                    credential_hash = proof_dict['hash']
+                    url = proof_dict['url']
+                    if credential_hash is None or url is None:
+                        logger.error("Verified error, hash or url in request proof is None")
+                    elif url != download_url:
+                        logger.error("Verified error, the url is not matched")
+                    elif vsw.utils.generate_digest(download_url) != credential_hash:
+                        logger.error("Verified error, the digest is not matched")
+                    else:
+                        logger.info('Congratulation! verified successfully!')
                 else:
-                    logger.info('Congratulation! verified successfully!')
+                    logger.error("Verified error, the name in presentation request is wrong")
+                break;
             else:
-                logger.error("Verified error, the name in presentation request is wrong")
-            break;
-        else:
-            times += 1
+                times += 1
 
-    if times > 10:
-        logger.error("verified error, presentation proof result is not verified!")
+        if times > 10:
+            logger.error("verified error, presentation proof result is not verified!")
 
 
 def retrieve_result(presentation_exchange_id):
@@ -82,6 +88,13 @@ def get_vsw_proof(pres_ex_id):
     vsw_url = urljoin(vsw_url_host, f"/present-proof/records/{pres_ex_id}")
     res = requests.get(vsw_url)
     return json.loads(res.text)
+
+
+def check_credential(issuer_did, software_name):
+    wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name, "schema_name": "software-certificate"})
+    repo_url = f"{repo_url_host}/credentials?wql={wql}"
+    res = requests.get(repo_url)
+    return json.loads(res.text)["results"]
 
 
 def send_request(client_conn_id, software_name, issuer_did):

@@ -45,6 +45,7 @@ def issue_credential(software_name, software_version, software_did, software_url
     times = 0
     while times <= 10:
         res = retrieve_result(credential_exchange_id)
+        print(f'waiting state update, current state: {res["state"]}')
         if res["state"] == "credential_acked":
             logger.info("Congratulation, execute publish successfully!")
             break;
