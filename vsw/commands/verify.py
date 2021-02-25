@@ -73,7 +73,7 @@ def execute(software_name, issuer_did, download_url):
 
 
 def retrieve_result(presentation_exchange_id):
-    time.sleep(5)  # wait communicate complete automatically between agents
+    time.sleep(1)  # wait communicate complete automatically between agents
     presentation_proof_result = get_vsw_proof(presentation_exchange_id)
     return presentation_proof_result
 
@@ -93,38 +93,23 @@ def send_request(client_conn_id, software_name, issuer_did):
     req_attrs = [
         {
             "name": "software-name",
-            "restrictions": [
-                {"schema_name": "software-certificate"},
-                {"issuer_did": issuer_did},
-                {"attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
         },
         {
             "name": "software-version",
-            "restrictions": [
-                {"schema_name": "software-certificate"},
-                {"issuer_did": issuer_did},
-                {"attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
         },
         {
             "name": "developer-did",
-            "restrictions": [
-                {"schema_name": "software-certificate"},
-                {"issuer_did": issuer_did},
-                {"attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
         },
         {
             "name": "hash",
-            "restrictions": [
-                {"schema_name": "software-certificate"},
-                {"issuer_did": issuer_did},
-                {"attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
         },
         {
             "name": "url",
-            "restrictions": [
-                {"schema_name": "software-certificate"},
-                {"issuer_did": issuer_did},
-                {"attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
         }
     ]
 

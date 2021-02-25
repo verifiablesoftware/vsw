@@ -55,7 +55,7 @@ def issue_credential(software_name, software_version, software_did, software_url
 
 
 def retrieve_result(credential_exchange_id):
-    time.sleep(3)  # wait communicate complete automatically between agents
+    time.sleep(1)  # wait communicate complete automatically between agents
     res = get_credential_record(credential_exchange_id)
     return res
 

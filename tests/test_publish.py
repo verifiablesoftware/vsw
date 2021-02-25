@@ -8,8 +8,8 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
-local_conn_id = "69fa2db4-0d97-4f95-a930-3453adb09406"
-repo_conn_id = "ba57a775-fded-431f-b212-170bef334b47"
+local_conn_id = "45c40084-edcb-42e9-ab39-6b7bf9c0cb2f"
+repo_conn_id = "569ee27c-17b3-4629-ad40-ef2a4c6fb653"
 credential_definition_id = "CqdPVBFnDs6uUzrrd8Prmw:3:CL:2950:default"
 cred_ex_id = "151c7bfb-a672-4507-99eb-aabd9bb3a494"
 
@@ -20,6 +20,10 @@ def test_parse_args():
 def test_list_issue_records():
     list.get_issue_credential_records()
 
+def test_publish():
+    publish.send_proposal(repo_conn_id, "CqdPVBFnDs6uUzrrd8Prmw", "Felix", "1.0", "12121212",
+                          "http://images.pccoo.cn/bar/2012426/20124261343081s.jpg",
+                  "", "")
 
 # 1 Repo Holder sends a proposal to the issuer (issuer receives proposal)
 def test_send_proposal():
@@ -36,7 +40,7 @@ def test_send_proposal():
         # "schema_name": "preferences",
         # "schema_version": "1.0",
         "credential_proposal": {
-            "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
+            "@type": "did:sov:CqdPVBFnDs6uUzrrd8Prmw;spec/issue-credential/1.0/credential-preview",
             "attributes": [{
                 "name": "developer-did",
                 "value": "M4yVd8vfSE7qo9PeRG5ArM"  # TODO
@@ -47,7 +51,7 @@ def test_send_proposal():
                 },
                 {
                     "name": "software-name",
-                    "value": "Felix Test"
+                    "value": "HappyBirds"
                 },
                 {
                     "name": "software-did",
@@ -270,3 +274,14 @@ def test_clean_all_records():
             url = f'{repo_url_host}/present-proof/records/{presentation_exchange_id}/remove'
             res = requests.post(url)
             print(f'Removed present proof records {presentation_exchange_id}')
+
+    # Remove Credential
+    repo = f'{repo_url_host}/credentials?count={100}'
+    response = requests.get(repo)
+    results = json.loads(response.text)["results"]
+    if len(results) > 0:
+        for result in results:
+            referent = result["referent"]
+            url = f'{repo_url_host}/credential/{referent}/remove'
+            requests.post(url)
+            print(f'Removed referent {referent}')

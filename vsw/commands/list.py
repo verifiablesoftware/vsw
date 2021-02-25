@@ -30,6 +30,8 @@ def main(argv: List[str]) -> bool:
         get_credentials(vsw_config)
     elif args.credential_definition:
         get_credential_definition(vsw_config)
+    elif args.present_proof:
+        get_present_proof(vsw_config)
     else:
         console.print('Usage:')
         console.print('vsw list [options]')
@@ -38,6 +40,7 @@ def main(argv: List[str]) -> bool:
         console.print('-sc: list all the schema')
         console.print('-s: see agent status')
         console.print('-i: list all the issue credential records')
+        console.print('-p: list all present proof records')
         console.print('-cs: list all the credentials')
         console.print('-cd: list all the credential definitions')
 
@@ -49,6 +52,7 @@ def parse_args(args):
     parser.add_argument('-sc', '--schema', action='store_true')
     parser.add_argument('-s', '--status', action='store_true')
     parser.add_argument('-i', '--issue_credential_records', action='store_true')
+    parser.add_argument('-p', '--present_proof', action='store_true')
     parser.add_argument('-cs', '--credentials', action='store_true')
     parser.add_argument('-cd', '--credential_definition', action='store_true')
     return parser.parse_args(args)
@@ -94,6 +98,13 @@ def get_wallet(vsw_config):
     response = requests.get(local)
     res = json.loads(response.text)
     print_wallet_info(res["results"])
+
+
+def get_present_proof(vsw_config):
+    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/present-proof/records'
+    response = requests.get(local)
+    res = json.loads(response.text)
+    console.log(res)
 
 
 def print_wallet_info(results):
