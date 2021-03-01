@@ -3,7 +3,6 @@ import json
 from typing import List
 from uuid import uuid4
 from urllib.parse import urljoin
-from urllib.parse import urlencode
 
 import requests
 import vsw.utils
@@ -15,6 +14,7 @@ vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
+timeout = 60
 
 
 def main(args: List[str]) -> bool:
@@ -31,7 +31,7 @@ def main(args: List[str]) -> bool:
 def execute(software_name, issuer_did, download_url):
     connection = get_client_connection()
     logger.info("Executing verify, please wait for response...")
-    credentials = check_credential(issuer_did, software_name)
+    credentials = check_credential(issuer_did, software_name, download_url)
     if len(credentials) == 0:
         logger.error("Not found credential, please check if the conditions is correct.")
     else:
@@ -39,7 +39,7 @@ def execute(software_name, issuer_did, download_url):
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
         times = 0
-        while times <= 10:
+        while times <= timeout:
             presentation_proof_result = retrieve_result(presentation_exchange_id)
             state = presentation_proof_result["state"]
             print(f"waiting state update, current state is: {state}")
@@ -74,7 +74,7 @@ def execute(software_name, issuer_did, download_url):
             else:
                 times += 1
 
-        if times > 10:
+        if times > timeout:
             logger.error("verified error, presentation proof result is not verified!")
 
 
@@ -90,8 +90,9 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def check_credential(issuer_did, software_name):
-    wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name, "schema_name": "software-certificate"})
+def check_credential(issuer_did, software_name, download_url):
+    wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name,
+                      "schema_name": "software-certificate", "attr::url::value": download_url})
     repo_url = f"{repo_url_host}/credentials?wql={wql}"
     res = requests.get(repo_url)
     return json.loads(res.text)["results"]

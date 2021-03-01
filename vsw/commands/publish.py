@@ -12,7 +12,7 @@ vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
-
+timeout = 60
 
 def main(args: List[str]) -> bool:
     args = parse_args(args)
@@ -43,7 +43,7 @@ def issue_credential(software_name, software_version, software_did, software_url
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
 
     times = 0
-    while times <= 10:
+    while times <= timeout:
         res = retrieve_result(credential_exchange_id)
         print(f'waiting state update, current state: {res["state"]}')
         if res["state"] == "credential_acked":
@@ -51,7 +51,7 @@ def issue_credential(software_name, software_version, software_did, software_url
             break;
         else:
             times += 1;
-    if times > 10:
+    if times > timeout:
         logger.error("Sorry, there might be some issue during publishing")
 
 
