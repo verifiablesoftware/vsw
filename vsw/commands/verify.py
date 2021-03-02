@@ -33,7 +33,7 @@ def execute(software_name, issuer_did, download_url):
     logger.info("Executing verify, please wait for response...")
     credentials = check_credential(issuer_did, software_name, download_url)
     if len(credentials) == 0:
-        logger.error("Not found credential, please check if the conditions is correct.")
+        logger.error("No found credential, please check if the specified conditions are correct.")
     else:
         proof_response = send_request(connection["connection_id"], software_name, issuer_did)
         presentation_exchange_id = proof_response["presentation_exchange_id"]

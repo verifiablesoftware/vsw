@@ -14,6 +14,7 @@ repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
 timeout = 60
 
+
 def main(args: List[str]) -> bool:
     args = parse_args(args)
     software_name = input('Please enter software name: ')
