@@ -230,6 +230,10 @@ def test_send():
     print(json.loads(res.text))
 
 
+def test_get_public_did():
+    publish.get_public_did()
+
+
 def test_get_credentail_records():
     publish.get_credential_record("d073e5f4-b825-4cae-8d65-1ec62ba4d448")
 

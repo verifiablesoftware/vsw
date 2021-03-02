@@ -37,7 +37,7 @@ def parse_args(args):
 def issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2):
     logger.info("executing publish, please waiting for response")
     connection = get_repo_connection()
-    proposal_response = send_proposal(connection["connection_id"], connection["their_did"], software_name,
+    proposal_response = send_proposal(connection["connection_id"], get_public_did(), software_name,
                                       software_version, software_did, software_url, software_alt_url1,
                                       software_alt_url2)
     credential_exchange_id = proposal_response["credential_exchange_id"]
@@ -67,6 +67,13 @@ def get_repo_connection():
     res = json.loads(connection_response.text)
     connections = res["results"]
     return connections[-1]
+
+
+def get_public_did():
+    url = urljoin(vsw_url_host, "/wallet/did/public")
+    response = requests.get(url)
+    res = json.loads(response.text)
+    return res["result"]["did"]
 
 
 def get_credential_record(cred_ex_id):

@@ -46,5 +46,5 @@ def test_remove_all_connection():
 
 # clean all history data
 def test_clean_history_data():
-    test_connection_repo()
+    test_remove_all_connection()
     test_publish.test_clean_all_records()
