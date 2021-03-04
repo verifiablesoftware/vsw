@@ -3,7 +3,7 @@ import json
 from typing import List
 from uuid import uuid4
 from urllib.parse import urljoin
-
+import validators
 import requests
 import vsw.utils
 import time
@@ -25,6 +25,9 @@ def main(args: List[str]) -> bool:
     parser.add_argument("--issuer-did", required=True, help="The issuer did")
     parser.add_argument("--developer-did", required=False, help="The developer did")
     parsed_args = parser.parse_args(args)
+    if not validators.url(parsed_args.url):
+        print('The software package url is wrong, please check')
+        return
     execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url)
 
 
