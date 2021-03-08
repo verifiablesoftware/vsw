@@ -1,3 +1,4 @@
+import configparser
 import hashlib
 import shutil
 import tempfile
@@ -29,6 +30,25 @@ class ConfigReader:
         else:
             configs = self.configparser.items(section)
             return dict(configs)
+
+
+def save_ports(admin_port, webhook_port, transport_port):
+    parser = configparser.ConfigParser()
+    parser.read(Path(__file__).parent.joinpath("conf/vsw.ini").resolve())
+    need_update = False
+    if admin_port:
+        parser.set("vsw-agent", "admin_port", admin_port)
+        need_update = True
+    if webhook_port:
+        parser.set("vsw-agent", "webhook_port", webhook_port)
+        need_update = True
+    if transport_port:
+        parser.set("vsw-agent", "inbound_transport_port", transport_port)
+        need_update = True
+
+    if need_update:
+        with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
+            parser.write(configfile)
 
 
 def get_repo_host():

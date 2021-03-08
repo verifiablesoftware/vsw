@@ -1,4 +1,5 @@
 from vsw.commands import setup
+from vsw import utils
 
 def test_retrieve_DID():
     setup.retrieve_DID()
@@ -14,3 +15,6 @@ def test_provision():
 
 def test_connection_repo():
     setup.connection_repo()
+
+def test_save_specified_port():
+    utils.save_ports("9021", "9022", "9023")
