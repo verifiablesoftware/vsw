@@ -53,7 +53,7 @@ def connection_repo():
     try:
         vsw_config = vsw.utils.get_vsw_agent()
         vsw_repo_config = vsw.utils.get_repo_host()
-        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true&public=true'
+        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
         logger.info(f'Create invitation to: {vsw_repo_url}')
         response = requests.post(vsw_repo_url)
         res = json.loads(response.text)
@@ -61,11 +61,18 @@ def connection_repo():
 
         local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
         logger.info(f'Receive invitation {local_url}')
+        # invitation = res["invitation"]
+        # body = {
+        #     "label": invitation["label"],
+        #     "did": invitation["did"],
+        #     "@type": invitation["@type"],
+        #     "@id": invitation["@id"]
+        # }
         invitation = res["invitation"]
         body = {
             "label": invitation["label"],
-            "did": invitation["did"],
-            "@type": invitation["@type"],
+            "serviceEndpoint": invitation["serviceEndpoint"],
+            "recipientKeys": invitation["recipientKeys"],
             "@id": invitation["@id"]
         }
         ss = requests.post(local_url, json=body)

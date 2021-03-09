@@ -66,19 +66,19 @@ def start_agent(wallet_key, name):
     admin_port = configuration.get("admin_port")
     transport_port = configuration.get("inbound_transport_port")
     logger.info('genesis_file: ' + str(config_path))
-    endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
-    webhook_url = f'{configuration.get("webhook_protocol")}://{configuration.get("webhook_host")}:{configuration.get("webhook_port")}/webhooks'
+    # endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
+    # webhook_url = f'{configuration.get("webhook_protocol")}://{configuration.get("webhook_host")}:{configuration.get("webhook_port")}/webhooks'
     if name:
         wallet_name = name
     run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
                           '--inbound-transport', configuration.get("inbound_transport_protocol"),
                           configuration.get("inbound_transport_host"), transport_port,
                           '--outbound-transport', configuration.get('outbound_transport_protocol'),
-                          '--endpoint', endpoint,
+                          '--endpoint', configuration.get("endpoint"),
                           '--label', configuration.get("label"),
                           '--seed', get_seed(wallet_name),
                           '--genesis-file', str(config_path),
-                          '--webhook-url', webhook_url,
+                          '--webhook-url', configuration.get("webhook_url"),
                           '--accept-taa', '1',
                           '--wallet-type', 'indy',
                           '--wallet-name', wallet_name,

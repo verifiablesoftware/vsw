@@ -126,11 +126,11 @@ def get_connections(vsw_config):
 
 
 def print_connection_table(results):
-    data = [["their_label", "my_did", "their_did", "connection_id", "routing_state", "created_at", "state"]]
+    data = [["their_label", "my_did", "invitation_key", "connection_id", "created_at", "state"]]
     for row in results:
         data.append(
-            [row["their_label"], row["my_did"], row["their_did"],
-             row["connection_id"], row["routing_state"], row["created_at"], row["state"]]
+            [row["their_label"], row["my_did"], row["invitation_key"],
+             row["connection_id"], row["created_at"], row["state"]]
         )
     table = AsciiTable(data)
     table.title = "Connection Records"
