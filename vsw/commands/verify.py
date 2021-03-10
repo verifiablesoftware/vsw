@@ -18,17 +18,18 @@ timeout = 60
 
 
 def main(args: List[str]) -> bool:
-    parser = argparse.ArgumentParser(prog="vsw verify")
-    parser.add_argument("--software-name", required=True, help="The software name")
-    parser.add_argument("--software-did", required=False, help="The software did")
-    parser.add_argument("--url", required=True, help="The software download url")
-    parser.add_argument("--issuer-did", required=True, help="The issuer did")
-    parser.add_argument("--developer-did", required=False, help="The developer did")
-    parsed_args = parser.parse_args(args)
-    if not validators.url(parsed_args.url):
-        print('The software package url is wrong, please check')
-        return
-    execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url)
+    try:
+        parser = argparse.ArgumentParser(prog="vsw verify")
+        parser.add_argument("--software-name", required=True, help="The software name")
+        parser.add_argument("--url", required=True, help="The software download url")
+        parser.add_argument("--issuer-did", required=True, help="The issuer did")
+        parsed_args = parser.parse_args(args)
+        if not validators.url(parsed_args.url):
+            print('The software package url is wrong, please check')
+            return
+        execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url)
+    except KeyboardInterrupt:
+        print(" ==> Exit verify!")
 
 
 def execute(software_name, issuer_did, download_url):

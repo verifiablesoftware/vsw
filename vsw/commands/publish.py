@@ -17,24 +17,26 @@ timeout = 60
 
 
 def main(args: List[str]) -> bool:
-    args = parse_args(args)
-    software_name = input('Please enter software name: ')
-    software_version = input('Please enter software version: ')
-    software_did = input('Please enter software did: ')
-    software_url = input('Please enter software package url: ')
-    software_alt_url1 = args.alt_url1
-    software_alt_url2 = args.alt_url2
-    if software_url and not validators.url(software_url):
-        print('The software package url is wrong, please check')
-        return
-    if software_alt_url1 and not validators.url(software_alt_url1):
-        print('The software package alt-url1 is wrong, please check')
-        return
-    if software_alt_url2 and not validators.url(software_alt_url2):
-        print('The software package alt-url2 is wrong, please check')
-        return
-
-    issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2)
+    try:
+        args = parse_args(args)
+        software_name = input('Please enter software name: ')
+        software_version = input('Please enter software version: ')
+        software_did = input('Please enter software did: ')
+        software_url = input('Please enter software package url: ')
+        software_alt_url1 = args.alt_url1
+        software_alt_url2 = args.alt_url2
+        if software_url and not validators.url(software_url):
+            print('The software package url is wrong, please check')
+            return
+        if software_alt_url1 and not validators.url(software_alt_url1):
+            print('The software package alt-url1 is wrong, please check')
+            return
+        if software_alt_url2 and not validators.url(software_alt_url2):
+            print('The software package alt-url2 is wrong, please check')
+            return
+        issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2)
+    except KeyboardInterrupt:
+        print(" ==> Exit publish!")
 
 
 def parse_args(args):

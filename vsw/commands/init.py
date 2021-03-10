@@ -12,10 +12,13 @@ logger = Log(__name__).logger
 
 def main(args: List[str]) -> bool:
     args = parse_args(args)
-    if args.connection:
-        connection_repo()
-    if args.schema:
-        do_schema(args.schema)
+    try:
+        if args.connection:
+            connection_repo()
+        if args.schema:
+            do_schema(args.schema)
+    except KeyboardInterrupt:
+        print(" ==> Exit init")
 
 
 def parse_args(args):

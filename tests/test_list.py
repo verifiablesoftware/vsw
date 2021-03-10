@@ -19,6 +19,7 @@ def test_get_schema():
     vsw_config = get_vsw_agent()
     get_schema(vsw_config)
 
+
 def test_get_credential_definition():
     vsw_config = get_vsw_agent()
     get_credential_definition(vsw_config)

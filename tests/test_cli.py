@@ -4,12 +4,16 @@ import pretend
 from vsw import cli
 from vsw.commands import publish
 
+
 class Resouce:
     def __init__(self, version):
         self.version = version
 
+
 def mock_resove(reqs, env, installer, extra):
     return None
+
+
 def test_dispatch(monkeypatch):
     demoUrl = "https://6665-felix-dev-z5nuv-1258995345.tcb.qcloud.la/7c3e03d0-54a8-11eb-99ce-61c802d429b9.jpg"
     replaced_main = pretend.call_recorder(lambda args: None)
