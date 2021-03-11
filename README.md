@@ -42,6 +42,15 @@ If you have already locally installed it before, need to uninstall it firstly.
     --schema: this will init schema name and create credential definition
 
 3. `vsw publish`
+    publish your software credential
+    
+4. `vsw verify`
+    verify if the software credential is correct. the following parameters are needed.
+    --software-name
+    --url
+    --issuer-did
+5. `vsw exit`
+    exit agent
     
 
 # Verifiable Software
