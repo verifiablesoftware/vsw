@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 import sys
 import uuid
 import getpass
@@ -20,11 +21,10 @@ logger = Log(__name__).logger
 
 def main(args: List[str]) -> bool:
     try:
+        # kill()
         wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
-
         utils.save_endpoint(args.endpoint)
-        kill()
         if args.provision:
             provision(wallet_key, args.name)
         else:
@@ -33,10 +33,11 @@ def main(args: List[str]) -> bool:
     except KeyboardInterrupt:
         print(" => Exit setup")
 
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=False, help="The wallet name")
-    parser.add_argument("--endpoint", required=False, help="The endpoint url")
+    parser.add_argument("--endpoint", required=True, help="The endpoint url, please get it with 'vsw register -e'")
     parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 

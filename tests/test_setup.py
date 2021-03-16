@@ -7,7 +7,8 @@ def test_retrieve_DID():
 
 
 def test_start_agent():
-    setup.start_agent("default", "default")
+    endpoint = utils.save_endpoint(None)
+    setup.start_agent("default", "default", endpoint)
 
 
 def test_get_seed():

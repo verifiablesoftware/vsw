@@ -5,6 +5,7 @@ setuptools >= 0.7.0
 setuptools_scm
 py-multicodec
 py-multibase
+pyngrok
 tqdm >= 4.14
 pretend >= 1.0.9
 aries-cloudagent-vsw==0.0.2

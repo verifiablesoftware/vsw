@@ -39,6 +39,7 @@ def save_endpoint(endpoint):
         parser.set("vsw-agent", "endpoint", endpoint)
         with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
             parser.write(configfile)
+    return endpoint
 
 
 def get_repo_host():

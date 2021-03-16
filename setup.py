@@ -5,5 +5,5 @@ with open('requirements.txt') as f:
 
 setup(
     install_requires=requirements,
-    package_data={'vsw.conf':['*.ini','*.txt']}
+    package_data={'vsw.conf':['*.ini','*.txt','*.sh']}
 )
