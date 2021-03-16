@@ -32,25 +32,46 @@ If you have already locally installed it before, need to uninstall it firstly.
 `pip uninstall vsw-x.x.x-py3-none-any.whl`
 
 # How to run vsw
-1. `vsw setup`
+1. `vsw register`
 
-    this will start agent, and print DID and verykey, for test environment, if you don't register DID and verkey, please go to https://selfserve.sovrin.org/ to register.
-2. `vsw init`
+    -e, --endpoint: generate the public endpoint url which is used to communicate with the repo agent.
+    -m, --merchant: specify which tool to use, default value is lt, the other value is lhr. lt means localtunnel and lhr means localhost.run
+    
+2. `vsw setup`
 
-    -c: this option will init the connection with repo
+    -e, --endpoint: The endpoint url which is generate by #1
+    -n, --name: The wallet name
+    -p: this will start agent, and print DID and verykey, for test environment, if you don't register DID and verkey, please go to https://selfserve.sovrin.org/ to register.
+    
+3. `vsw init`
+
+    -c, --connection: this option will init the connection with repo
     
     --schema: this will init schema name and create credential definition
 
-3. `vsw publish`
+4. `vsw publish`
     publish your software credential
     
-4. `vsw verify`
-    verify if the software credential is correct. the following parameters are needed.
+5. `vsw verify`
+    Verify if the software credential is correct. the following parameters are needed.
     --software-name
     --url
     --issuer-did
-5. `vsw exit`
-    exit agent
+
+6. `vsw list`
+
+    List all the necessary information in the console
+    -c, --connection: list the connections.
+    -w, --wallet: list the wallet information.
+    -sc, --schema: list the schema ids.
+    -s, --status: list the agent status.
+    -i, --issue_credential_records: list the issue credential records.
+    -p, --present_proof: list the present proof records.
+    -cs, --credentials: list the credential records.
+    --cd, --credential_definition: list all the credential definition records.      
+    
+7. `vsw exit`
+    Exit agent
     
 
 # Verifiable Software

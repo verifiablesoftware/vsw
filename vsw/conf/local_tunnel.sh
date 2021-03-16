@@ -19,4 +19,4 @@ if [ ! -d ~/localtunnel-master ]; then
 fi
 cd ~/localtunnel-master
 lt --port $1
-echo "started localtunnel succesfully, port: $1"
+echo "started localtunnel."
