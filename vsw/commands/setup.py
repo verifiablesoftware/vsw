@@ -36,8 +36,8 @@ def main(args: List[str]) -> bool:
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("n", "--name", required=False, help="The wallet name")
-    parser.add_argument("e", "--endpoint", required=True, help="The endpoint url, please get it with 'vsw register -e'")
+    parser.add_argument("-n", "--name", required=False, help="The wallet name")
+    parser.add_argument("-e", "--endpoint", required=True, help="The endpoint url, please get it with 'vsw register -e'")
     parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 
@@ -86,7 +86,6 @@ def start_agent(wallet_key, name, endpoint):
                           '--wallet-type', 'indy',
                           '--wallet-name', wallet_name,
                           '--wallet-key', wallet_key,
-                          '--public-invites',
                           '--log-config', logger.aries_config_path,
                           '--log-file', logger.aries_log_file,
                           '--auto-accept-invites',

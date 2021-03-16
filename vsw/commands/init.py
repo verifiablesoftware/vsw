@@ -23,7 +23,7 @@ def main(args: List[str]) -> bool:
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--schema", required=False, help="The schema name")
+    parser.add_argument("-s", "--schema", required=False, help="The schema name")
     parser.add_argument('-c', '--connection', action='store_true')
     return parser.parse_args(args)
 

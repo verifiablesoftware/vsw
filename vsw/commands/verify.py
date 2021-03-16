@@ -20,9 +20,9 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
-        parser.add_argument("--software-name", required=True, help="The software name")
-        parser.add_argument("--url", required=True, help="The software download url")
-        parser.add_argument("--issuer-did", required=True, help="The issuer did")
+        parser.add_argument("-s", "--software-name", required=True, help="The software name")
+        parser.add_argument("-u", "--url", required=True, help="The software download url")
+        parser.add_argument("-i", "--issuer-did", required=True, help="The issuer did")
         parsed_args = parser.parse_args(args)
         if not validators.url(parsed_args.url):
             print('The software package url is wrong, please check')

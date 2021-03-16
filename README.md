@@ -45,18 +45,19 @@ If you have already locally installed it before, need to uninstall it firstly.
     
 3. `vsw init`
 
-    -c, --connection: this option will init the connection with repo
+    -c,--connection, --connection: this option will init the connection with repo
     
-    --schema: this will init schema name and create credential definition
+    -s,--schema: this will init schema name and create credential definition
 
 4. `vsw publish`
     publish your software credential
+    This needs you provide software name and version, software did information.
     
 5. `vsw verify`
     Verify if the software credential is correct. the following parameters are needed.
-    --software-name
-    --url
-    --issuer-did
+    -s,--software-name: The software name
+    -u,--url: The download url
+    -i,--issuer-did: The issuer did
 
 6. `vsw list`
 

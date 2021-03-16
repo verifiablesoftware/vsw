@@ -1,7 +1,11 @@
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 from typing import List
+
+import daemon
+
 from vsw.log import Log
 from vsw import utils
 import os
@@ -14,10 +18,11 @@ def main(args: List[str]) -> bool:
     try:
         if args.endpoint:
             port = utils.get_vsw_agent().get("inbound_transport_port")
-            if args.merchant == "lhr":
-                start_localhost_run(port)
-            else:
-                start_local_tunnel(port)
+            with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr):
+                if args.merchant == "lhr":
+                    start_localhost_run(port)
+                else:
+                    start_local_tunnel(port)
         else:
             print('Nothing to do, one parameter at least is required. eg: -e means register your endpoint url')
     except KeyboardInterrupt:
@@ -33,7 +38,7 @@ def parse_args(args):
 
 
 def start_localhost_run(port):
-    subprocess.Popen(f"ssh -tt -R 80:localhost:{port} localhost.run &", shell=True)
+    subprocess.Popen(f"echo 1 | ssh -tt -R 80:localhost:{port} localhost.run &", shell=True)
 
 
 def start_local_tunnel(port):
