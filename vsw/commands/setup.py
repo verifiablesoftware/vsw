@@ -1,12 +1,10 @@
 import argparse
 import os
-import subprocess
 import sys
 import uuid
 import getpass
 from pathlib import Path
 from typing import List
-from vsw.commands.exit import kill
 from os.path import expanduser
 import configparser
 import daemon
@@ -21,15 +19,16 @@ logger = Log(__name__).logger
 
 def main(args: List[str]) -> bool:
     try:
-        # kill()
         wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
-        utils.save_endpoint(args.endpoint)
+        sub_domain = uuid.uuid4().hex
+        utils.save_endpoint(sub_domain)
+        start_local_tunnel(sub_domain)
         if args.provision:
             provision(wallet_key, args.name)
         else:
             with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-                start_agent(wallet_key, args.name, args.endpoint)
+                start_agent(wallet_key, args.name)
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -37,7 +36,6 @@ def main(args: List[str]) -> bool:
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--name", required=False, help="The wallet name")
-    parser.add_argument("-e", "--endpoint", required=True, help="The endpoint url, please get it with 'vsw register -e'")
     parser.add_argument('-p', '--provision', action='store_true')
     return parser.parse_args(args)
 
@@ -61,7 +59,7 @@ def provision(wallet_key, name):
     ])
 
 
-def start_agent(wallet_key, name, endpoint):
+def start_agent(wallet_key, name):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     wallet_name = 'default'
@@ -69,15 +67,13 @@ def start_agent(wallet_key, name, endpoint):
     transport_port = configuration.get("inbound_transport_port")
     logger.info('genesis_file: ' + str(config_path))
 
-    if endpoint is None:
-        endpoint = configuration.get("endpoint")
     if name:
         wallet_name = name
     run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
                           '--inbound-transport', configuration.get("inbound_transport_protocol"),
                           configuration.get("inbound_transport_host"), transport_port,
                           '--outbound-transport', configuration.get('outbound_transport_protocol'),
-                          '--endpoint', endpoint,
+                          '--endpoint', configuration.get("endpoint"),
                           '--label', configuration.get("label"),
                           '--seed', get_seed(wallet_name),
                           '--genesis-file', str(config_path),
@@ -129,3 +125,11 @@ def get_seed(wallet_name):
 
     logger.info('seed:' + seed)
     return seed
+
+
+def start_local_tunnel(sub_domain):
+    configuration = utils.get_vsw_agent()
+    port = configuration.get("inbound_transport_port")
+    script_path = Path(__file__).parent.parent.joinpath("conf/local_tunnel.sh").resolve()
+    os.system(f'chmod +x {script_path}')
+    os.system(f'nohup {script_path} {port} {sub_domain} &')

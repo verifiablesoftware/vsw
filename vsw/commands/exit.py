@@ -24,30 +24,17 @@ def kill_vsw():
         os.system(f'kill $(lsof -t -i:{configuration.get("admin_port")})')
 
 
-def kill_localhost_run():
-    out = os.popen("ps aux | grep localhost.run").read()
-    for line in out.splitlines():
-        print(line)
-        if 'localhost.run' in line:
-            pid = int(line.split()[1])
-            kill_pid(pid)
-            print('Killed localhost.run')
-
-
 def kill_lt():
-    out = os.popen("ps aux | grep /lt").read()
+    out = os.popen("ps aux | grep npx").read()
     for line in out.splitlines():
-        print(line)
-        if 'node' in line:
+        if 'localtunnel' in line:
             pid = int(line.split()[1])
             kill_pid(pid)
-            print('Killed local tunnel')
+            print('Closed local tunnel')
 
 
 def kill_pid(pid):
     try:
         os.kill(pid, signal.SIGKILL)
-        print(f'Killed pid {pid}')
-
-    except OSError:
-        print('Not found process')
+    except OSError as e:
+        pass

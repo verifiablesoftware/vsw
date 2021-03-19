@@ -18,5 +18,5 @@ if [ ! -d ~/localtunnel-master ]; then
     npm install -g localtunnel
 fi
 cd ~/localtunnel-master
-lt --port $1
-echo "started localtunnel."
+npx localtunnel --port $1 --subdomain $2
+#lt --port $1

@@ -32,13 +32,13 @@ class ConfigReader:
             return dict(configs)
 
 
-def save_endpoint(endpoint):
-    if endpoint:
-        parser = configparser.ConfigParser()
-        parser.read(Path(__file__).parent.joinpath("conf/vsw.ini").resolve())
-        parser.set("vsw-agent", "endpoint", endpoint)
-        with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
-            parser.write(configfile)
+def save_endpoint(sub_domain):
+    endpoint = f'https://{sub_domain}.loca.lt'  # will change to the custom domain name
+    parser = configparser.ConfigParser()
+    parser.read(Path(__file__).parent.joinpath("conf/vsw.ini").resolve())
+    parser.set("vsw-agent", "endpoint", endpoint)
+    with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
+        parser.write(configfile)
     return endpoint
 
 

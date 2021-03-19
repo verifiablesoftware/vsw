@@ -32,34 +32,28 @@ If you have already locally installed it before, need to uninstall it firstly.
 `pip uninstall vsw-x.x.x-py3-none-any.whl`
 
 # How to run vsw
-1. `vsw register`
+1. `vsw setup`
 
-    -e, --endpoint: generate the public endpoint url which is used to communicate with the repo agent.
-    -m, --merchant: specify which tool to use, default value is lt, the other value is lhr. lt means localtunnel and lhr means localhost.run
-    
-2. `vsw setup`
-
-    -e, --endpoint: The endpoint url which is generate by #1
     -n, --name: The wallet name
     -p: this will start agent, and print DID and verykey, for test environment, if you don't register DID and verkey, please go to https://selfserve.sovrin.org/ to register.
     
-3. `vsw init`
+2. `vsw init`
 
     -c,--connection, --connection: this option will init the connection with repo
     
     -s,--schema: this will init schema name and create credential definition
 
-4. `vsw publish`
+3. `vsw publish`
     publish your software credential
     This needs you provide software name and version, software did information.
     
-5. `vsw verify`
+4. `vsw verify`
     Verify if the software credential is correct. the following parameters are needed.
     -s,--software-name: The software name
     -u,--url: The download url
     -i,--issuer-did: The issuer did
 
-6. `vsw list`
+5. `vsw list`
 
     List all the necessary information in the console
     -c, --connection: list the connections.
@@ -71,7 +65,7 @@ If you have already locally installed it before, need to uninstall it firstly.
     -cs, --credentials: list the credential records.
     --cd, --credential_definition: list all the credential definition records.      
     
-7. `vsw exit`
+6. `vsw exit`
     Exit agent
     
 
