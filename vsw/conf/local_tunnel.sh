@@ -19,4 +19,3 @@ if [ ! -d ~/localtunnel-master ]; then
 fi
 cd ~/localtunnel-master
 npx localtunnel --port $1 --subdomain $2
-#lt --port $1

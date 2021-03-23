@@ -7,7 +7,6 @@ def main(args: List[str]) -> bool:
     print('')
     print('')
     print('Commands:')
-    print('register           Register your endpoint to communicate with repo.')
     print('setup              Start your local agent service to talk with repo.')
     print('init               Initialize schema, connection for the first time.')
     print('publish            Publish a software credential to the vsw-repo')

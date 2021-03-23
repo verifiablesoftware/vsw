@@ -1,14 +1,14 @@
 import argparse
+import configparser
+import getpass
 import os
 import sys
 import uuid
-import getpass
+from os.path import expanduser
 from pathlib import Path
 from typing import List
-from os.path import expanduser
-import configparser
-import daemon
 
+import daemon
 from aries_cloudagent_vsw.commands import run_command
 
 from vsw import utils
@@ -24,11 +24,9 @@ def main(args: List[str]) -> bool:
         sub_domain = uuid.uuid4().hex
         utils.save_endpoint(sub_domain)
         start_local_tunnel(sub_domain)
-        if args.provision:
-            provision(wallet_key, args.name)
-        else:
-            with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-                start_agent(wallet_key, args.name)
+
+        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
+            start_agent(wallet_key, args.name)
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -132,4 +130,6 @@ def start_local_tunnel(sub_domain):
     port = configuration.get("inbound_transport_port")
     script_path = Path(__file__).parent.parent.joinpath("conf/local_tunnel.sh").resolve()
     os.system(f'chmod +x {script_path}')
-    os.system(f'nohup {script_path} {port} {sub_domain} &')
+    log_dir = Path(__file__).parent.parent.parent.resolve()
+    lt_log_file = str(Path(log_dir).joinpath("logs/lt.log").resolve())
+    os.system(f'nohup {script_path} {port} {sub_domain} > {lt_log_file} &')

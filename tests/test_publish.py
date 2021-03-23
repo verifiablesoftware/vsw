@@ -17,8 +17,6 @@ cred_ex_id = "151c7bfb-a672-4507-99eb-aabd9bb3a494"
 def test_parse_args():
     publish.parse_args()
 
-def test_list_issue_records():
-    list.get_issue_credential_records()
 
 def test_publish():
     publish.send_proposal(repo_conn_id, "CqdPVBFnDs6uUzrrd8Prmw", "Felix", "1.0", "12121212",
