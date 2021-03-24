@@ -1,14 +1,15 @@
 import argparse
 import json
+import time
 from typing import List
-
+from urllib.parse import urljoin
 import requests
 
 import vsw.utils
 from vsw.log import Log
 
 logger = Log(__name__).logger
-
+timeout = 60
 
 def main(args: List[str]) -> bool:
     args = parse_args(args)
@@ -60,7 +61,7 @@ def connection_repo():
         logger.info(f'Create invitation to: {vsw_repo_url}')
         response = requests.post(vsw_repo_url)
         res = json.loads(response.text)
-        print(res)
+        logger.info(res)
 
         local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
         logger.info(f'Receive invitation {local_url}')
@@ -79,7 +80,28 @@ def connection_repo():
             "@id": invitation["@id"]
         }
         ss = requests.post(local_url, json=body)
-        print(json.loads(ss.text))
-        logger.info('Created connection with Repo')
+        invitation_response = json.loads(ss.text)
+        logger.info(invitation_response)
+        connection_id = invitation_response["connection_id"]
+        times = 0
+        while times <= timeout:
+            connection_res = get_connection(connection_id, vsw_config)
+            logger.info(f'waiting state update, current state: {connection_res["state"]}')
+            if connection_res["state"] == "active":
+                logger.info('Created connection with Repo')
+                break;
+            else:
+                times += 1;
+        if times > timeout:
+            logger.error("Sorry, there might be some issue during initializing connection.")
+
     except Exception as err:
         logger.error('connection vsw-repo failed', err)
+
+
+def get_connection(connection_id, vsw_config):
+    time.sleep(1)  # wait communicate complete automatically between agents
+    url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/{connection_id}'
+    connection_response = requests.get(url)
+    res = json.loads(connection_response.text)
+    return res

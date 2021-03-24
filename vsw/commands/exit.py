@@ -1,10 +1,10 @@
 import os
-import signal
 import socket
+import subprocess
 from typing import List
-from vsw.utils import get_vsw_agent
 
 from vsw.log import Log
+from vsw.utils import get_vsw_agent
 
 logger = Log(__name__).logger
 
@@ -12,6 +12,7 @@ logger = Log(__name__).logger
 def main(args: List[str]) -> bool:
     kill_lt()
     kill_vsw()
+    print("Exited vsw")
 
 
 def kill_vsw():
@@ -21,7 +22,7 @@ def kill_vsw():
     location = (configuration.get("admin_host"), int(configuration.get("admin_port")))
     result_of_check = a_socket.connect_ex(location)
     if result_of_check == 0:
-        os.system(f'kill $(lsof -t -i:{configuration.get("admin_port")})')
+        subprocess.Popen(f'kill -9 $(lsof -t -i:{configuration.get("admin_port")})', stdout=subprocess.DEVNULL, shell=True)
 
 
 def kill_lt():
@@ -29,12 +30,4 @@ def kill_lt():
     for line in out.splitlines():
         if 'localtunnel' in line:
             pid = int(line.split()[1])
-            kill_pid(pid)
-            print('Closed local tunnel')
-
-
-def kill_pid(pid):
-    try:
-        os.kill(pid, signal.SIGKILL)
-    except OSError as e:
-        pass
+            subprocess.run(f'kill -9 {pid}', stdout=subprocess.DEVNULL, shell=True)
