@@ -56,6 +56,13 @@ def get_vsw_agent():
     return config_dict
 
 
+def get_tails_server():
+    config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
+    config_reader = ConfigReader(config_path)
+    config_dict = config_reader.to_dict('tails-server')
+    return config_dict
+
+
 def generate_digest(software_url):
     with urllib.request.urlopen(software_url) as response:
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:

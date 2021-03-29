@@ -19,7 +19,7 @@ def test_parse_args():
 
 
 def test_publish():
-    publish.send_proposal(repo_conn_id, "CqdPVBFnDs6uUzrrd8Prmw", "Felix", "1.0", "12121212",
+    publish.send_proposal(repo_conn_id, "6NQ84mYSmD5FiBC1fVYiL7", "Fly", "0.1.0", "12121212",
                           "http://images.pccoo.cn/bar/2012426/20124261343081s.jpg",
                   "", "")
 

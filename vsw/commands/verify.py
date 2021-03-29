@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import json
 from typing import List
 from uuid import uuid4
@@ -20,26 +21,28 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
-        parser.add_argument("-s", "--software-name", required=True, help="The software name")
+        parser.add_argument("-s", "--schema-name", required=True, help="The schema name")
+        parser.add_argument("-n", "--software-name", required=True, help="The software name")
         parser.add_argument("-u", "--url", required=True, help="The software download url")
         parser.add_argument("-i", "--issuer-did", required=True, help="The issuer did")
+        parser.add_argument("-rd", "--revoke-date", required=False, help="The revoke date,format: YYYY-MM-dd")
         parsed_args = parser.parse_args(args)
         if not validators.url(parsed_args.url):
             print('The software package url is wrong, please check')
             return
-        execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url)
+        execute(parsed_args.software_name, parsed_args.issuer_did, parsed_args.url, parsed_args.schema_name, parsed_args.revoke_date)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
 
-def execute(software_name, issuer_did, download_url):
+def execute(software_name, issuer_did, download_url, schema_name, revoke_date):
     connection = get_client_connection()
     logger.info("Executing verify, please wait for response...")
-    credentials = check_credential(issuer_did, software_name, download_url)
+    credentials = check_credential(issuer_did, software_name, download_url, schema_name)
     if len(credentials) == 0:
         logger.error("No found credential, please check if the specified conditions are correct.")
     else:
-        proof_response = send_request(connection["connection_id"], software_name, issuer_did)
+        proof_response = send_request(connection["connection_id"], software_name, issuer_did, schema_name, revoke_date)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
         times = 0
@@ -48,6 +51,9 @@ def execute(software_name, issuer_did, download_url):
             state = presentation_proof_result["state"]
             print(f"waiting state update, current state is: {state}")
             if state == "verified":
+                if presentation_proof_result["verified"] == "false":
+                    logger.error("Verified error, the credential might be revoked!")
+                    break;
                 pres_req = presentation_proof_result["presentation_request"]
                 pres = presentation_proof_result["presentation"]
                 is_proof_of_software_certificate = (
@@ -79,7 +85,7 @@ def execute(software_name, issuer_did, download_url):
                 times += 1
 
         if times > timeout:
-            logger.error("verified error, presentation proof result is not verified!")
+            logger.error("Verified error, presentation proof result is not verified!")
 
 
 def retrieve_result(presentation_exchange_id):
@@ -94,47 +100,71 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def check_credential(issuer_did, software_name, download_url):
+def check_credential(issuer_did, software_name, download_url, schema_name):
     wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name,
-                      "schema_name": "software-certificate", "attr::url::value": download_url})
+                      "schema_name": schema_name, "attr::url::value": download_url})
     repo_url = f"{repo_url_host}/credentials?wql={wql}"
     res = requests.get(repo_url)
     return json.loads(res.text)["results"]
 
 
-def send_request(client_conn_id, software_name, issuer_did):
+def send_request(client_conn_id, software_name, issuer_did, schema_name, revoke_date):
     """
     Verifier sends request (prover receives request)
     Request Proof (from verifier to prover, required)
     """
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
+    time_from = time_to = int(time.time())
+    if revoke_date:
+        datetime_object = datetime.strptime(revoke_date, '%Y-%M-%d')
+        time_from = time_to = datetime.timestamp(datetime_object)
     req_attrs = [
         {
             "name": "software-name",
-            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": schema_name}],
+            # "non_revoked": {
+            #     "from":time_from,
+            #     "to": time_to
+            # }
         },
         {
             "name": "software-version",
-            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": schema_name}],
+            # "non_revoked": {
+            #     "from": time_from,
+            #     "to": time_to
+            # }
         },
         {
             "name": "developer-did",
-            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": schema_name}],
+            # "non_revoked": {
+            #     "from": time_from,
+            #     "to": time_to
+            # }
         },
         {
             "name": "hash",
-            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": schema_name}],
+            # "non_revoked": {
+            #     "from": time_from,
+            #     "to": time_to
+            # }
         },
         {
             "name": "url",
-            "restrictions": [{"schema_name": "software-certificate", "attr::developer-did::value": issuer_did, "attr::software-name::value": software_name}]
+            "restrictions": [{"schema_name": schema_name}],
+            # "non_revoked": {
+            #     "from": time_from,
+            #     "to": time_to
+            # }
         }
     ]
 
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
-        "nonce": str(uuid4().int),
+        # "nonce": str(uuid4().int),
         "requested_attributes": {
             f"0_{req_attr['name']}_uuid": req_attr
             for req_attr in req_attrs

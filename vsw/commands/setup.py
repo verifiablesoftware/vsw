@@ -10,6 +10,7 @@ from typing import List
 
 import daemon
 from aries_cloudagent_vsw.commands import run_command
+from aries_cloudagent_vsw.commands.provision import ProvisionError
 
 from vsw import utils
 from vsw.log import Log
@@ -21,12 +22,15 @@ def main(args: List[str]) -> bool:
     try:
         wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
-        sub_domain = uuid.uuid4().hex
-        utils.save_endpoint(sub_domain)
-        start_local_tunnel(sub_domain)
+        # sub_domain = uuid.uuid4().hex
+        # utils.save_endpoint(sub_domain)
+        # start_local_tunnel(sub_domain)
 
         with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-            start_agent(wallet_key, args.name)
+            if args.provision:
+                provision(wallet_key, args.name)
+            else:
+                start_agent(wallet_key, args.name)
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -46,15 +50,20 @@ def provision(wallet_key, name):
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     logger.info('genesis_file: ' + str(config_path))
     endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
-    run_command('provision', [
-        '--endpoint', endpoint,
-        '--seed', get_seed(wallet_name),
-        '--genesis-file', str(config_path),
-        '--accept-taa', '1',
-        '--wallet-type', 'indy',
-        '--wallet-name', wallet_name,
-        '--wallet-key', wallet_key
-    ])
+    try:
+        run_command('provision', [
+            '--endpoint', endpoint,
+            '--seed', get_seed(wallet_name),
+            '--genesis-file', str(config_path),
+            '--accept-taa', '1',
+            '--wallet-type', 'indy',
+            '--wallet-name', wallet_name,
+            '--wallet-key', wallet_key
+        ])
+    except ProvisionError as e:
+        logger.error(e.message)
+        logger.error("please check if your public DID and verkey is registered in the ledger!")
+        pass
 
 
 def start_agent(wallet_key, name):
@@ -74,6 +83,7 @@ def start_agent(wallet_key, name):
                           '--endpoint', configuration.get("endpoint"),
                           '--label', configuration.get("label"),
                           '--seed', get_seed(wallet_name),
+                          '--tails-server-base-url', utils.get_tails_server().get("host"),
                           '--genesis-file', str(config_path),
                           '--webhook-url', configuration.get("webhook_url"),
                           '--accept-taa', '1',

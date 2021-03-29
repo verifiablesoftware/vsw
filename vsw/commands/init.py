@@ -44,8 +44,8 @@ def do_schema(schema):
 
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
     res = requests.post(credential_definition_url, json={
-        "revocation_registry_size": 0,
-        "support_revocation": False,
+        "revocation_registry_size": 100,
+        "support_revocation": True,
         "schema_id": schema_id,
         "tag": "default"
     })

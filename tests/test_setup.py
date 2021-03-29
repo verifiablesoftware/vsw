@@ -2,7 +2,7 @@ from vsw.commands import setup
 
 
 def test_start_agent():
-    setup.start_agent("default", "default")
+    setup.start_agent("test9", "test9")
 
 
 def test_get_seed():
