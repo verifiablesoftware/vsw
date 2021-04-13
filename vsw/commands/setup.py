@@ -21,9 +21,9 @@ def main(args: List[str]) -> bool:
     try:
         wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
-        # sub_domain = uuid.uuid4().hex
-        # utils.save_endpoint(sub_domain)
-        # start_local_tunnel(sub_domain)
+        sub_domain = uuid.uuid4().hex
+        utils.save_endpoint(sub_domain)
+        start_local_tunnel(sub_domain)
 
         start_process(wallet_key, args)
 
