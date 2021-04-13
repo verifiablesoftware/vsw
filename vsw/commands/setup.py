@@ -2,15 +2,14 @@ import argparse
 import configparser
 import getpass
 import os
-import sys
 import uuid
 from os.path import expanduser
 from pathlib import Path
 from typing import List
 
-import daemon
 from aries_cloudagent_vsw.commands import run_command
 from aries_cloudagent_vsw.commands.provision import ProvisionError
+from daemons import daemonizer
 
 from vsw import utils
 from vsw.log import Log
@@ -26,13 +25,20 @@ def main(args: List[str]) -> bool:
         # utils.save_endpoint(sub_domain)
         # start_local_tunnel(sub_domain)
 
-        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-            if args.provision:
-                provision(wallet_key, args.name)
-            else:
-                start_agent(wallet_key, args.name)
+        start_process(wallet_key, args)
+
     except KeyboardInterrupt:
         print(" => Exit setup")
+
+
+@daemonizer.run(
+    pidfile="~/aca-py"
+)
+def start_process(wallet_key, args):
+    if args.provision:
+        provision(wallet_key, args.name)
+    else:
+        start_agent(wallet_key, args.name)
 
 
 def parse_args(args):
@@ -60,7 +66,7 @@ def provision(wallet_key, name):
             '--wallet-name', wallet_name,
             '--wallet-key', wallet_key
         ])
-    except ProvisionError as e:
+    except BaseException as e:
         logger.error(e.message)
         logger.error("please check if your public DID and verkey is registered in the ledger!")
         pass
@@ -76,34 +82,38 @@ def start_agent(wallet_key, name):
 
     if name:
         wallet_name = name
-    run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
-                          '--inbound-transport', configuration.get("inbound_transport_protocol"),
-                          configuration.get("inbound_transport_host"), transport_port,
-                          '--outbound-transport', configuration.get('outbound_transport_protocol'),
-                          '--endpoint', configuration.get("endpoint"),
-                          '--label', configuration.get("label"),
-                          '--seed', get_seed(wallet_name),
-                          '--tails-server-base-url', utils.get_tails_server().get("host"),
-                          '--genesis-file', str(config_path),
-                          '--webhook-url', configuration.get("webhook_url"),
-                          '--accept-taa', '1',
-                          '--wallet-type', 'indy',
-                          '--wallet-name', wallet_name,
-                          '--wallet-key', wallet_key,
-                          '--log-config', logger.aries_config_path,
-                          '--log-file', logger.aries_log_file,
-                          '--auto-accept-invites',
-                          '--auto-accept-requests',
-                          '--auto-ping-connection',
-                          '--auto-respond-messages',
-                          '--auto-respond-credential-proposal',
-                          '--auto-respond-credential-offer',
-                          '--auto-respond-credential-request',
-                          '--auto-store-credential',
-                          '--auto-respond-presentation-request',
-                          '--auto-verify-presentation',
-                          '--auto-respond-presentation-proposal',
-                          '--admin-insecure-mode'])
+    try:
+        run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
+                              '--inbound-transport', configuration.get("inbound_transport_protocol"),
+                              configuration.get("inbound_transport_host"), transport_port,
+                              '--outbound-transport', configuration.get('outbound_transport_protocol'),
+                              '--endpoint', configuration.get("endpoint"),
+                              '--label', configuration.get("label"),
+                              '--seed', get_seed(wallet_name),
+                              '--tails-server-base-url', utils.get_tails_server().get("host"),
+                              '--genesis-file', str(config_path),
+                              '--webhook-url', configuration.get("webhook_url"),
+                              '--accept-taa', '1',
+                              '--wallet-type', 'indy',
+                              '--wallet-name', wallet_name,
+                              '--wallet-key', wallet_key,
+                              '--log-config', logger.aries_config_path,
+                              '--log-file', logger.aries_log_file,
+                              '--auto-accept-invites',
+                              '--auto-accept-requests',
+                              '--auto-ping-connection',
+                              '--auto-respond-messages',
+                              '--auto-respond-credential-proposal',
+                              '--auto-respond-credential-offer',
+                              '--auto-respond-credential-request',
+                              '--auto-store-credential',
+                              '--auto-respond-presentation-request',
+                              '--auto-verify-presentation',
+                              '--auto-respond-presentation-proposal',
+                              '--admin-insecure-mode'])
+    except BaseException as error:
+        logger.error("started vsw failed.")
+        print('An exception occurred: {}'.format(error))
 
 
 def get_seed(wallet_name):
@@ -142,4 +152,4 @@ def start_local_tunnel(sub_domain):
     os.system(f'chmod +x {script_path}')
     log_dir = Path(__file__).parent.parent.parent.resolve()
     lt_log_file = str(Path(log_dir).joinpath("logs/lt.log").resolve())
-    os.system(f'nohup {script_path} {port} {sub_domain} > {lt_log_file} &')
+    os.system(f'nohup {script_path} {port} {sub_domain} > {lt_log_file} 2>&1 &')

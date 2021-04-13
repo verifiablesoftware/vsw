@@ -2,7 +2,7 @@ from vsw.commands import verify
 
 
 def test_main():
-    verify.execute("test9", "6NQ84mYSmD5FiBC1fVYiL7", "https://files.pythonhosted.org/packages/75/90/3fe7d9bf7b5794cdd344682fa2cbc050a4d8f9d86e9d56d30538b15aa461/urllib-3-0.1.tar.gz", "software-certificate", None)
+    verify.execute("E01", "1.0.0", "YUezFWnyeDAEPqMKaWhc4x", "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz", None)
 
 
 def test_retrieve_results():

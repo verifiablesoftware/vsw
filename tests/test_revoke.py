@@ -1,3 +1,3 @@
 from vsw.commands import revoke
 def test_execute_revoke():
-    revoke.execute_revoke("d737b406-b880-4f9c-920b-adbdd7166868", None, None, True)
+    revoke.revoke("cc2a2758-45c5-4295-93a5-77ef5c383df1", None, None, True)

@@ -2,7 +2,7 @@ import argparse
 import json
 import time
 from typing import List
-from urllib.parse import urljoin
+
 import requests
 
 import vsw.utils
@@ -11,46 +11,38 @@ from vsw.log import Log
 logger = Log(__name__).logger
 timeout = 60
 
+
 def main(args: List[str]) -> bool:
     args = parse_args(args)
     try:
         if args.connection:
             connection_repo()
-        if args.schema:
-            do_schema(args.schema)
+        if args.credential_definition:
+            do_credential_definition()
+
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
 
-def parse_args(args):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--schema", required=False, help="The schema name")
-    parser.add_argument('-c', '--connection', action='store_true')
-    return parser.parse_args(args)
-
-
-def do_schema(schema):
+def do_credential_definition():
     vsw_config = vsw.utils.get_vsw_agent()
-    schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/schemas'
-    response = requests.post(schema_url, json={
-        "schema_version": "0.2",
-        "attributes": ["developer-did","software-version","software-name","software-did", "hash",
-                       "alt-hash", "url", "alt-url1", "alt-url2"],
-        "schema_name": schema
-    })
-    schema_res = json.loads(response.text)
-    schema_id = schema_res["schema_id"]
-    logger.info(f'Created schema_id: {schema_id}')
-
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
     res = requests.post(credential_definition_url, json={
         "revocation_registry_size": 100,
         "support_revocation": True,
-        "schema_id": schema_id,
+        "schema_id": vsw_config.get("schema_id"),
         "tag": "default"
     })
+    logger.info(res.text)
     credential_definition_res = json.loads(res.text)
     logger.info(f'Created credential_definition_id: {credential_definition_res["credential_definition_id"]}')
+
+
+def parse_args(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-cd", "--credential-definition", action='store_true')
+    parser.add_argument('-c', '--connection', action='store_true')
+    return parser.parse_args(args)
 
 
 def connection_repo():
@@ -65,13 +57,6 @@ def connection_repo():
 
         local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
         logger.info(f'Receive invitation {local_url}')
-        # invitation = res["invitation"]
-        # body = {
-        #     "label": invitation["label"],
-        #     "did": invitation["did"],
-        #     "@type": invitation["@type"],
-        #     "@id": invitation["@id"]
-        # }
         invitation = res["invitation"]
         body = {
             "label": invitation["label"],
@@ -95,7 +80,7 @@ def connection_repo():
         if times > timeout:
             logger.error("Sorry, there might be some issue during initializing connection.")
 
-    except Exception as err:
+    except BaseException as err:
         logger.error('connection vsw-repo failed', err)
 
 
