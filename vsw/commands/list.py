@@ -44,6 +44,8 @@ def main(argv: List[str]) -> bool:
             console.print('-p: list all present proof records')
             console.print('-cs: list all the credentials')
             console.print('-cd: list all the credential definitions')
+    except KeyboardInterrupt:
+        print(" ==> Exit list!")
     except NewConnectionError as ce:
         logger.error(str(ce))
         logger.error("Please check if you have executed 'vsw setup' to start agent!")

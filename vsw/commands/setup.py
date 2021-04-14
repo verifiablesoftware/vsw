@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List
 
 from aries_cloudagent_vsw.commands import run_command
-from aries_cloudagent_vsw.commands.provision import ProvisionError
 from daemons import daemonizer
 
 from vsw import utils

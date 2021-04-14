@@ -25,20 +25,30 @@ def main(args: List[str]) -> bool:
         if not credential_exchange_id and not credential_registry_id and not credential_revocation_id:
             print('Either the Credential Exchange ID, or Credential Registry ID and Credential '
                   'Revocation ID are required.')
+            print_help()
             return
         elif not credential_exchange_id:
             if not credential_registry_id or not credential_revocation_id:
                 print('The Credential Registry ID and Credential Revocation ID are both required.')
+                print_help()
                 return
 
         revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
     except KeyboardInterrupt:
-        print(" ==> Exit publish!")
+        print(" ==> Exit revoke!")
+
+
+def print_help():
+    print('Usage:')
+    print('vsw revoke [options]')
+    print('-cei, --credential-exchange-id         The Credential Exchange Id')
+    print('-reg, --credential-registry-id         The Credential Registry ID')
+    print('-cei, --credential-revocation-id       The Credential Revocation ID')
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-cei", "--credential-exchange-id", required=False, help="The credential exchange id")
+    parser.add_argument("-cei", "--credential-exchange-id", required=False, help="The credential Exchange ID")
     parser.add_argument("-reg", "--credential-registry-id", required=False, help="The Credential Registry ID ")
     parser.add_argument("-rev", "--credential-revocation-id", required=False, help="The Credential Revocation ID")
     parser.add_argument("-p", "--publish", required=False, default=True,  help="If publish revocation immediately")

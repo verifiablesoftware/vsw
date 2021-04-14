@@ -31,7 +31,8 @@ def main(args: List[str]) -> bool:
         if not validators.url(parsed_args.url):
             print('The software package url is wrong, please check')
             return
-        execute(parsed_args.software_name, parsed_args.version, parsed_args.issuer_did, parsed_args.url, parsed_args.revoke_date)
+        execute(parsed_args.software_name, parsed_args.version, parsed_args.issuer_did, parsed_args.url,
+                parsed_args.revoke_date)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
@@ -96,39 +97,23 @@ def check_credential(issuer_did, software_name, download_url, schema_name):
     return json.loads(res.text)["results"]
 
 
-def send_request(client_conn_id, software_name, version, issuer_did, schema_name, schema_version, url, hash, revoke_date):
+def send_request(client_conn_id, software_name, version, issuer_did, schema_name, schema_version, url, hash,
+                 revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     time_from = 0
     time_to = int(time.time())
     if revoke_date:
         datetime_object = datetime.strptime(revoke_date, '%Y-%M-%d')
-        time_from = time_to = datetime.timestamp(datetime_object)
+        time_to = datetime.timestamp(datetime_object)
     req_attr = {
-            "names": ["software-name","software-version", "developer-did", "hash", "url"],
-            "non_revoked": {"from": time_from, "to": time_to},
-            "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did, "attr::software-name::value": software_name, "attr::software-version::value": version}]
-        }
-        # {
-        #     "name": "software-version",
-        #     "non_revoked": {"from": time_from, "to": time_to},
-        #     "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did, "attr::software-version::value": version}]
-        # },
-        # {
-        #     "name": "developer-did",
-        #     "non_revoked": {"from": time_from, "to": time_to},
-        #     "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did, "attr::developer-did::value": issuer_did}]
-        # },
-        # {
-        #     "name": "hash",
-        #     "non_revoked": {"from": time_from, "to": time_to},
-        #     "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did, "attr::hash::value": hash}]
-        # },
-        # {
-        #     "name": "url",
-        #     "non_revoked": {"from": time_from, "to": time_to},
-        #     "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did,"attr::url::value": url}]
-        # }
-
+        "names": ["software-name", "software-version", "developer-did", "hash", "url"],
+        "non_revoked": {"from": time_from, "to": time_to},
+        "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did,
+                          "attr::software-name::value": software_name,
+                          "attr::software-version::value": version,
+                          "attr::url::value": url,
+                          "attr::hash::value": hash}]
+    }
 
     indy_proof_request = {
         "name": "Proof of Software Certificate",
