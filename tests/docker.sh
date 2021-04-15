@@ -3,8 +3,8 @@
 docker run \
  --name ubuntu \
  -e HOST_IP=$(ifconfig en0 | awk ‘/ *inet /{print $2}’) \
- -v /home/ubuntu/felix:/workspace \
- --network host -t -i \
+ -v /var/folders/:/workspace \
+ -t -i -p 8020:8020 -p 8021:8021 -p 8022:8022 \
  ubuntu:bionic /bin/bash
 
 #cat /etc/lsb-release

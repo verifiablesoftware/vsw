@@ -91,7 +91,6 @@ def start_agent(wallet_key, name):
                               '--seed', get_seed(wallet_name),
                               '--tails-server-base-url', utils.get_tails_server().get("host"),
                               '--genesis-file', str(config_path),
-                              '--webhook-url', configuration.get("webhook_url"),
                               '--accept-taa', '1',
                               '--wallet-type', 'indy',
                               '--wallet-name', wallet_name,

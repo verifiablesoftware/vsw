@@ -1,8 +1,8 @@
 pkginfo >= 1.4.2
 readme_renderer >= 21.0
 requests-toolbelt >= 0.8.0, != 0.9.0
-setuptools-scm
-setuptools >= 0.7.0
+setuptools >= 45
+setuptools-scm >= 1.15
 rich
 daemons
 terminaltables
