@@ -104,7 +104,7 @@ def get_credential(developer_did, software_name):
     repo_url = f"{repo_url_host}/credentials?wql={wql}"
     res = requests.get(repo_url)
     try:
-        return json.loads(res.text)["results"]["values"]
+        return json.loads(res.text)["results"][0]["attrs"]
     except BaseException:
         return None
 
@@ -127,6 +127,7 @@ def generate_software_did(developer_did, software_name, software_version, downlo
     if credential:
         same_version = is_same_version(software_version, credential["software-version"])
     if same_version:
+        logger.info(f'Existed software-did: {credential["software-did"]}')
         return credential["software-did"]
     else:
         # Create a DID
@@ -146,12 +147,13 @@ def generate_software_did(developer_did, software_name, software_version, downlo
             "endpoint_type": "Endpoint",
             "endpoint": f'{download_url}:h1?{hash}'
         })
+        logger.info(f'Created new software-did: {did}')
         return did
 
 
 def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_url):
     digest = vsw.utils.generate_digest(software_url)
-    software_did = generate_software_did(software_url, digest)
+    software_did = generate_software_did(developer_did, software_name, software_version, software_url, digest)
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
         "comment": "execute vsw publish cli",
@@ -180,6 +182,14 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
                 {
                     "name": "url",
                     "value": software_url
+                },
+                {
+                    "name": "alt-url1",
+                    "value": ''
+                },
+                {
+                    "name": "alt-url2",
+                    "value": ''
                 },
                 {
                     "name": "hash",
