@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 import vsw.utils
 import requests
 import validators
+from version_parser import Version
 
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
@@ -19,39 +20,42 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         args = parse_args(args)
-        software_name = input('Please enter software name: ')
-        software_version = input('Please enter software version: ')
-        software_did = input('Please enter software did: ')
-        software_url = input('Please enter software package url: ')
-        software_alt_url1 = args.alt_url1
-        software_alt_url2 = args.alt_url2
-        if software_url and not validators.url(software_url):
-            print('The software package url is wrong, please check')
-            return
-        if software_alt_url1 and not validators.url(software_alt_url1):
-            print('The software package alt-url1 is wrong, please check')
-            return
-        if software_alt_url2 and not validators.url(software_alt_url2):
-            print('The software package alt-url2 is wrong, please check')
-            return
-        issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2)
+        with open(args.cred) as json_file:
+            data = json.load(json_file)
+            software_name = data['software_name']
+            software_version = data["software_version"]
+            software_url = data["software_url"]
+            if check_version(software_version) is False:
+                return;
+            if software_url and not validators.url(software_url):
+                print('The software package url is wrong, please check')
+                return
+            developer_did = get_public_did()
+            issue_credential(developer_did, software_name, software_version, software_url)
     except KeyboardInterrupt:
         print(" ==> Exit publish!")
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--alt-url1", required=False, help="The software optional package url1")
-    parser.add_argument("--alt-url2", required=False, help="The software optional package url2")
+    parser.add_argument("-c", "--cred", required=True, help="The software credential json file path")
     return parser.parse_args(args)
 
 
-def issue_credential(software_name, software_version, software_did, software_url, software_alt_url1, software_alt_url2):
+def check_version(software_version):
+    try:
+        Version(software_version)
+    except ValueError:
+        print("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
+        return False
+    return True
+
+
+def issue_credential(developer_did, software_name, software_version, software_url):
     logger.info("executing publish, please waiting for response")
     connection = get_repo_connection()
-    proposal_response = send_proposal(connection["connection_id"], get_public_did(), software_name,
-                                      software_version, software_did, software_url, software_alt_url1,
-                                      software_alt_url2)
+    proposal_response = send_proposal(connection["connection_id"], developer_did, software_name,
+                                      software_version, software_url)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
 
@@ -95,13 +99,59 @@ def get_credential_record(cred_ex_id):
     return res
 
 
-def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_did, software_url,
-                  software_alt_url1, software_alt_url2):
-    if software_alt_url1 is None:
-        software_alt_url1 = ""
-    if software_alt_url2 is None:
-        software_alt_url2 = ""
+def get_credential(developer_did, software_name):
+    wql = json.dumps({"attr::developer-did::value": developer_did, "attr::software-name::value": software_name})
+    repo_url = f"{repo_url_host}/credentials?wql={wql}"
+    res = requests.get(repo_url)
+    try:
+        return json.loads(res.text)["results"]["values"]
+    except BaseException:
+        return None
+
+
+def is_same_version(software_version, exist_software_version):
+    if exist_software_version is None:
+        return False
+    v1 = Version(software_version)
+    v2 = Version(exist_software_version)
+    if v1.get_major_version() == v2.get_major_version() and v1.get_minor_version() == v2.get_minor_version():
+        return True
+    else:
+        return False
+
+
+def generate_software_did(developer_did, software_name, software_version, download_url, hash):
+
+    credential = get_credential(developer_did, software_name)
+    same_version = False
+    if credential:
+        same_version = is_same_version(software_version, credential["software-version"])
+    if same_version:
+        return credential["software-did"]
+    else:
+        # Create a DID
+        create_did_res = requests.post(urljoin(vsw_url_host, "/wallet/did/create"))
+        res = json.loads(create_did_res.text)
+        did = res["result"]["did"]
+        verkey = res["result"]["verkey"]
+        # Write DID to ledger by NYM
+        ledger_res = requests.post(urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"))
+        write_did_ledger_res = json.loads(ledger_res.text)
+        if write_did_ledger_res["success"] is False:
+            logger.err("write did to ledger failed!")
+            raise Exception('write did to ledger failed!')
+        # Set DID Endpoint
+        requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
+            "did": did,
+            "endpoint_type": "Endpoint",
+            "endpoint": f'{download_url}:h1?{hash}'
+        })
+        return did
+
+
+def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_url):
     digest = vsw.utils.generate_digest(software_url)
+    software_did = generate_software_did(software_url, digest)
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
         "comment": "execute vsw publish cli",
@@ -130,14 +180,6 @@ def send_proposal(repo_conn_id, developer_did, software_name, software_version, 
                 {
                     "name": "url",
                     "value": software_url
-                },
-                {
-                    "name": "alt-url1",
-                    "value": software_alt_url1
-                },
-                {
-                    "name": "alt-url2",
-                    "value": software_alt_url2
                 },
                 {
                     "name": "hash",

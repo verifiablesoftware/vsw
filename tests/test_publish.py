@@ -18,10 +18,19 @@ def test_parse_args():
     publish.parse_args()
 
 
+def test_generate_software_did():
+    url = "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz"
+    digest = vsw.utils.generate_digest(url)
+    publish.generate_software_did(url, digest)
+
+
+def test_version():
+    publish.check_version("aaa")
+
+
 def test_publish():
-    publish.send_proposal(repo_conn_id, "XGLt7XwLkZrYLGsSf2TZEz", "PublishTest", "1.0.1", "12121212",
-                          "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-                  "", "")
+    publish.send_proposal(repo_conn_id, "XGLt7XwLkZrYLGsSf2TZEz", "PublishTest", "1.0.1",
+                          "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz")
 
 # 1 Repo Holder sends a proposal to the issuer (issuer receives proposal)
 def test_send_proposal():

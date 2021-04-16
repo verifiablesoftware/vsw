@@ -6,6 +6,7 @@ setuptools-scm >= 1.15
 rich
 daemons
 terminaltables
+version-parser
 py-multicodec
 py-multibase
 tqdm >= 4.14
