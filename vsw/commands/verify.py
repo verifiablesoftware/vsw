@@ -4,7 +4,7 @@ import json
 import time
 from typing import List
 from urllib.parse import urljoin
-
+from version_parser import Version
 import requests
 import validators
 
@@ -22,17 +22,21 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
-        parser.add_argument("-n", "--software-name", required=True, help="The software name")
-        parser.add_argument("-v", "--version", required=True, help="The software version")
-        parser.add_argument("-u", "--url", required=True, help="The software download url")
-        parser.add_argument("-i", "--issuer-did", required=True, help="The issuer did")
-        parser.add_argument("-rd", "--revoke-date", required=False, help="The revoke date,format: YYYY-MM-dd")
+        parser.add_argument("-c", "--cred", required=True, help="The software credential json file path")
         parsed_args = parser.parse_args(args)
-        if not validators.url(parsed_args.url):
-            print('The software package url is wrong, please check')
-            return
-        execute(parsed_args.software_name, parsed_args.version, parsed_args.issuer_did, parsed_args.url,
-                parsed_args.revoke_date)
+        with open(parsed_args.cred) as json_file:
+            data = json.load(json_file)
+            software_name = data['software_name']
+            software_version = data["software_version"]
+            software_url = data["software_url"]
+            issuer_did = data["issuer_did"]
+            revoke_date = data["revoke_date"]
+            if not validators.url(software_url):
+                print('The software package url is wrong, please check')
+                return
+            if check_version(software_version) is False:
+                return;
+            execute(software_name, software_version, issuer_did, software_url, revoke_date)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
@@ -61,7 +65,6 @@ def execute(software_name, version, issuer_did, download_url, revoke_date):
                     logger.error("Verified error, the credential might be revoked!")
                     break;
                 pres_req = presentation_proof_result["presentation_request"]
-                pres = presentation_proof_result["presentation"]
                 is_proof_of_software_certificate = (
                         pres_req["name"] == "Proof of Software Certificate"
                 )
@@ -75,6 +78,15 @@ def execute(software_name, version, issuer_did, download_url, revoke_date):
 
         if times > timeout:
             logger.error("Verified error, presentation proof result is not verified!")
+
+
+def check_version(software_version):
+    try:
+        Version(software_version)
+    except ValueError:
+        print("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
+        return False
+    return True
 
 
 def retrieve_result(presentation_exchange_id):

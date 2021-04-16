@@ -80,8 +80,8 @@ def connection_repo():
         if times > timeout:
             logger.error("Sorry, there might be some issue during initializing connection.")
 
-    except BaseException as err:
-        logger.error('connection vsw-repo failed', err)
+    except BaseException:
+        logger.error('connection vsw-repo failed')
 
 
 def get_connection(connection_id, vsw_config):
