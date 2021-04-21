@@ -22,13 +22,14 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
-        parser.add_argument("-c", "--cred", required=True, help="The software credential json file path")
+        parser.add_argument("-c", "--proof-request", required=True, help="The software credential json file path")
         parsed_args = parser.parse_args(args)
-        with open(parsed_args.cred) as json_file:
+        with open(parsed_args.proof_request) as json_file:
             data = json.load(json_file)
             software_name = data['software_name']
             software_version = data["software_version"]
             software_url = data["software_url"]
+            software_did = data["software_did"]
             issuer_did = data["issuer_did"]
             revoke_date = data["revoke_date"]
             if not validators.url(software_url):
@@ -36,17 +37,19 @@ def main(args: List[str]) -> bool:
                 return
             if check_version(software_version) is False:
                 return;
-            execute(software_name, software_version, issuer_did, software_url, revoke_date)
+            execute(software_name, software_version, issuer_did, software_url, software_did, revoke_date)
+    except ConnectionError as e:
+        logger.error(e)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
 
-def execute(software_name, version, issuer_did, download_url, revoke_date):
+def execute(software_name, version, issuer_did, download_url, software_did, revoke_date):
     connection = get_client_connection()
     logger.info("Executing verify, please wait for response...")
     schema_name = vsw_config.get("schema_name")
     schema_version = vsw_config.get("schema_version")
-    credentials = check_credential(issuer_did, software_name, download_url, schema_name)
+    credentials = check_credential(issuer_did, software_name, download_url, schema_name, software_did)
     if len(credentials) == 0:
         logger.error("No found credential, please check if the specified conditions are correct.")
     else:
@@ -101,8 +104,9 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def check_credential(issuer_did, software_name, download_url, schema_name):
+def check_credential(issuer_did, software_name, download_url, schema_name, software_did):
     wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name,
+                      "attr::software-did::value": software_did,
                       "schema_name": schema_name, "attr::url::value": download_url})
     repo_url = f"{repo_url_host}/credentials?wql={wql}"
     res = requests.get(repo_url)
@@ -148,7 +152,10 @@ def send_request(client_conn_id, software_name, version, issuer_did, schema_name
 
 
 def get_client_connection():
-    connection_response = requests.get(f'{vsw_url_host}/connections')
+    connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
     res = json.loads(connection_response.text)
     connections = res["results"]
-    return connections[-1]
+    if len(connections) > 0:
+        return connections[-1]
+    else:
+        raise ConnectionError("Not found active vsw connection! Have you executed vsw init -c?")

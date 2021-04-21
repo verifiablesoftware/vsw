@@ -20,7 +20,7 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         args = parse_args(args)
-        with open(args.cred) as json_file:
+        with open(args.cred_file) as json_file:
             data = json.load(json_file)
             software_name = data['software_name']
             software_version = data["software_version"]
@@ -32,13 +32,15 @@ def main(args: List[str]) -> bool:
                 return
             developer_did = get_public_did()
             issue_credential(developer_did, software_name, software_version, software_url)
+    except ConnectionError as e:
+        logger.error(e)
     except KeyboardInterrupt:
         print(" ==> Exit publish!")
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--cred", required=True, help="The software credential json file path")
+    parser.add_argument("-c", "--cred-file", required=True, help="The software credential json file path")
     return parser.parse_args(args)
 
 
@@ -52,8 +54,8 @@ def check_version(software_version):
 
 
 def issue_credential(developer_did, software_name, software_version, software_url):
-    logger.info("executing publish, please waiting for response")
     connection = get_repo_connection()
+    logger.info("executing publish, please waiting for response")
     proposal_response = send_proposal(connection["connection_id"], developer_did, software_name,
                                       software_version, software_url)
     credential_exchange_id = proposal_response["credential_exchange_id"]
@@ -79,10 +81,21 @@ def retrieve_result(credential_exchange_id):
 
 
 def get_repo_connection():
-    connection_response = requests.get(f'{repo_url_host}/connections')
-    res = json.loads(connection_response.text)
+    vsw_connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
+    res = json.loads(vsw_connection_response.text)
     connections = res["results"]
-    return connections[-1]
+    if len(connections) > 0:
+        last_connection = connections[-1]
+        repo_connection_response = requests.get(
+            f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}')
+        repo_res = json.loads(repo_connection_response.text)
+        repo_connections = repo_res["results"]
+        if len(repo_connections) > 0:
+            return repo_connections[-1]
+        else:
+            raise ConnectionError("Not found related repo active connection!")
+    else:
+        raise ConnectionError("Not found active vsw connection! Have you executed vsw init -c?")
 
 
 def get_public_did():
@@ -121,7 +134,6 @@ def is_same_version(software_version, exist_software_version):
 
 
 def generate_software_did(developer_did, software_name, software_version, download_url, hash):
-
     credential = get_credential(developer_did, software_name)
     same_version = False
     if credential:
@@ -142,10 +154,10 @@ def generate_software_did(developer_did, software_name, software_version, downlo
             logger.err("write did to ledger failed!")
             raise Exception('write did to ledger failed!')
         # Set DID Endpoint
-        requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
+        did_endpoint_res = requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
             "did": did,
             "endpoint_type": "Endpoint",
-            "endpoint": f'{download_url}:h1?{hash}'
+            "endpoint": download_url  # not support :h1 format
         })
         logger.info(f'Created new software-did: {did}')
         return did

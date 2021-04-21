@@ -23,7 +23,7 @@ def test_parse_args():
 def test_generate_software_did():
     url = "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz"
     digest = vsw.utils.generate_digest(url)
-    publish.generate_software_did(url, digest)
+    publish.generate_software_did("UyDtaEFuTySAV9VZDykHkh", "Mac", "1.3.0", url, digest)
 
 
 def test_version():
@@ -47,6 +47,10 @@ def test_get_public_did():
 
 def test_get_credentail_records():
     publish.get_credential_record("d073e5f4-b825-4cae-8d65-1ec62ba4d448")
+
+
+def test_get_repo_connection():
+    publish.get_repo_connection()
 
 
 def test_clean_all_records():
