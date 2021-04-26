@@ -12,6 +12,7 @@ from daemons import daemonizer
 
 from vsw import utils
 from vsw.log import Log
+from vsw.controller import server
 
 logger = Log(__name__).logger
 
@@ -23,7 +24,6 @@ def main(args: List[str]) -> bool:
         sub_domain = uuid.uuid4().hex
         utils.save_endpoint(sub_domain)
         start_local_tunnel(sub_domain)
-
         start_process(wallet_key, args)
 
     except KeyboardInterrupt:
@@ -89,6 +89,7 @@ def start_agent(wallet_key, name):
                               '--endpoint', configuration.get("endpoint"),
                               '--label', configuration.get("label"),
                               '--seed', get_seed(wallet_name),
+                              '--webhook-url', configuration.get("webhook_url"),
                               '--tails-server-base-url', utils.get_tails_server().get("host"),
                               '--genesis-file', str(config_path),
                               '--accept-taa', '1',

@@ -22,16 +22,14 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         with open(args.cred_file) as json_file:
             data = json.load(json_file)
-            software_name = data['software_name']
-            software_version = data["software_version"]
-            software_url = data["software_url"]
+            software_version = data["softwareVersion"]
+            software_url = data["softwareUrl"]
             if check_version(software_version) is False:
                 return;
             if software_url and not validators.url(software_url):
                 print('The software package url is wrong, please check')
                 return
-            developer_did = get_public_did()
-            issue_credential(developer_did, software_name, software_version, software_url)
+            issue_credential(data)
     except ConnectionError as e:
         logger.error(e)
     except KeyboardInterrupt:
@@ -53,11 +51,9 @@ def check_version(software_version):
     return True
 
 
-def issue_credential(developer_did, software_name, software_version, software_url):
-    connection = get_repo_connection()
+def issue_credential(data):
     logger.info("executing publish, please waiting for response")
-    proposal_response = send_proposal(connection["connection_id"], developer_did, software_name,
-                                      software_version, software_url)
+    proposal_response = send_proposal(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
 
@@ -133,7 +129,7 @@ def is_same_version(software_version, exist_software_version):
         return False
 
 
-def generate_software_did(developer_did, software_name, software_version, download_url, hash):
+def generate_software_did(developer_did, software_name, software_version, download_url):
     credential = get_credential(developer_did, software_name)
     same_version = False
     if credential:
@@ -163,53 +159,81 @@ def generate_software_did(developer_did, software_name, software_version, downlo
         return did
 
 
-def send_proposal(repo_conn_id, developer_did, software_name, software_version, software_url):
-    digest = vsw.utils.generate_digest(software_url)
-    software_did = generate_software_did(developer_did, software_name, software_version, software_url, digest)
+def send_proposal(data):
+    developer_did = get_public_did()
+    connection = get_repo_connection()
+    logger.info(f'holder connection_id: {connection["connection_id"]}')
+
+    digest = vsw.utils.generate_digest(data["softwareUrl"])
+    software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
         "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,
-        "connection_id": repo_conn_id,
+        "connection_id": connection["connection_id"],
+        "schema_id": data["schemaID"] or vsw_config.get("schema_id"),
+        "schema_name": data["schemaName"] or vsw_config.get("schema_name"),
+        "schema_version": data["schemaVersion"] or vsw_config.get("schema_version"),
+        "issuer_did": developer_did,
         "credential_proposal": {
             "@type": f"did:sov:{developer_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [
                 {
-                    "name": "developer-did",
+                    "name": "developerDid",
                     "value": developer_did
                 },
                 {
-                    "name": "software-version",
-                    "value": software_version
+                    "name": "softwareName",
+                    "value": data["softwareName"]
                 },
                 {
-                    "name": "software-name",
-                    "value": software_name
+                    "name": "softwareVersion",
+                    "value": data["softwareVersion"]
                 },
                 {
-                    "name": "software-did",
+                    "name": "softwareDid",
                     "value": software_did
                 },
                 {
-                    "name": "url",
-                    "value": software_url
+                    "name": "softwareUrl",
+                    "value": data["softwareUrl"]
                 },
                 {
-                    "name": "alt-url1",
-                    "value": ''
-                },
-                {
-                    "name": "alt-url2",
-                    "value": ''
-                },
-                {
-                    "name": "hash",
+                    "name": "softwareHash",
                     "value": digest
                 },
                 {
-                    "name": "alt-hash",
-                    "value": ""
+                    "name": "mediaType",
+                    "value": data["mediaType"]
+                },
+                {
+                    "name": "sourceDid",
+                    "value": data["sourceDid"]
+                },
+                {
+                    "name": "sourceUrl",
+                    "value": data["sourceUrl"]
+                },
+                {
+                    "name": "sourceHash",
+                    "value": data["sourceHash"]
+                },
+                {
+                    "name": "builderToolDidList",
+                    "value": data["builderToolDidList"]
+                },
+                {
+                    "name": "dependencyDidList",
+                    "value": data["dependencyDidList"]
+                },
+                {
+                    "name": "buildLog",
+                    "value": data["buildLog"]
+                },
+                {
+                    "name": "builderDid",
+                    "value": data["builderDid"]
                 }
             ]
         },

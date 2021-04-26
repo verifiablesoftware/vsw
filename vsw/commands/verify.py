@@ -22,40 +22,32 @@ timeout = 60
 def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
-        parser.add_argument("-c", "--proof-request", required=True, help="The software credential json file path")
+        parser.add_argument("-p", "--proof-request", required=True, help="The software credential json file path")
         parsed_args = parser.parse_args(args)
-        with open(parsed_args.proof_request) as json_file:
-            data = json.load(json_file)
-            software_name = data['software_name']
-            software_version = data["software_version"]
-            software_url = data["software_url"]
-            software_did = data["software_did"]
-            issuer_did = data["issuer_did"]
-            revoke_date = data["revoke_date"]
-            if not validators.url(software_url):
-                print('The software package url is wrong, please check')
-                return
-            if check_version(software_version) is False:
-                return;
-            execute(software_name, software_version, issuer_did, software_url, software_did, revoke_date)
+        execute(parsed_args.proof_request)
     except ConnectionError as e:
         logger.error(e)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
 
-def execute(software_name, version, issuer_did, download_url, software_did, revoke_date):
-    connection = get_client_connection()
-    logger.info("Executing verify, please wait for response...")
-    schema_name = vsw_config.get("schema_name")
-    schema_version = vsw_config.get("schema_version")
-    credentials = check_credential(issuer_did, software_name, download_url, schema_name, software_did)
-    if len(credentials) == 0:
-        logger.error("No found credential, please check if the specified conditions are correct.")
-    else:
-        hash = vsw.utils.generate_digest(download_url)
-        proof_response = send_request(connection["connection_id"], software_name, version, issuer_did, schema_name,
-                                      schema_version, download_url, hash, revoke_date)
+def execute(proof_request):
+    with open(proof_request) as json_file:
+        data = json.load(json_file)
+        software_version = data["softwareVersion"]
+        software_url = data["softwareUrl"]
+        if not validators.url(software_url):
+            print('The software package url is wrong, please check')
+            return
+        if check_version(software_version) is False:
+            return;
+        connection = get_client_connection()
+        logger.info("Executing verify, please wait for response...")
+        logger.info(f'issuer connection_id: {connection["connection_id"]}')
+        schema_id = data["schemaID"] or vsw_config.get("schemaID")
+
+        digest = vsw.utils.generate_digest(data["softwareUrl"])
+        proof_response = send_request(connection["connection_id"], schema_id, digest, data)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
         times = 0
@@ -104,42 +96,42 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def check_credential(issuer_did, software_name, download_url, schema_name, software_did):
-    wql = json.dumps({"attr::developer-did::value": issuer_did, "attr::software-name::value": software_name,
-                      "attr::software-did::value": software_did,
-                      "schema_name": schema_name, "attr::url::value": download_url})
-    repo_url = f"{repo_url_host}/credentials?wql={wql}"
-    res = requests.get(repo_url)
-    return json.loads(res.text)["results"]
-
-
-def send_request(client_conn_id, software_name, version, issuer_did, schema_name, schema_version, url, hash,
-                 revoke_date):
+def send_request(client_conn_id, schema_id, digest, data):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     time_from = 0
     time_to = int(time.time())
-    if revoke_date:
-        datetime_object = datetime.strptime(revoke_date, '%Y-%M-%d')
-        time_to = datetime.timestamp(datetime_object)
+    if data["revokeDate"]:
+        datetime_object = datetime.datetime.strptime(data["revokeDate"], '%Y-%m-%d')
+        time_to = datetime.datetime.timestamp(datetime_object)
     req_attr = {
-        "names": ["software-name", "software-version", "developer-did", "hash", "url"],
+        "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
+                  "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
+                  "buildlog", "builderdid"],
         "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": [{"schema_version": schema_version, "schema_name": schema_name, "issuer_did": issuer_did,
-                          "attr::software-name::value": software_name,
-                          "attr::software-version::value": version,
-                          "attr::url::value": url,
-                          "attr::hash::value": hash}]
+        "restrictions": [{"schema_id": schema_id,
+                          "issuer_did": data["developerDid"],
+                          "attr::softwarename::value": data["softwareName"],
+                          "attr::softwareversion::value": data["softwareVersion"],
+                          "attr::softwaredid::value": data["softwareDid"],
+                          "attr::developerdid::value": data["developerDid"],
+                          "attr::softwareurl::value": data["softwareUrl"],
+                          "attr::softwarehash::value": digest,
+                          "attr::mediatype::value": data["mediaType"],
+                          "attr::sourcedid::value": data["sourceDid"],
+                          "attr::sourceurl::value": data["sourceUrl"],
+                          "attr::sourcehash::value": data["sourceHash"],
+                          "attr::buildertooldidlist::value": data["builderToolDidList"],
+                          "attr::dependencydidlist::value": data["dependencyDidList"],
+                          "attr::buildlog::value": data["buildLog"],
+                          "attr::builderdid::value": data["builderDid"]
+                          }]
     }
 
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
         "requested_attributes": {
-            f"0_software-name_uuid": req_attr,
-            f"0_software-version_uuid": req_attr,
-            f"0_developer-did_uuid": req_attr,
-            f"0_hash_uuid": req_attr,
-            f"0_url_uuid": req_attr
+            f"0_software_certificate_uuid": req_attr
         },
         "requested_predicates": {}
     }

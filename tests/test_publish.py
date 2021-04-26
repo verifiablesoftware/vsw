@@ -37,8 +37,9 @@ def test_write_did():
 
 
 def test_publish():
-    publish.send_proposal(repo_conn_id, "UyDtaEFuTySAV9VZDykHkh", "Mac", "1.0.1",
-                          "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz")
+    with open("/Users/Felix/development/vsw-workspace/vsw/dist/publish.json") as json_file:
+        data = json.load(json_file)
+        publish.issue_credential(data)
 
 
 def test_get_public_did():
