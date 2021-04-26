@@ -41,12 +41,17 @@ def execute(proof_request):
             return
         if check_version(software_version) is False:
             return;
+
+        digest = vsw.utils.generate_digest(data["softwareUrl"])
+        credentials = check_credential(data, digest)
+        if len(credentials) == 0:
+            logger.error("No found matched credential, please check if the specified conditions are correct.")
+            return;
         connection = get_client_connection()
         logger.info("Executing verify, please wait for response...")
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
         schema_id = data["schemaID"] or vsw_config.get("schemaID")
 
-        digest = vsw.utils.generate_digest(data["softwareUrl"])
         proof_response = send_request(connection["connection_id"], schema_id, digest, data)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
@@ -82,6 +87,26 @@ def check_version(software_version):
         print("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
         return False
     return True
+
+
+def check_credential(data, digest):
+    wql = json.dumps({"attr::softwarename::value": data["softwareName"],
+                          "attr::softwareversion::value": data["softwareVersion"],
+                          "attr::softwaredid::value": data["softwareDid"],
+                          "attr::developerdid::value": data["developerDid"],
+                          "attr::softwareurl::value": data["softwareUrl"],
+                          "attr::softwarehash::value": digest,
+                          "attr::mediatype::value": data["mediaType"],
+                          "attr::sourcedid::value": data["sourceDid"],
+                          "attr::sourceurl::value": data["sourceUrl"],
+                          "attr::sourcehash::value": data["sourceHash"],
+                          "attr::buildertooldidlist::value": data["builderToolDidList"],
+                          "attr::dependencydidlist::value": data["dependencyDidList"],
+                          "attr::buildlog::value": data["buildLog"],
+                          "attr::builderdid::value": data["builderDid"]})
+    repo_url = f"{repo_url_host}/credentials?wql={wql}"
+    res = requests.get(repo_url)
+    return json.loads(res.text)["results"]
 
 
 def retrieve_result(presentation_exchange_id):

@@ -12,7 +12,6 @@ from daemons import daemonizer
 
 from vsw import utils
 from vsw.log import Log
-from vsw.controller import server
 
 logger = Log(__name__).logger
 
@@ -23,8 +22,10 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         sub_domain = uuid.uuid4().hex
         utils.save_endpoint(sub_domain)
+        start_controller()
         start_local_tunnel(sub_domain)
         start_process(wallet_key, args)
+
 
     except KeyboardInterrupt:
         print(" => Exit setup")
@@ -152,3 +153,8 @@ def start_local_tunnel(sub_domain):
     log_dir = Path(__file__).parent.parent.parent.resolve()
     lt_log_file = str(Path(log_dir).joinpath("logs/lt.log").resolve())
     os.system(f'nohup {script_path} {port} {sub_domain} > {lt_log_file} 2>&1 &')
+
+
+def start_controller():
+    controller_file = Path(__file__).parent.parent.joinpath("controller/server.py").resolve()
+    os.system(f'nohup python3 {controller_file} &')
