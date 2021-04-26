@@ -6,6 +6,7 @@ from typing import List
 from urllib.parse import urljoin
 from version_parser import Version
 import requests
+from urllib import parse
 import validators
 
 import vsw.utils
@@ -104,7 +105,7 @@ def check_credential(data, digest):
                           "attr::dependencydidlist::value": data["dependencyDidList"],
                           "attr::buildlog::value": data["buildLog"],
                           "attr::builderdid::value": data["builderDid"]})
-    repo_url = f"{repo_url_host}/credentials?wql={wql}"
+    repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
     res = requests.get(repo_url)
     return json.loads(res.text)["results"]
 
