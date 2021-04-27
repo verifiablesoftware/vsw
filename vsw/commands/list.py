@@ -2,7 +2,6 @@ import argparse
 import json
 from typing import List
 from rich.console import Console
-from terminaltables import AsciiTable
 import requests
 from urllib3.exceptions import NewConnectionError
 
@@ -70,76 +69,54 @@ def get_credential_definition(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created'
     response = requests.get(local)
     res = json.loads(response.text)
-    print(res)
+    console.print(res)
 
 
 def get_credentials(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credentials'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
+    console.print(res)
 
 
 def get_issue_credential_records(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/issue-credential/records'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
+    console.print(res)
 
 
 def get_status(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
+    console.print(res)
 
 
 def get_schema(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/schemas/created'
     response = requests.get(local)
     res = json.loads(response.text)
-    print(res)
+    console.print(res)
 
 
 def get_wallet(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/wallet/did'
     response = requests.get(local)
     res = json.loads(response.text)
-    print_wallet_info(res["results"])
+    console.print(res)
 
 
 def get_present_proof(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/present-proof/records'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.log(res)
-
-
-def print_wallet_info(results):
-    data = [["public", "did", "verkey"]]
-    for row in results:
-        data.append(
-            [row["public"], row["did"], row["verkey"]]
-        )
-    table = AsciiTable(data)
-    table.title = "Wallet Records"
-    print(table.table)
+    console.print(res)
 
 
 def get_connections(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections'
     response = requests.get(local)
     res = json.loads(response.text)
-    print_connection_table(res["results"])
+    console.print(res)
 
-
-def print_connection_table(results):
-    data = [["their_label", "my_did", "connection_id", "created_at", "state"]]
-    for row in results:
-        data.append(
-            [row["their_label"], row["my_did"],
-             row["connection_id"], row["created_at"], row["state"]]
-        )
-    table = AsciiTable(data)
-    table.title = "Connection Records"
-    print(table.table)

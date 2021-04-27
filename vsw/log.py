@@ -19,7 +19,7 @@ class Log:
         aries_config_path = str(Path(__file__).parent.joinpath("conf/aries_logging_config.ini").resolve())
         if not os.path.exists(str(log_dir)+"/logs/"):
             os.makedirs(str(log_dir)+"/logs/")
-        file_path = Path(log_dir).joinpath(f"logs/{name}.log").resolve()
+        file_path = Path(log_dir).joinpath(f"logs/vsw.log").resolve()
         aries_log_file = str(Path(log_dir).joinpath("logs/aries-cloud-agent.log").resolve())
 
         file_handler = logging.FileHandler(file_path, encoding='utf-8')

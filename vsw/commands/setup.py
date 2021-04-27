@@ -150,11 +150,13 @@ def start_local_tunnel(sub_domain):
     port = configuration.get("inbound_transport_port")
     script_path = Path(__file__).parent.parent.joinpath("conf/local_tunnel.sh").resolve()
     os.system(f'chmod +x {script_path}')
-    log_dir = Path(__file__).parent.parent.parent.resolve()
+    log_dir = Path(os.path.expanduser('~'))
     lt_log_file = str(Path(log_dir).joinpath("logs/lt.log").resolve())
     os.system(f'nohup {script_path} {port} {sub_domain} > {lt_log_file} 2>&1 &')
 
 
 def start_controller():
     controller_file = Path(__file__).parent.parent.joinpath("controller/server.py").resolve()
-    os.system(f'nohup python3 {controller_file} &')
+    log_dir = Path(os.path.expanduser('~'))
+    controller_log_file = str(Path(log_dir).joinpath("logs/vsw-controller.log").resolve())
+    os.system(f'nohup python3 {controller_file} > {controller_log_file} 2>&1 &')
