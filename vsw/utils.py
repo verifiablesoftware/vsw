@@ -42,6 +42,21 @@ def save_endpoint(sub_domain):
     return endpoint
 
 
+def set_port_number(args_ports):
+    parser = configparser.ConfigParser()
+    parser.read(Path(__file__).parent.joinpath("conf/vsw.ini").resolve())
+    ports = args_ports.split(",")
+    if len(ports) != 3:
+        raise ValueError("The ports format should be (endpoint_port,admin_port,webhook_port)")
+    parser.set("vsw-agent", "inbound_transport_port", ports[0])
+    parser.set("vsw-agent", "endpoint", f'http://127.0.0.1:{ports[0]}/')
+    parser.set("vsw-agent", "admin_port", ports[1])
+    parser.set("vsw-agent", "webhook_port", ports[2])
+    parser.set("vsw-agent", "webhook_url", f'http://127.0.0.1:{ports[2]}/webhooks')
+    with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
+        parser.write(configfile)
+
+
 def get_repo_host():
     config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
     config_reader = ConfigReader(config_path)

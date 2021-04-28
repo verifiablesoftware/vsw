@@ -20,6 +20,8 @@ def main(args: List[str]) -> bool:
     try:
         wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
+        if args.ports:
+            utils.set_port_number(args.ports)
         sub_domain = uuid.uuid4().hex
         utils.save_endpoint(sub_domain)
         start_controller()
@@ -39,6 +41,8 @@ def start_process(wallet_key, args):
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--name", required=False, help="The wallet name")
+    parser.add_argument("-p", "--ports", required=False, help="The ports number,"
+                                                              "format is (endpoint_port,admin_port,webhook_port)")
     parser.add_argument("-ne", "--non-endorser", action='store_true')
     return parser.parse_args(args)
 
