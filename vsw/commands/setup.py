@@ -25,8 +25,6 @@ def main(args: List[str]) -> bool:
         start_controller()
         start_local_tunnel(sub_domain)
         start_process(wallet_key, args)
-
-
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -35,44 +33,17 @@ def main(args: List[str]) -> bool:
     pidfile="~/aca-py"
 )
 def start_process(wallet_key, args):
-    if args.provision:
-        provision(wallet_key, args.name)
-    else:
-        start_agent(wallet_key, args.name)
+    start_agent(wallet_key, args.name, args.non_endorser)
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--name", required=False, help="The wallet name")
-    parser.add_argument('-p', '--provision', action='store_true')
+    parser.add_argument("-ne", "--non-endorser", action='store_true')
     return parser.parse_args(args)
 
 
-def provision(wallet_key, name):
-    wallet_name = 'default'
-    if name:
-        wallet_name = name
-    configuration = utils.get_vsw_agent()
-    config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
-    logger.info('genesis_file: ' + str(config_path))
-    endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
-    try:
-        run_command('provision', [
-            '--endpoint', endpoint,
-            '--seed', get_seed(wallet_name),
-            '--genesis-file', str(config_path),
-            '--accept-taa', '1',
-            '--wallet-type', 'indy',
-            '--wallet-name', wallet_name,
-            '--wallet-key', wallet_key
-        ])
-    except BaseException as e:
-        logger.error(e.message)
-        logger.error("please check if your public DID and verkey is registered in the ledger!")
-        pass
-
-
-def start_agent(wallet_key, name):
+def start_agent(wallet_key, name, non_endorser):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     wallet_name = 'default'
@@ -83,7 +54,7 @@ def start_agent(wallet_key, name):
     if name:
         wallet_name = name
     try:
-        run_command('start', ['--admin', configuration.get("admin_host"), admin_port,
+        args = ['--admin', configuration.get("admin_host"), admin_port,
                               '--inbound-transport', configuration.get("inbound_transport_protocol"),
                               configuration.get("inbound_transport_host"), transport_port,
                               '--outbound-transport', configuration.get('outbound_transport_protocol'),
@@ -97,7 +68,6 @@ def start_agent(wallet_key, name):
                               '--wallet-type', 'indy',
                               '--wallet-name', wallet_name,
                               '--wallet-key', wallet_key,
-                              '--wallet-local-did',
                               '--log-config', logger.aries_config_path,
                               '--log-file', logger.aries_log_file,
                               '--auto-accept-invites',
@@ -111,7 +81,10 @@ def start_agent(wallet_key, name):
                               '--auto-respond-presentation-request',
                               '--auto-verify-presentation',
                               '--auto-respond-presentation-proposal',
-                              '--admin-insecure-mode'])
+                              '--admin-insecure-mode']
+        if non_endorser:
+            args.append('--wallet-local-did')
+        run_command('start', args)
     except BaseException as error:
         logger.error("started vsw failed.")
         print('An exception occurred: {}'.format(error))
