@@ -9,7 +9,7 @@ def test_start_agent():
     # sub_domain = uuid.uuid4().hex
     # utils.save_endpoint(sub_domain)
     # setup.start_local_tunnel(sub_domain)
-    setup.start_agent("publisher", "publisher")
+    setup.start_agent("nonepublic1", "nonepublic1")
 
 
 def test_provision():

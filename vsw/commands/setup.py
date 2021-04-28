@@ -97,6 +97,7 @@ def start_agent(wallet_key, name):
                               '--wallet-type', 'indy',
                               '--wallet-name', wallet_name,
                               '--wallet-key', wallet_key,
+                              '--wallet-local-did',
                               '--log-config', logger.aries_config_path,
                               '--log-file', logger.aries_log_file,
                               '--auto-accept-invites',
