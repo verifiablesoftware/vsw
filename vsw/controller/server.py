@@ -18,7 +18,7 @@ logging.basicConfig(filename=controller_log_file, level=logging.DEBUG)
 
 @app.route('/')
 def hello():
-    return "Hello VSW Controller"
+    return "Welcome to vsw controller"
 
 
 @app.route('/webhooks/topic/connections/', methods=['POST'])
@@ -45,10 +45,34 @@ def problem_report():
     return Response(status=200)
 
 
+@app.route("/webhooks/topic/revocation_registry/", methods=['POST'])
+def revocation_registry():
+    app.logger.info(request.json)  # Handle webhook request here
+    return Response(status=200)
+
+
+@app.route("/webhooks/topic/issuer_cred_rev/", methods=['POST'])
+def issuer_cred_rev():
+    app.logger.info(request.json)  # Handle webhook request here
+    return Response(status=200)
+
+
+@app.route("/webhooks/topic/basicmessages/", methods=['POST'])
+def basicmessages():
+    app.logger.info(request.json)  # Handle webhook request here
+    return Response(status=200)
+
+
+@app.route("/webhooks/topic/ping/", methods=['POST'])
+def ping():
+    app.logger.info(request.json)  # Handle webhook request here
+    return Response(status=200)
+
+
 if __name__ == '__main__':
     configuration = utils.get_vsw_agent()
     webhook_port = configuration.get("webhook_port")
-    app.logger.info(f"started controller, http://127.0.0.1:{webhook_port}")
+    app.logger.info(f"Started controller, http://127.0.0.1:{webhook_port}")
     server = make_server('127.0.0.1', int(webhook_port), app)
     server.serve_forever()
     app.run()
