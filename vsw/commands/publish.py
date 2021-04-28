@@ -5,6 +5,7 @@ from typing import List
 from vsw.log import Log
 from urllib.parse import urljoin
 import vsw.utils
+from urllib import parse
 import requests
 import validators
 from version_parser import Version
@@ -109,11 +110,11 @@ def get_credential_record(cred_ex_id):
 
 
 def get_credential(developer_did, software_name):
-    wql = json.dumps({"attr::developer-did::value": developer_did, "attr::software-name::value": software_name})
-    repo_url = f"{repo_url_host}/credentials?wql={wql}"
+    wql = json.dumps({"attr::developerdid::value": developer_did, "attr::softwarename::value": software_name})
+    repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
     res = requests.get(repo_url)
     try:
-        return json.loads(res.text)["results"][0]["attrs"]
+        return json.loads(res.text)["results"]
     except BaseException:
         return None
 
@@ -130,34 +131,42 @@ def is_same_version(software_version, exist_software_version):
 
 
 def generate_software_did(developer_did, software_name, software_version, download_url):
-    credential = get_credential(developer_did, software_name)
-    same_version = False
-    if credential:
-        same_version = is_same_version(software_version, credential["software-version"])
-    if same_version:
-        logger.info(f'Existed software-did: {credential["software-did"]}')
-        return credential["software-did"]
+    credentials = get_credential(developer_did, software_name)
+    if len(credentials) > 0:
+        logger.info(f'The software name {software_name} is existed.')
+        same_version = False
+        for credential in credentials:
+            attrs = credential["attrs"]
+            same_version = is_same_version(software_version, attrs["softwareVersion"])
+            if same_version:
+                logger.info(f'Existed softwareDid: {attrs["softwareDid"]}')
+                return attrs["softwareDid"]
+        if same_version is False:
+            return generate_new_did(download_url)
     else:
-        # Create a DID
-        create_did_res = requests.post(urljoin(vsw_url_host, "/wallet/did/create"))
-        res = json.loads(create_did_res.text)
-        did = res["result"]["did"]
-        verkey = res["result"]["verkey"]
-        # Write DID to ledger by NYM
-        ledger_res = requests.post(urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"))
-        write_did_ledger_res = json.loads(ledger_res.text)
-        if write_did_ledger_res["success"] is False:
-            logger.err("write did to ledger failed!")
-            raise Exception('write did to ledger failed!')
-        # Set DID Endpoint
-        did_endpoint_res = requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
-            "did": did,
-            "endpoint_type": "Endpoint",
-            "endpoint": download_url  # not support :h1 format
-        })
-        logger.info(f'Created new software-did: {did}')
-        return did
+        return generate_new_did(download_url)
 
+
+def generate_new_did(download_url):
+    # Create a DID
+    create_did_res = requests.post(urljoin(vsw_url_host, "/wallet/did/create"))
+    res = json.loads(create_did_res.text)
+    did = res["result"]["did"]
+    verkey = res["result"]["verkey"]
+    # Write DID to ledger by NYM
+    ledger_res = requests.post(urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"))
+    write_did_ledger_res = json.loads(ledger_res.text)
+    if write_did_ledger_res["success"] is False:
+        logger.err("write did to ledger failed!")
+        raise Exception('write did to ledger failed!')
+    # Set DID Endpoint
+    did_endpoint_res = requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
+        "did": did,
+        "endpoint_type": "Endpoint",
+        "endpoint": download_url  # not support :h1 format
+    })
+    logger.info(f'Created new software-did: {did}')
+    return did
 
 def send_proposal(data):
     developer_did = get_public_did()

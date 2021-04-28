@@ -22,8 +22,7 @@ def test_parse_args():
 
 def test_generate_software_did():
     url = "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz"
-    digest = vsw.utils.generate_digest(url)
-    publish.generate_software_did("UyDtaEFuTySAV9VZDykHkh", "Mac", "1.3.0", url, digest)
+    publish.generate_software_did("UyDtaEFuTySAV9VZDykHkh", "Mac", "1.0.0", url)
 
 
 def test_version():
