@@ -9,6 +9,7 @@ from urllib import parse
 import requests
 import validators
 from version_parser import Version
+from multiprocessing.connection import Listener
 
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
@@ -32,7 +33,7 @@ def main(args: List[str]) -> bool:
                 return
             issue_credential(data)
     except ConnectionError as e:
-        logger.error(e)
+        logger.error(str(e))
     except KeyboardInterrupt:
         print(" ==> Exit publish!")
 
@@ -57,18 +58,29 @@ def issue_credential(data):
     proposal_response = send_proposal(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
-
+    address = ('localhost', 6001)
+    listener = Listener(address)
     times = 0
     while times <= timeout:
-        res = retrieve_result(credential_exchange_id)
-        print(f'waiting state update, current state: {res["state"]}')
-        if res["state"] == "credential_acked":
+        conn = listener.accept()
+        msg = conn.recv()
+        state = msg["state"]
+        logger.info(f'waiting state change, current state is: {state}')
+        conn.close()
+        if state == 'credential_acked':
             logger.info("Congratulation, execute publish successfully!")
-            break;
+            break
         else:
             times += 1;
+    listener.close()
     if times > timeout:
-        logger.error("Sorry, there might be some issue during publishing")
+        remove_credential(credential_exchange_id)
+        logger.error("Request timeout, there might be some issue during publishing")
+
+
+def remove_credential(credential_exchange_id):
+    url = urljoin(repo_url_host, f"/issue-credential/records/{credential_exchange_id}/remove")
+    requests.post(url)
 
 
 def retrieve_result(credential_exchange_id):
@@ -167,6 +179,7 @@ def generate_new_did(download_url):
     })
     logger.info(f'Created new software-did: {did}')
     return did
+
 
 def send_proposal(data):
     developer_did = get_public_did()

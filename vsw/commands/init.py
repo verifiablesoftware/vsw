@@ -7,6 +7,7 @@ import requests
 
 import vsw.utils
 from vsw.log import Log
+from multiprocessing.connection import Listener
 
 logger = Log(__name__).logger
 timeout = 60
@@ -68,21 +69,28 @@ def connection_repo():
         ss = requests.post(local_url, json=body)
         invitation_response = json.loads(ss.text)
         logger.info(invitation_response)
-        connection_id = invitation_response["connection_id"]
+        address = ('localhost', 6000)
+        listener = Listener(address)
         times = 0
+        connection_id = invitation_response["connection_id"]
         while times <= timeout:
-            connection_res = get_connection(connection_id, vsw_config)
-            logger.info(f'waiting state update, current state: {connection_res["state"]}')
-            if connection_res["state"] == "active":
-                logger.info('Created connection with Repo')
-                break;
+            conn = listener.accept()
+            msg = conn.recv()
+            state = msg["state"]
+            logger.info(f'waiting state change, current state is: {state}')
+            conn.close()
+            if state == 'active':
+                logger.info("Created connection successfully!")
+                break
             else:
                 times += 1;
         if times > timeout:
-            logger.error("Sorry, there might be some issue during initializing connection.")
-
-    except BaseException:
-        logger.error('connection vsw-repo failed')
+            remove_connection(connection_id, vsw_config)
+            logger.error("Request timeout, there might be some issue during initializing connection.")
+        listener.close()
+    except BaseException as e:
+        remove_connection(connection_id, vsw_config)
+        logger.error('connection vsw-repo failed', str(e))
 
 
 def get_connection(connection_id, vsw_config):
@@ -101,3 +109,8 @@ def remove_history_connection(vsw_config):
         schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{result["connection_id"]}/remove'
         requests.post(schema_url)
         logger.info(f"Removed history connection id: {result['connection_id']}")
+
+
+def remove_connection(connection_id, vsw_config):
+    schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{connection_id}/remove'
+    requests.post(schema_url)

@@ -1,13 +1,14 @@
 import argparse
-import datetime
 import json
 import time
+from multiprocessing.connection import Listener
 from typing import List
-from urllib.parse import urljoin
-from version_parser import Version
-import requests
 from urllib import parse
+from urllib.parse import urljoin
+
+import requests
 import validators
+from version_parser import Version
 
 import vsw.utils
 from vsw.log import Log
@@ -53,29 +54,37 @@ def execute(proof_request):
         proof_response = send_request(connection["connection_id"], data)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
+        address = ('localhost', 6002)
+        listener = Listener(address)
         times = 0
         while times <= timeout:
-            presentation_proof_result = retrieve_result(presentation_exchange_id)
-            state = presentation_proof_result["state"]
-            print(f"waiting state update, current state is: {state}")
+            conn = listener.accept()
+            msg = conn.recv()
+            state = msg["state"]
+            conn.close()
+            logger.info(f"waiting state update, current state is: {state}")
             if state == "verified":
-                if presentation_proof_result["verified"] == "false":
-                    logger.error("Verified error, the credential might be revoked!")
+                if msg["verified"] == "false":
+                    remove_proof_request(presentation_exchange_id)
+                    logger.error("Verified error, Verified value from indy is False!")
                     break;
-                pres_req = presentation_proof_result["presentation_request"]
+                pres_req = msg["presentation_request"]
                 is_proof_of_software_certificate = (
                         pres_req["name"] == "Proof of Software Certificate"
                 )
                 if is_proof_of_software_certificate:
                     logger.info('Congratulation! verified successfully!')
                 else:
+                    remove_proof_request(presentation_exchange_id)
                     logger.error("Verified error, the name in presentation request is wrong")
                 break;
             else:
                 times += 1
 
         if times > timeout:
-            logger.error("Verified error, presentation proof result is not verified!")
+            remove_proof_request(presentation_exchange_id)
+            logger.error("Request timeout, Verified error!")
+        listener.close()
 
 
 def check_version(software_version):
@@ -92,6 +101,11 @@ def check_credential(data):
     repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
     res = requests.get(repo_url)
     return json.loads(res.text)["results"]
+
+
+def remove_proof_request(presentation_exchange_id):
+    vsw_url = urljoin(vsw_url_host, f"/present-proof/records/{presentation_exchange_id}/remove")
+    requests.post(vsw_url)
 
 
 def retrieve_result(presentation_exchange_id):
