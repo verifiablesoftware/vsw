@@ -48,6 +48,7 @@ def parse_args(args):
 def connection_repo():
     try:
         vsw_config = vsw.utils.get_vsw_agent()
+        remove_history_connection(vsw_config)
         vsw_repo_config = vsw.utils.get_repo_host()
         vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
         logger.info(f'Create invitation to: {vsw_repo_url}')
@@ -90,3 +91,13 @@ def get_connection(connection_id, vsw_config):
     connection_response = requests.get(url)
     res = json.loads(connection_response.text)
     return res
+
+
+def remove_history_connection(vsw_config):
+    schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections'
+    response = requests.get(schema_url)
+    results = json.loads(response.text)["results"]
+    for result in results:
+        schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{result["connection_id"]}/remove'
+        requests.post(schema_url)
+        logger.info(f"Removed history connection id: {result['connection_id']}")
