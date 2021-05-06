@@ -7,12 +7,18 @@ from configparser import RawConfigParser
 from pathlib import Path
 from typing import Union
 
+import requests
 from multicodec import add_prefix
 from multibase import encode
 
 from vsw.log import Log
 
 logger = Log(__name__).logger
+
+
+class Constant:
+    PORT_NUMBER = 6000
+    TIMEOUT = 60
 
 
 class ConfigReader:

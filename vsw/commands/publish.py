@@ -8,6 +8,7 @@ import vsw.utils
 from urllib import parse
 import requests
 import validators
+from vsw.utils import Constant
 from version_parser import Version
 from multiprocessing.connection import Listener
 
@@ -16,7 +17,7 @@ vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
-timeout = 60
+timeout = Constant.TIMEOUT
 
 
 def main(args: List[str]) -> bool:
@@ -55,11 +56,12 @@ def check_version(software_version):
 
 def issue_credential(data):
     logger.info("executing publish, please waiting for response")
+    address = ('localhost', Constant.PORT_NUMBER)
+    listener = Listener(address)
     proposal_response = send_proposal(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
-    address = ('localhost', 6001)
-    listener = Listener(address)
+
     times = 0
     while times <= timeout:
         conn = listener.accept()

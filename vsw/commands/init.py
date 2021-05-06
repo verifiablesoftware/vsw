@@ -4,13 +4,13 @@ import time
 from typing import List
 
 import requests
-
+from vsw.utils import Constant
 import vsw.utils
 from vsw.log import Log
 from multiprocessing.connection import Listener
 
 logger = Log(__name__).logger
-timeout = 60
+timeout = Constant.TIMEOUT
 
 
 def main(args: List[str]) -> bool:
@@ -48,6 +48,8 @@ def parse_args(args):
 
 def connection_repo():
     try:
+        address = ('localhost', Constant.PORT_NUMBER)
+        listener = Listener(address)
         vsw_config = vsw.utils.get_vsw_agent()
         remove_history_connection(vsw_config)
         vsw_repo_config = vsw.utils.get_repo_host()
@@ -69,16 +71,15 @@ def connection_repo():
         ss = requests.post(local_url, json=body)
         invitation_response = json.loads(ss.text)
         logger.info(invitation_response)
-        address = ('localhost', 6000)
-        listener = Listener(address)
+
         times = 0
         connection_id = invitation_response["connection_id"]
         while times <= timeout:
             conn = listener.accept()
             msg = conn.recv()
             state = msg["state"]
-            logger.info(f'waiting state change, current state is: {state}')
             conn.close()
+            logger.info(f'waiting state change, current state is: {state}')
             if state == 'active':
                 logger.info("Created connection successfully!")
                 break

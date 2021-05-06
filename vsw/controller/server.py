@@ -1,12 +1,13 @@
+import logging
 import os
+from multiprocessing.connection import Client
 from pathlib import Path
 from wsgiref.simple_server import make_server
 
 from flask import Flask, request, Response
-import logging
 
 from vsw import utils
-from multiprocessing.connection import Client
+from vsw.utils import Constant
 
 app = Flask(__name__)
 
@@ -17,7 +18,6 @@ controller_log_file = str(Path(os.path.expanduser('~')).joinpath("logs/vsw-contr
 logging.basicConfig(filename=controller_log_file, level=logging.DEBUG)
 
 
-
 @app.route('/')
 def hello():
     return "Welcome to vsw controller"
@@ -26,16 +26,17 @@ def hello():
 @app.route('/webhooks/topic/connections/', methods=['POST'])
 def connections():
     app.logger.info(request.json)
-    address = ('localhost', 6000)
+    address = ('localhost', Constant.PORT_NUMBER)
     conn = Client(address)
     conn.send(request.json)
+    conn.close()
     return Response(status=200)
 
 
 @app.route("/webhooks/topic/issue_credential/", methods=['POST'])
 def issue_credential():
     app.logger.info(request.json)  # Handle webhook request here
-    address = ('localhost', 6001)
+    address = ('localhost', Constant.PORT_NUMBER)
     conn = Client(address)
     conn.send(request.json)
     return Response(status=200)
@@ -44,7 +45,7 @@ def issue_credential():
 @app.route('/webhooks/topic/present_proof/', methods=['POST'])
 def present_proof():
     app.logger.info(request.json)  # Handle webhook request here
-    address = ('localhost', 6002)
+    address = ('localhost', Constant.PORT_NUMBER)
     conn = Client(address)
     conn.send(request.json)
     return Response(status=200)
@@ -53,6 +54,9 @@ def present_proof():
 @app.route("/webhooks/topic/problem_report/", methods=['POST'])
 def problem_report():
     app.logger.info(request.json)  # Handle webhook request here
+    address = ('localhost', Constant.PORT_NUMBER)
+    conn = Client(address)
+    conn.send(request.json)
     return Response(status=200)
 
 

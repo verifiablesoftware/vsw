@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import requests
 import validators
 from version_parser import Version
-
+from vsw.utils import Constant
 import vsw.utils
 from vsw.log import Log
 
@@ -18,7 +18,7 @@ vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
-timeout = 60
+timeout = Constant.TIMEOUT
 
 
 def main(args: List[str]) -> bool:
@@ -34,6 +34,7 @@ def main(args: List[str]) -> bool:
 
 
 def execute(proof_request):
+
     with open(proof_request) as json_file:
         data = json.load(json_file)
         software_version = data["attr::softwareversion::value"]
@@ -51,11 +52,12 @@ def execute(proof_request):
         connection = get_client_connection()
         logger.info("Executing verify, please wait for response...")
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
+        address = ('localhost', Constant.PORT_NUMBER)
+        listener = Listener(address)
         proof_response = send_request(connection["connection_id"], data)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
-        address = ('localhost', 6002)
-        listener = Listener(address)
+
         times = 0
         while times <= timeout:
             conn = listener.accept()
@@ -66,7 +68,7 @@ def execute(proof_request):
             if state == "verified":
                 if msg["verified"] == "false":
                     remove_proof_request(presentation_exchange_id)
-                    logger.error("Verified error, Verified value from indy is False!")
+                    logger.error("Verified error, Verified result from indy is False!")
                     break;
                 pres_req = msg["presentation_request"]
                 is_proof_of_software_certificate = (
