@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import json
 import time
 from multiprocessing.connection import Listener
@@ -25,15 +26,16 @@ def main(args: List[str]) -> bool:
     try:
         parser = argparse.ArgumentParser(prog="vsw verify")
         parser.add_argument("-p", "--proof-request", required=True, help="The software credential json file path")
+        parser.add_argument("-d", "--revoke-date", required=False, help="The revoke date, %Y-%m-%d")
         parsed_args = parser.parse_args(args)
-        execute(parsed_args.proof_request)
+        execute(parsed_args.proof_request, parsed_args.revoke_date)
     except ConnectionError as e:
         logger.error(e)
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
 
-def execute(proof_request):
+def execute(proof_request, revoke_date):
 
     with open(proof_request) as json_file:
         data = json.load(json_file)
@@ -54,7 +56,7 @@ def execute(proof_request):
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
-        proof_response = send_request(connection["connection_id"], data)
+        proof_response = send_request(connection["connection_id"], data, revoke_date)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
@@ -122,13 +124,13 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def send_request(client_conn_id, data):
+def send_request(client_conn_id, data, revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     time_from = 0
     time_to = int(time.time())
-    # if data["revokeDate"]:
-    #     datetime_object = datetime.datetime.strptime(data["revokeDate"], '%Y-%m-%d')
-    #     time_to = datetime.datetime.timestamp(datetime_object)
+    if revoke_date:
+        datetime_object = datetime.datetime.strptime(revoke_date, '%Y-%m-%d')
+        time_to = datetime.datetime.timestamp(datetime_object)
     req_attr = {
         "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
                   "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",

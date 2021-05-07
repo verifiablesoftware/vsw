@@ -47,51 +47,47 @@ def parse_args(args):
 
 
 def connection_repo():
-    try:
-        address = ('localhost', Constant.PORT_NUMBER)
-        listener = Listener(address)
-        vsw_config = vsw.utils.get_vsw_agent()
-        remove_history_connection(vsw_config)
-        vsw_repo_config = vsw.utils.get_repo_host()
-        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
-        logger.info(f'Create invitation to: {vsw_repo_url}')
-        response = requests.post(vsw_repo_url)
-        res = json.loads(response.text)
-        logger.info(res)
+    address = ('localhost', Constant.PORT_NUMBER)
+    listener = Listener(address)
+    vsw_config = vsw.utils.get_vsw_agent()
+    remove_history_connection(vsw_config)
+    vsw_repo_config = vsw.utils.get_repo_host()
+    vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
+    logger.info(f'Create invitation to: {vsw_repo_url}')
+    response = requests.post(vsw_repo_url)
+    res = json.loads(response.text)
+    logger.info(res)
 
-        local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
-        logger.info(f'Receive invitation {local_url}')
-        invitation = res["invitation"]
-        body = {
-            "label": invitation["label"],
-            "serviceEndpoint": invitation["serviceEndpoint"],
-            "recipientKeys": invitation["recipientKeys"],
-            "@id": invitation["@id"]
-        }
-        ss = requests.post(local_url, json=body)
-        invitation_response = json.loads(ss.text)
-        logger.info(invitation_response)
+    local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
+    logger.info(f'Receive invitation {local_url}')
+    invitation = res["invitation"]
+    body = {
+        "label": invitation["label"],
+        "serviceEndpoint": invitation["serviceEndpoint"],
+        "recipientKeys": invitation["recipientKeys"],
+        "@id": invitation["@id"]
+    }
+    ss = requests.post(local_url, json=body)
+    invitation_response = json.loads(ss.text)
+    logger.info(invitation_response)
 
-        times = 0
-        connection_id = invitation_response["connection_id"]
-        while times <= timeout:
-            conn = listener.accept()
-            msg = conn.recv()
-            state = msg["state"]
-            conn.close()
-            logger.info(f'waiting state change, current state is: {state}')
-            if state == 'active':
-                logger.info("Created connection successfully!")
-                break
-            else:
-                times += 1;
-        if times > timeout:
-            remove_connection(connection_id, vsw_config)
-            logger.error("Request timeout, there might be some issue during initializing connection.")
-        listener.close()
-    except BaseException as e:
+    times = 0
+    connection_id = invitation_response["connection_id"]
+    while times <= timeout:
+        conn = listener.accept()
+        msg = conn.recv()
+        state = msg["state"]
+        conn.close()
+        logger.info(f'waiting state change, current state is: {state}')
+        if state == 'active':
+            logger.info("Created connection successfully!")
+            break
+        else:
+            times += 1;
+    if times > timeout:
         remove_connection(connection_id, vsw_config)
-        logger.error('connection vsw-repo failed', str(e))
+        logger.error("Request timeout, there might be some issue during initializing connection.")
+    listener.close()
 
 
 def get_connection(connection_id, vsw_config):
