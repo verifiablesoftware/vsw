@@ -14,7 +14,7 @@ app = Flask(__name__)
 log_folder = str(Path(os.path.expanduser('~')).joinpath("logs").resolve())
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
-controller_log_file = str(Path(os.path.expanduser('~')).joinpath("logs/vsw-controller.log").resolve())
+controller_log_file = str(Path(os.path.expanduser('~')).joinpath("vsw_logs/vsw-controller.log").resolve())
 logging.basicConfig(filename=controller_log_file, level=logging.DEBUG)
 
 
