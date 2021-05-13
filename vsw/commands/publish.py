@@ -85,12 +85,6 @@ def remove_credential(credential_exchange_id):
     requests.post(url)
 
 
-def retrieve_result(credential_exchange_id):
-    time.sleep(1)  # wait communicate complete automatically between agents
-    res = get_credential_record(credential_exchange_id)
-    return res
-
-
 def get_repo_connection():
     vsw_connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
     res = json.loads(vsw_connection_response.text)
@@ -114,13 +108,6 @@ def get_public_did():
     response = requests.get(url)
     res = json.loads(response.text)
     return res["result"]["did"]
-
-
-def get_credential_record(cred_ex_id):
-    url = urljoin(repo_url_host, f"/issue-credential/records/{cred_ex_id}")
-    credential_response = requests.get(url)
-    res = json.loads(credential_response.text)
-    return res
 
 
 def get_credential(developer_did, software_name):

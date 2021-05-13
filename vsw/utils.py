@@ -17,7 +17,7 @@ logger = Log(__name__).logger
 
 
 class Constant:
-    PORT_NUMBER = 6000
+    PORT_NUMBER = 49111
     TIMEOUT = 60
 
 
@@ -84,8 +84,10 @@ def get_tails_server():
     return config_dict
 
 
-def generate_digest(software_url):
-    with urllib.request.urlopen(software_url) as response:
+def generate_digest(url):
+    if url is None:
+        return ""
+    with urllib.request.urlopen(url) as response:
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
             shutil.copyfileobj(response, tmp_file)
             sha256_hash = hashlib.sha256()
@@ -96,6 +98,5 @@ def generate_digest(software_url):
             multi_codec = add_prefix('sha2-256', str.encode(hex_digest))
             base58btc = encode('base58btc', multi_codec)
             digest = base58btc.decode()
-            print(f'digest: {digest}')
 
             return digest

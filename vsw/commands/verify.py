@@ -36,21 +36,24 @@ def main(args: List[str]) -> bool:
 
 
 def execute(proof_request, revoke_date):
-
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_version = data["attr::softwareversion::value"]
-        software_url = data["attr::softwareurl::value"]
-        if not validators.url(software_url):
-            print('The software package url is wrong, please check')
-            return
-        if check_version(software_version) is False:
-            return;
+        software_credential = data[0]
+        if hasattr(software_credential, "attr::softwareversion::value"):
+            software_version = software_credential["attr::softwareversion::value"]
+            if check_version(software_version) is False:
+                return;
+        if hasattr(software_credential, "attr::softwareurl::value"):
+            software_url = software_credential["attr::softwareurl::value"]
+            if not validators.url(software_url):
+                print('The software package url is wrong, please check')
+                return
 
-        credentials = check_credential(data)
-        if len(credentials) == 0:
-            logger.error("No found matched credential, please check if the specified conditions are correct.")
-            return;
+        for cred in data:
+            credentials = check_credential(cred)
+            if len(credentials) == 0:
+                logger.error("No found matched credential, please check if the specified conditions are correct.")
+                return;
         connection = get_client_connection()
         logger.info("Executing verify, please wait for response...")
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
@@ -134,9 +137,10 @@ def send_request(client_conn_id, data, revoke_date):
     req_attr = {
         "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
                   "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
-                  "buildlog", "builderdid"],
+                  "buildlog", "builderdid", "softwaredid", "testspecdid", "testspecurl", "testresult",
+                  "testresultdetaildid", "testresultdetailurl", "ranking", "comments"],
         "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": [data]
+        "restrictions": data
     }
 
     indy_proof_request = {

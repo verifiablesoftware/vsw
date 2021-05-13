@@ -15,23 +15,30 @@ timeout = Constant.TIMEOUT
 
 def main(args: List[str]) -> bool:
     args = parse_args(args)
+    print(args)
     try:
         if args.connection:
             connection_repo()
         if args.credential_definition:
-            do_credential_definition()
+            do_credential_definition(args.test_schema)
 
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
 
-def do_credential_definition():
+def do_credential_definition(test_schema):
     vsw_config = vsw.utils.get_vsw_agent()
+    schema_id = vsw_config.get("schema_id")
+    support_revocation = True
+    if test_schema:
+        schema_id = vsw_config.get("test_schema_id")
+        support_revocation = False
+
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
     res = requests.post(credential_definition_url, json={
         "revocation_registry_size": 100,
-        "support_revocation": True,
-        "schema_id": vsw_config.get("schema_id"),
+        "support_revocation": support_revocation,
+        "schema_id": schema_id,
         "tag": "default"
     })
     logger.info(res.text)
@@ -43,6 +50,8 @@ def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-cd", "--credential-definition", action='store_true')
     parser.add_argument('-c', '--connection', action='store_true')
+    parser.add_argument('-t', '--test-schema', action='store_true')
+
     return parser.parse_args(args)
 
 

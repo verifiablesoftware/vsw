@@ -22,11 +22,9 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         if args.ports:
             utils.set_port_number(args.ports)
-        sub_domain = uuid.uuid4().hex
-        utils.save_endpoint(sub_domain)
+        start_local_tunnel()
+        start_aca_py(wallet_key, args)
         start_controller()
-        start_local_tunnel(sub_domain)
-        start_process(wallet_key, args)
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -34,7 +32,7 @@ def main(args: List[str]) -> bool:
 @daemonizer.run(
     pidfile="~/aca-py"
 )
-def start_process(wallet_key, args):
+def start_aca_py(wallet_key, args):
     if args.provision:
         provision(wallet_key, args.name, args.non_endorser)
     else:
@@ -154,7 +152,9 @@ def get_seed(wallet_name):
     return seed
 
 
-def start_local_tunnel(sub_domain):
+def start_local_tunnel():
+    sub_domain = uuid.uuid4().hex
+    utils.save_endpoint(sub_domain)
     configuration = utils.get_vsw_agent()
     port = configuration.get("inbound_transport_port")
     script_path = Path(__file__).parent.parent.joinpath("conf/local_tunnel.sh").resolve()
