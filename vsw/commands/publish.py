@@ -11,6 +11,7 @@ import validators
 from vsw.utils import Constant
 from version_parser import Version
 from multiprocessing.connection import Listener
+from vsw.commands import attest
 
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
@@ -25,14 +26,17 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         with open(args.cred_file) as json_file:
             data = json.load(json_file)
-            software_version = data["softwareVersion"]
-            software_url = data["softwareUrl"]
-            if check_version(software_version) is False:
-                return;
-            if software_url and not validators.url(software_url):
-                print('The software package url is wrong, please check')
-                return
-            issue_credential(data)
+            if args.schema == vsw_config.get("test_schema_name"):
+                attest.publish(data)
+            else:
+                software_version = data["softwareVersion"]
+                software_url = data["softwareUrl"]
+                if check_version(software_version) is False:
+                    return;
+                if software_url and not validators.url(software_url):
+                    print('The software package url is wrong, please check')
+                    return
+                issue_credential(data)
     except ConnectionError as e:
         logger.error(str(e))
     except KeyboardInterrupt:
@@ -42,6 +46,8 @@ def main(args: List[str]) -> bool:
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--cred-file", required=True, help="The software credential json file path")
+    parser.add_argument('-s', '--schema', default='software-certificate',
+                        required=True, help="The schema name")
     return parser.parse_args(args)
 
 

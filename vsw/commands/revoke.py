@@ -52,6 +52,7 @@ def parse_args(args):
     parser.add_argument("-reg", "--credential-registry-id", required=False, help="The Credential Registry ID ")
     parser.add_argument("-rev", "--credential-revocation-id", required=False, help="The Credential Revocation ID")
     parser.add_argument("-p", "--publish", required=False, default=True,  help="If publish revocation immediately")
+
     return parser.parse_args(args)
 
 

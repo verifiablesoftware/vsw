@@ -23,8 +23,8 @@ def main(args: List[str]) -> bool:
         if args.ports:
             utils.set_port_number(args.ports)
         start_local_tunnel()
-        start_aca_py(wallet_key, args)
         start_controller()
+        start_aca_py(wallet_key, args)
     except KeyboardInterrupt:
         print(" => Exit setup")
 

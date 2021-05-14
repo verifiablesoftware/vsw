@@ -137,17 +137,21 @@ def send_request(client_conn_id, data, revoke_date):
     req_attr = {
         "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
                   "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
-                  "buildlog", "builderdid", "softwaredid", "testspecdid", "testspecurl", "testresult",
-                  "testresultdetaildid", "testresultdetailurl", "ranking", "comments"],
+                  "buildlog", "builderdid"],
         "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": data
+        "restrictions": [data[0]]
     }
-
+    req_test_attr = {
+        "names": ["testspecdid", "testspecurl", "testresult","testresultdetaildid", "testresultdetailurl",
+                  "ranking", "comments"],
+        "restrictions": [data[1]]
+    }
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
         "requested_attributes": {
-            f"0_software_certificate_uuid": req_attr
+            f"0_software_certificate_uuid": req_attr,
+            f"0_test_certificate_uuid": req_test_attr
         },
         "requested_predicates": {}
     }

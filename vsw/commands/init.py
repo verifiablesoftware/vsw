@@ -20,24 +20,27 @@ def main(args: List[str]) -> bool:
         if args.connection:
             connection_repo()
         if args.credential_definition:
-            do_credential_definition(args.test_schema)
+            do_credential_definition(args.schema)
 
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
 
-def do_credential_definition(test_schema):
+def get_schema_id_by_name(vsw_config, schema_name):
+    if schema_name == vsw_config.get("test_schema_name"):
+        return vsw_config.get("test_schema_id")
+    else:
+        return vsw_config.get("schema_id")
+
+
+def do_credential_definition(schema_name):
     vsw_config = vsw.utils.get_vsw_agent()
-    schema_id = vsw_config.get("schema_id")
-    support_revocation = True
-    if test_schema:
-        schema_id = vsw_config.get("test_schema_id")
-        support_revocation = False
+    schema_id = get_schema_id_by_name(vsw_config, schema_name)
 
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
     res = requests.post(credential_definition_url, json={
         "revocation_registry_size": 100,
-        "support_revocation": support_revocation,
+        "support_revocation": True,
         "schema_id": schema_id,
         "tag": "default"
     })
@@ -50,7 +53,8 @@ def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-cd", "--credential-definition", action='store_true')
     parser.add_argument('-c', '--connection', action='store_true')
-    parser.add_argument('-t', '--test-schema', action='store_true')
+    parser.add_argument('-s', '--schema', default='software-certificate',
+                        required=True, help="The schema name")
 
     return parser.parse_args(args)
 
