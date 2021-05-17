@@ -25,6 +25,11 @@ def test_generate_software_did():
     publish.generate_software_did("UyDtaEFuTySAV9VZDykHkh", "Mac", "1.0.0", url)
 
 
+def test_get_credential_definition_id():
+    credential_definition_id = publish.get_credential_definition_id()
+    print(credential_definition_id)
+
+
 def test_version():
     publish.check_version("aaa")
 

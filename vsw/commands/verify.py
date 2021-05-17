@@ -38,7 +38,8 @@ def main(args: List[str]) -> bool:
 def execute(proof_request, revoke_date):
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_credential = data[0]
+        software_credential = get_software_credential(data)
+        test_credential = get_test_credential(data)
         if hasattr(software_credential, "attr::softwareversion::value"):
             software_version = software_credential["attr::softwareversion::value"]
             if check_version(software_version) is False:
@@ -59,7 +60,7 @@ def execute(proof_request, revoke_date):
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
-        proof_response = send_request(connection["connection_id"], data, revoke_date)
+        proof_response = send_request(connection["connection_id"], software_credential, test_credential, revoke_date)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
@@ -92,6 +93,20 @@ def execute(proof_request, revoke_date):
             remove_proof_request(presentation_exchange_id)
             logger.error("Request timeout, Verified error!")
         listener.close()
+
+
+def get_software_credential(data):
+    for cred in data:
+        if cred["schema_id"] == vsw_config.get("schema_id"):
+            return cred
+    return None
+
+
+def get_test_credential(data):
+    for cred in data:
+        if cred["schema_id"] == vsw_config.get("test_schema_id"):
+            return cred
+    return None
 
 
 def check_version(software_version):
@@ -127,7 +142,7 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def send_request(client_conn_id, data, revoke_date):
+def send_request(client_conn_id, software_credential, test_credential, revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     time_from = 0
     time_to = int(time.time())
@@ -139,26 +154,30 @@ def send_request(client_conn_id, data, revoke_date):
                   "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
                   "buildlog", "builderdid"],
         "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": [data[0]]
+        "restrictions": [software_credential]
     }
     req_test_attr = {
-        "names": ["testspecdid", "testspecurl", "testresult","testresultdetaildid", "testresultdetailurl",
-                  "ranking", "comments"],
-        "restrictions": [data[1]]
+        "names": ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult","testresultdetaildid",
+                  "testresultdetailurl", "testresultdetailhash", "ranking", "comments", "softwaredid"],
+        "restrictions": [test_credential]
     }
+    request_attributes = {}
+    if software_credential:
+        request_attributes["0_software_certificate_uuid"] = req_attr
+    if test_credential:
+        request_attributes["0_test_certificate_uuid"] = req_test_attr
+
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
-        "requested_attributes": {
-            f"0_software_certificate_uuid": req_attr,
-            f"0_test_certificate_uuid": req_test_attr
-        },
+        "requested_attributes": request_attributes,
         "requested_predicates": {}
     }
     proof_request_web_request = {
         "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
+    logger.info(json.dumps(proof_request_web_request))
     res = requests.post(vsw_url, json=proof_request_web_request)
     return json.loads(res.text)
 

@@ -26,16 +26,19 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         with open(args.cred_file) as json_file:
             data = json.load(json_file)
+            logger.info(f'schema name: {args.schema}')
             if args.schema == vsw_config.get("test_schema_name"):
                 attest.publish(data)
             else:
-                software_version = data["softwareVersion"]
-                software_url = data["softwareUrl"]
-                if check_version(software_version) is False:
-                    return;
-                if software_url and not validators.url(software_url):
-                    print('The software package url is wrong, please check')
-                    return
+                if hasattr(data, "softwareVersion"):
+                    software_version = data["softwareVersion"]
+                    if check_version(software_version) is False:
+                        return;
+                if hasattr(data, "softwareUrl"):
+                    software_url = data["softwareUrl"]
+                    if software_url and not validators.url(software_url):
+                        print('The software package url is wrong, please check')
+                        return
                 issue_credential(data)
     except ConnectionError as e:
         logger.error(str(e))
@@ -46,8 +49,7 @@ def main(args: List[str]) -> bool:
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--cred-file", required=True, help="The software credential json file path")
-    parser.add_argument('-s', '--schema', default='software-certificate',
-                        required=True, help="The schema name")
+    parser.add_argument('-s', '--schema', default='software-certificate', help="The schema name")
     return parser.parse_args(args)
 
 
@@ -176,6 +178,15 @@ def generate_new_did(download_url):
     return did
 
 
+def get_credential_definition_id():
+    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("schema_id")}'
+    response = requests.get(local)
+    res = json.loads(response.text)
+    cred_def_id = res["credential_definition_ids"][-1]
+    logger.info(f'cred_def_id: {cred_def_id}')
+    return cred_def_id
+
+
 def send_proposal(data):
     developer_did = get_public_did()
     connection = get_repo_connection()
@@ -193,6 +204,7 @@ def send_proposal(data):
         "schema_name": data["schemaName"] or vsw_config.get("schema_name"),
         "schema_version": data["schemaVersion"] or vsw_config.get("schema_version"),
         "issuer_did": developer_did,
+        "cred_def_id": get_credential_definition_id(),
         "credential_proposal": {
             "@type": f"did:sov:{developer_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [

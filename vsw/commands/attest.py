@@ -32,14 +32,16 @@ def main(args: List[str]) -> bool:
 
 
 def publish(data):
-    test_spec_url = data["testSpecUrl"]
-    test_result_detail_url = data["testResultDetailUrl"]
-    if test_spec_url and not validators.url(test_spec_url):
-        print('The testSpecUrl is wrong, please check')
-        return
-    if test_result_detail_url and not validators.url(test_result_detail_url):
-        print('The testResultDetailUrl is wrong, please check')
-        return
+    if hasattr(data, "testSpecUrl"):
+        test_spec_url = data["testSpecUrl"]
+        if test_spec_url and not validators.url(test_spec_url):
+            print('The testSpecUrl is wrong, please check')
+            return
+    if hasattr(data, "testResultDetailUrl"):
+        test_result_detail_url = data["testResultDetailUrl"]
+        if test_result_detail_url and not validators.url(test_result_detail_url):
+            print('The testResultDetailUrl is wrong, please check')
+            return
     if data["testSpecDid"] or data["testSpecUrl"]:
         if not data["testResult"]:
             print("The testResult is mandatory if specify testSpecDid or testSpecUrl")
@@ -56,8 +58,17 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
+def get_credential_definition_id():
+    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("test_schema_id")}'
+    response = requests.get(local)
+    res = json.loads(response.text)
+    cred_def_id = res["credential_definition_ids"][-1]
+    logger.info(f'cred_def_id: {cred_def_id}')
+    return cred_def_id
+
+
 def issue_credential(data):
-    logger.info("executing attest, please waiting for response")
+    logger.info("executing publish, please waiting for response")
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     proposal_response = send_proposal(data)
@@ -72,14 +83,14 @@ def issue_credential(data):
         logger.info(f'waiting state change, current state is: {state}')
         conn.close()
         if state == 'credential_acked':
-            logger.info("Congratulation, execute attest successfully!")
+            logger.info("Congratulation, execute publish successfully!")
             break
         else:
             times += 1;
     listener.close()
     if times > timeout:
         remove_credential(credential_exchange_id)
-        logger.error("Request timeout, there might be some issue during attesting")
+        logger.error("Request timeout, there might be some issue during publishing")
 
 
 def remove_credential(credential_exchange_id):
@@ -121,7 +132,7 @@ def send_proposal(data):
     test_result_detail_hash = vsw.utils.generate_digest(data["testResultDetailUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
-        "comment": "execute vsw attest cli",
+        "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,
         "connection_id": connection["connection_id"],
@@ -129,6 +140,7 @@ def send_proposal(data):
         "schema_name": data["schemaName"] or vsw_config.get("test_schema_name"),
         "schema_version": data["schemaVersion"] or vsw_config.get("test_schema_version"),
         "issuer_did": tester_did,
+        "cred_def_id": get_credential_definition_id(),
         "credential_proposal": {
             "@type": f"did:sov:{tester_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [

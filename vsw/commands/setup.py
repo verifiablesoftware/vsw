@@ -22,7 +22,7 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         if args.ports:
             utils.set_port_number(args.ports)
-        start_local_tunnel()
+        start_local_tunnel(args.name)
         start_controller()
         start_aca_py(wallet_key, args)
     except KeyboardInterrupt:
@@ -152,8 +152,11 @@ def get_seed(wallet_name):
     return seed
 
 
-def start_local_tunnel():
-    sub_domain = uuid.uuid4().hex
+def start_local_tunnel(name):
+    wallet_name = 'default'
+    if name:
+        wallet_name = name
+    sub_domain = get_seed(wallet_name)
     utils.save_endpoint(sub_domain)
     configuration = utils.get_vsw_agent()
     port = configuration.get("inbound_transport_port")

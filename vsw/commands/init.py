@@ -44,17 +44,15 @@ def do_credential_definition(schema_name):
         "schema_id": schema_id,
         "tag": "default"
     })
-    logger.info(res.text)
     credential_definition_res = json.loads(res.text)
-    logger.info(f'Created credential_definition_id: {credential_definition_res["credential_definition_id"]}')
+    logger.info(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-cd", "--credential-definition", action='store_true')
     parser.add_argument('-c', '--connection', action='store_true')
-    parser.add_argument('-s', '--schema', default='software-certificate',
-                        required=True, help="The schema name")
+    parser.add_argument('-s', '--schema', default='software-certificate', help="The schema name")
 
     return parser.parse_args(args)
 
