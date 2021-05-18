@@ -13,6 +13,7 @@ from version_parser import Version
 from vsw.utils import Constant
 import vsw.utils
 from vsw.log import Log
+from vsw.commands import attest
 
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
@@ -38,29 +39,38 @@ def main(args: List[str]) -> bool:
 def execute(proof_request, revoke_date):
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_credential = get_software_credential(data)
-        test_credential = get_test_credential(data)
-        if hasattr(software_credential, "attr::softwareversion::value"):
+        software_credential = get_software_credential(data["requested_attributes"])
+        test_credential = get_test_credential(data["requested_attributes"])
+        if "attr::softwareversion::value" in software_credential:
             software_version = software_credential["attr::softwareversion::value"]
             if check_version(software_version) is False:
                 return;
-        if hasattr(software_credential, "attr::softwareurl::value"):
+        if "attr::softwareurl::value" in software_credential:
             software_url = software_credential["attr::softwareurl::value"]
             if not validators.url(software_url):
                 print('The software package url is wrong, please check')
                 return
 
-        for cred in data:
-            credentials = check_credential(cred)
+        if software_credential:
+            credentials = check_credential(software_credential)
             if len(credentials) == 0:
                 logger.error("No found matched credential, please check if the specified conditions are correct.")
                 return;
+        if test_credential:
+            credentials = check_credential(test_credential)
+            if len(credentials) == 0:
+                logger.error("No found matched attest credential, please check if the specified conditions are correct.")
+                return;
+        requested_predicates = None
+        if "requested_predicates" in data:
+            requested_predicates = data["requested_predicates"]
         connection = get_client_connection()
         logger.info("Executing verify, please wait for response...")
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
-        proof_response = send_request(connection["connection_id"], software_credential, test_credential, revoke_date)
+        proof_response = send_request(connection["connection_id"], software_credential, test_credential, requested_predicates, revoke_date)
+        print(proof_response)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
@@ -142,7 +152,7 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def send_request(client_conn_id, software_credential, test_credential, revoke_date):
+def send_request(client_conn_id, software_credential, test_credential, requested_predicates, revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     time_from = 0
     time_to = int(time.time())
@@ -158,26 +168,32 @@ def send_request(client_conn_id, software_credential, test_credential, revoke_da
     }
     req_test_attr = {
         "names": ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult","testresultdetaildid",
-                  "testresultdetailurl", "testresultdetailhash", "ranking", "comments", "softwaredid"],
+                  "testresultdetailurl", "testresultdetailhash", "comments", "softwaredid"],
+        "non_revoked": {"from": time_from, "to": time_to},
         "restrictions": [test_credential]
     }
+
     request_attributes = {}
     if software_credential:
         request_attributes["0_software_certificate_uuid"] = req_attr
     if test_credential:
-        request_attributes["0_test_certificate_uuid"] = req_test_attr
+        request_attributes["1_test_certificate_uuid"] = req_test_attr
+    if requested_predicates:
+        for p in requested_predicates.values():
+            p["restrictions"] = [{"cred_def_id": attest.get_credential_definition_id()}]
+            p["non_revoked"] = {"from": time_from, "to": time_to}
 
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
         "requested_attributes": request_attributes,
-        "requested_predicates": {}
+        "requested_predicates": requested_predicates
     }
     proof_request_web_request = {
         "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
-    logger.info(json.dumps(proof_request_web_request))
+    logger.info(proof_request_web_request)
     res = requests.post(vsw_url, json=proof_request_web_request)
     return json.loads(res.text)
 

@@ -30,11 +30,11 @@ def main(args: List[str]) -> bool:
             if args.schema == vsw_config.get("test_schema_name"):
                 attest.publish(data)
             else:
-                if hasattr(data, "softwareVersion"):
+                if "softwareVersion" in data:
                     software_version = data["softwareVersion"]
                     if check_version(software_version) is False:
                         return;
-                if hasattr(data, "softwareUrl"):
+                if "softwareUrl" in data:
                     software_url = data["softwareUrl"]
                     if software_url and not validators.url(software_url):
                         print('The software package url is wrong, please check')

@@ -32,21 +32,21 @@ def main(args: List[str]) -> bool:
 
 
 def publish(data):
-    if hasattr(data, "testSpecUrl"):
+    if "testSpecUrl" in data:
         test_spec_url = data["testSpecUrl"]
         if test_spec_url and not validators.url(test_spec_url):
             print('The testSpecUrl is wrong, please check')
             return
-    if hasattr(data, "testResultDetailUrl"):
+    if "testResultDetailUrl" in data:
         test_result_detail_url = data["testResultDetailUrl"]
         if test_result_detail_url and not validators.url(test_result_detail_url):
             print('The testResultDetailUrl is wrong, please check')
             return
-    if data["testSpecDid"] or data["testSpecUrl"]:
-        if not data["testResult"]:
+    if "testSpecDid" in data or "testSpecUrl" in data:
+        if "testResult" in data:
             print("The testResult is mandatory if specify testSpecDid or testSpecUrl")
             return
-    if not data["testSpecDid"] and not data["testSpecUrl"] and not data["ranking"]:
+    if "testSpecDid" not in data and "testSpecUrl" not in data and "ranking" not in data:
         print("The rank is mandatory if not specify testSpec")
         return
     issue_credential(data)
