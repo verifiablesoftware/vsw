@@ -41,17 +41,16 @@ def execute(proof_request, revoke_date):
         data = json.load(json_file)
         software_credential = get_software_credential(data["requested_attributes"])
         test_credential = get_test_credential(data["requested_attributes"])
-        if "attr::softwareversion::value" in software_credential:
-            software_version = software_credential["attr::softwareversion::value"]
-            if check_version(software_version) is False:
-                return;
-        if "attr::softwareurl::value" in software_credential:
-            software_url = software_credential["attr::softwareurl::value"]
-            if not validators.url(software_url):
-                print('The software package url is wrong, please check')
-                return
-
         if software_credential:
+            if "attr::softwareversion::value" in software_credential:
+                software_version = software_credential["attr::softwareversion::value"]
+                if check_version(software_version) is False:
+                    return;
+            if "attr::softwareurl::value" in software_credential:
+                software_url = software_credential["attr::softwareurl::value"]
+                if not validators.url(software_url):
+                    print('The software package url is wrong, please check')
+                    return
             credentials = check_credential(software_credential)
             if len(credentials) == 0:
                 logger.error("No found matched credential, please check if the specified conditions are correct.")
@@ -61,7 +60,7 @@ def execute(proof_request, revoke_date):
             if len(credentials) == 0:
                 logger.error("No found matched attest credential, please check if the specified conditions are correct.")
                 return;
-        requested_predicates = None
+        requested_predicates = {}
         if "requested_predicates" in data:
             requested_predicates = data["requested_predicates"]
         connection = get_client_connection()
