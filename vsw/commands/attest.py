@@ -1,5 +1,7 @@
 import argparse
 import json
+import socket
+import time
 from multiprocessing.connection import Listener
 from typing import List
 from urllib.parse import urljoin
@@ -43,7 +45,7 @@ def publish(data):
             print('The testResultDetailUrl is wrong, please check')
             return
     if "testSpecDid" in data or "testSpecUrl" in data:
-        if "testResult" in data:
+        if "testResult" not in data:
             print("The testResult is mandatory if specify testSpecDid or testSpecUrl")
             return
     if "testSpecDid" not in data and "testSpecUrl" not in data and "ranking" not in data:
@@ -71,26 +73,29 @@ def issue_credential(data):
     logger.info("executing publish, please waiting for response")
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
+    listener._listener._socket.settimeout(Constant.TIMEOUT)
     proposal_response = send_proposal(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
 
-    times = 0
-    while times <= timeout:
-        conn = listener.accept()
-        msg = conn.recv()
-        state = msg["state"]
-        logger.info(f'waiting state change, current state is: {state}')
-        conn.close()
-        if state == 'credential_acked':
-            logger.info("Congratulation, execute publish successfully!")
-            break
-        else:
-            times += 1;
-    listener.close()
-    if times > timeout:
-        remove_credential(credential_exchange_id)
-        logger.error("Request timeout, there might be some issue during publishing")
+    while True:
+        try:
+            conn = listener.accept()
+            msg = conn.recv()
+            state = msg["state"]
+            logger.info(f'waiting state change, current state is: {state}')
+            conn.close()
+            if state == 'credential_acked':
+                logger.info("Congratulation, execute publish successfully!")
+                listener.close()
+                break
+            else:
+                time.sleep(0.5)
+        except socket.timeout:
+            remove_credential(credential_exchange_id)
+            logger.error("Request timeout, there might be some issue during publishing")
+            listener.close()
+            break;
 
 
 def remove_credential(credential_exchange_id):

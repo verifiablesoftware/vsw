@@ -1,5 +1,6 @@
 import argparse
 import json
+import socket
 import time
 from typing import List
 
@@ -21,7 +22,6 @@ def main(args: List[str]) -> bool:
             connection_repo()
         if args.credential_definition:
             do_credential_definition(args.schema)
-
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
@@ -60,6 +60,7 @@ def parse_args(args):
 def connection_repo():
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
+    listener._listener._socket.settimeout(Constant.TIMEOUT)
     vsw_config = vsw.utils.get_vsw_agent()
     remove_history_connection(vsw_config)
     vsw_repo_config = vsw.utils.get_repo_host()
@@ -82,23 +83,25 @@ def connection_repo():
     invitation_response = json.loads(ss.text)
     logger.info(invitation_response)
 
-    times = 0
     connection_id = invitation_response["connection_id"]
-    while times <= timeout:
-        conn = listener.accept()
-        msg = conn.recv()
-        state = msg["state"]
-        conn.close()
-        logger.info(f'waiting state change, current state is: {state}')
-        if state == 'active':
-            logger.info("Created connection successfully!")
-            break
-        else:
-            times += 1;
-    if times > timeout:
-        remove_connection(connection_id, vsw_config)
-        logger.error("Request timeout, there might be some issue during initializing connection.")
-    listener.close()
+    while True:
+        try:
+            conn = listener.accept()
+            msg = conn.recv()
+            state = msg["state"]
+            conn.close()
+            logger.info(f'waiting state change, current state is: {state}')
+            if state == 'active':
+                logger.info("Created connection successfully!")
+                listener.close()
+                break
+            else:
+                time.sleep(0.5)
+        except socket.timeout:
+            remove_connection(connection_id, vsw_config)
+            logger.error("Request timeout, there might be some issue during initializing connection.")
+            listener.close()
+            break;
 
 
 def get_connection(connection_id, vsw_config):

@@ -18,7 +18,7 @@ logger = Log(__name__).logger
 
 class Constant:
     PORT_NUMBER = 49111
-    TIMEOUT = 60
+    TIMEOUT = 30
 
 
 class ConfigReader:

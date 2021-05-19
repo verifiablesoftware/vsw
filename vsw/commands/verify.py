@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import json
+import socket
 import time
 from multiprocessing.connection import Listener
 from typing import List
@@ -68,40 +69,43 @@ def execute(proof_request, revoke_date):
         logger.info(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
+        listener._listener._socket.settimeout(Constant.TIMEOUT)
         proof_response = send_request(connection["connection_id"], software_credential, test_credential, requested_predicates, revoke_date)
         print(proof_response)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
-        times = 0
-        while times <= timeout:
-            conn = listener.accept()
-            msg = conn.recv()
-            state = msg["state"]
-            conn.close()
-            logger.info(f"waiting state update, current state is: {state}")
-            if state == "verified":
-                if msg["verified"] == "false":
-                    remove_proof_request(presentation_exchange_id)
-                    logger.error("Verified error, Verified result from indy is False!")
+        while True:
+            try:
+                conn = listener.accept()
+                msg = conn.recv()
+                state = msg["state"]
+                conn.close()
+                logger.info(f"waiting state update, current state is: {state}")
+                if state == "verified":
+                    if msg["verified"] == "false":
+                        remove_proof_request(presentation_exchange_id)
+                        logger.error("Verified error, Verified result from indy is False!")
+                        listener.close()
+                        break;
+                    pres_req = msg["presentation_request"]
+                    is_proof_of_software_certificate = (
+                            pres_req["name"] == "Proof of Software Certificate"
+                    )
+                    if is_proof_of_software_certificate:
+                        logger.info('Congratulation! verified successfully!')
+                    else:
+                        remove_proof_request(presentation_exchange_id)
+                        logger.error("Verified error, the name in presentation request is wrong")
+                    listener.close()
                     break;
-                pres_req = msg["presentation_request"]
-                is_proof_of_software_certificate = (
-                        pres_req["name"] == "Proof of Software Certificate"
-                )
-                if is_proof_of_software_certificate:
-                    logger.info('Congratulation! verified successfully!')
                 else:
-                    remove_proof_request(presentation_exchange_id)
-                    logger.error("Verified error, the name in presentation request is wrong")
+                    time.sleep(0.5)
+            except socket.timeout:
+                remove_proof_request(presentation_exchange_id)
+                logger.error("Request timeout, Verified error!")
+                listener.close()
                 break;
-            else:
-                times += 1
-
-        if times > timeout:
-            remove_proof_request(presentation_exchange_id)
-            logger.error("Request timeout, Verified error!")
-        listener.close()
 
 
 def get_software_credential(data):

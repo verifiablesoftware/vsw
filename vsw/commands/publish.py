@@ -1,5 +1,6 @@
 import argparse
 import json
+import socket
 import time
 from typing import List
 from vsw.log import Log
@@ -66,26 +67,28 @@ def issue_credential(data):
     logger.info("executing publish, please waiting for response")
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
+    listener._listener._socket.settimeout(Constant.TIMEOUT)
     proposal_response = send_proposal(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
-
-    times = 0
-    while times <= timeout:
-        conn = listener.accept()
-        msg = conn.recv()
-        state = msg["state"]
-        logger.info(f'waiting state change, current state is: {state}')
-        conn.close()
-        if state == 'credential_acked':
-            logger.info("Congratulation, execute publish successfully!")
-            break
-        else:
-            times += 1;
-    listener.close()
-    if times > timeout:
-        remove_credential(credential_exchange_id)
-        logger.error("Request timeout, there might be some issue during publishing")
+    while True:
+        try:
+            conn = listener.accept()
+            msg = conn.recv()
+            state = msg["state"]
+            logger.info(f'waiting state change, current state is: {state}')
+            conn.close()
+            if state == 'credential_acked':
+                logger.info("Congratulation, execute publish successfully!")
+                listener.close()
+                break
+            else:
+                time.sleep(0.5)
+        except socket.timeout:
+            remove_credential(credential_exchange_id)
+            logger.error("Request timeout, there might be some issue during publishing")
+            listener.close();
+            break;
 
 
 def remove_credential(credential_exchange_id):
