@@ -31,6 +31,15 @@ def main(args: List[str]) -> bool:
             if args.schema == vsw_config.get("test_schema_name"):
                 attest.publish(data)
             else:
+                if "softwareName" not in data:
+                    print("softwareName is mandatory")
+                    return
+                if "softwareVersion" not in data:
+                    print("softwareVersion is mandatory")
+                    return
+                if "softwareUrl" not in data:
+                    print("softwareUrl is mandatory")
+                    return
                 if "softwareVersion" in data:
                     software_version = data["softwareVersion"]
                     if check_version(software_version) is False:
