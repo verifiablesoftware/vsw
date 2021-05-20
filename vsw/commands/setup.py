@@ -104,6 +104,7 @@ def start_agent(wallet_key, name, non_endorser):
                 '--log-config', logger.aries_config_path,
                 '--log-file', logger.aries_log_file,
                 '--auto-accept-invites',
+                '--preserve-exchange-records',
                 '--auto-accept-requests',
                 '--auto-ping-connection',
                 '--auto-respond-messages',
@@ -113,7 +114,7 @@ def start_agent(wallet_key, name, non_endorser):
                 '--auto-store-credential',
                 '--auto-respond-presentation-request',
                 '--auto-verify-presentation',
-                '--auto-respond-presentation-proposal',
+                '--auto-respond-presentation-proposal'
                 '--admin-insecure-mode']
         if non_endorser:
             args.append('--wallet-local-did')

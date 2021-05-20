@@ -29,7 +29,7 @@ def main(argv: List[str]) -> bool:
         elif args.status:
             get_status(vsw_config)
         elif args.issue_credential_records:
-            get_issue_credential_records(repo_url_host)
+            get_issue_credential_records(vsw_config)
         elif args.credentials:
             get_credentials(repo_url_host, vsw_config)
         elif args.credential_definition:
