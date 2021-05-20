@@ -1,12 +1,14 @@
 import argparse
 import json
 from typing import List
+from urllib.parse import urljoin
+from urllib import parse
 from rich.console import Console
 import requests
 from urllib3.exceptions import NewConnectionError
 
 from vsw.log import Log
-from vsw.utils import get_vsw_agent
+from vsw.utils import get_vsw_agent, get_repo_host
 
 logger = Log(__name__).logger
 console = Console()
@@ -15,6 +17,8 @@ console = Console()
 def main(argv: List[str]) -> bool:
     args = parse_args(argv)
     vsw_config = get_vsw_agent()
+    vsw_repo_config = get_repo_host()
+    repo_url_host = vsw_repo_config.get("host")
     try:
         if args.connection:
             get_connections(vsw_config)
@@ -25,9 +29,9 @@ def main(argv: List[str]) -> bool:
         elif args.status:
             get_status(vsw_config)
         elif args.issue_credential_records:
-            get_issue_credential_records(vsw_config)
+            get_issue_credential_records(repo_url_host)
         elif args.credentials:
-            get_credentials(vsw_config)
+            get_credentials(repo_url_host, vsw_config)
         elif args.credential_definition:
             get_credential_definition(vsw_config)
         elif args.present_proof:
@@ -72,18 +76,26 @@ def get_credential_definition(vsw_config):
     console.print(res)
 
 
-def get_credentials(vsw_config):
-    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credentials'
-    response = requests.get(local)
+def get_credentials(repo_url_host, vsw_config):
+    did = get_public_did(vsw_config)
+    repo = urljoin(f'{repo_url_host}', '/credentials?wql={"attr::developerdid::value":"'+did+'"}')
+    response = requests.get(repo)
     res = json.loads(response.text)
     console.print(res)
 
 
 def get_issue_credential_records(vsw_config):
-    local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/issue-credential/records'
+    local = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/issue-credential/records'
     response = requests.get(local)
     res = json.loads(response.text)
     console.print(res)
+
+
+def get_public_did(vsw_config):
+    url = urljoin(f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}', "/wallet/did/public")
+    response = requests.get(url)
+    res = json.loads(response.text)
+    return res["result"]["did"]
 
 
 def get_status(vsw_config):
