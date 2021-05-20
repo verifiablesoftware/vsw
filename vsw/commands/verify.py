@@ -1,5 +1,6 @@
 import argparse
-import datetime
+import calendar
+from datetime import datetime, timezone
 import json
 import socket
 import time
@@ -10,6 +11,7 @@ from urllib.parse import urljoin
 
 import requests
 import validators
+from aries_cloudagent_vsw.messaging.util import str_to_epoch
 from version_parser import Version
 from vsw.utils import Constant
 import vsw.utils
@@ -71,7 +73,6 @@ def execute(proof_request, revoke_date):
         listener = Listener(address)
         listener._listener._socket.settimeout(Constant.TIMEOUT)
         proof_response = send_request(connection["connection_id"], software_credential, test_credential, requested_predicates, revoke_date)
-        print(proof_response)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
@@ -157,11 +158,13 @@ def get_vsw_proof(pres_ex_id):
 
 def send_request(client_conn_id, software_credential, test_credential, requested_predicates, revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
+    NOW_8601 = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(" ", "seconds")
+    NOW_EPOCH = str_to_epoch(NOW_8601)
     time_from = 0
-    time_to = int(time.time())
+    time_to = NOW_EPOCH
+
     if revoke_date:
-        datetime_object = datetime.datetime.strptime(revoke_date, '%Y-%m-%d')
-        time_to = datetime.datetime.timestamp(datetime_object)
+        time_to = calendar.timegm(datetime.strptime(revoke_date, '%Y-%m-%d').timetuple())
     req_attr = {
         "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
                   "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
