@@ -32,5 +32,5 @@ importlib_metadata; python_version < "3.8"
 keyring >= 15.1
 rfc3986 >= 1.4.0
 colorama >= 0.4.3
-flask
+flask==1.1.4
 Jinja2<3.0
