@@ -42,9 +42,10 @@ def main(args: List[str]) -> bool:
 def execute(proof_request, revoke_date):
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_credential = get_software_credential(data["requested_attributes"])
-        test_credential = get_test_credential(data["requested_attributes"])
-        if software_credential:
+        software_credential = None
+        test_credential = None
+        if "requested_attributes" in data:
+            software_credential = data["requested_attributes"]
             if "attr::softwareversion::value" in software_credential:
                 software_version = software_credential["attr::softwareversion::value"]
                 if check_version(software_version) is False:
@@ -58,7 +59,8 @@ def execute(proof_request, revoke_date):
             if len(credentials) == 0:
                 logger.error("No found matched credential, please check if the specified conditions are correct.")
                 return;
-        if test_credential:
+        if "self_attested_attributes" in data:
+            test_credential = data["self_attested_attributes"]
             credentials = check_credential(test_credential)
             if len(credentials) == 0:
                 logger.error("No found matched attest credential, please check if the specified conditions are correct.")
@@ -107,20 +109,6 @@ def execute(proof_request, revoke_date):
                 logger.error("Request timeout, Verified error!")
                 listener.close()
                 break;
-
-
-def get_software_credential(data):
-    for cred in data:
-        if cred["schema_id"] == vsw_config.get("schema_id"):
-            return cred
-    return None
-
-
-def get_test_credential(data):
-    for cred in data:
-        if cred["schema_id"] == vsw_config.get("test_schema_id"):
-            return cred
-    return None
 
 
 def check_version(software_version):
@@ -180,10 +168,11 @@ def send_request(client_conn_id, software_credential, test_credential, requested
     }
 
     request_attributes = {}
+    self_attested_attributes = {}
     if software_credential:
         request_attributes["0_software_certificate_uuid"] = req_attr
     if test_credential:
-        request_attributes["1_test_certificate_uuid"] = req_test_attr
+        self_attested_attributes["0_test_certificate_uuid"] = req_test_attr
     if requested_predicates:
         for p in requested_predicates.values():
             p["restrictions"] = [{"cred_def_id": attest.get_credential_definition_id()}]
@@ -192,6 +181,7 @@ def send_request(client_conn_id, software_credential, test_credential, requested
     indy_proof_request = {
         "name": "Proof of Software Certificate",
         "version": "1.0",
+        "self_attested_attributes": self_attested_attributes,
         "requested_attributes": request_attributes,
         "requested_predicates": requested_predicates
     }

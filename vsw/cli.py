@@ -16,9 +16,7 @@ def _registered_commands(
 def dispatch(argv: List[str]) -> Any:
     registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="vsw")
-    parser.add_argument(
-        "--version",
-        action="version",
+    parser.add_argument("-v", "--version", action="version",
         version="%(prog)s version {}".format(pkg_resources.require("vsw")[0].version),
     )
     parser.add_argument(
