@@ -6,10 +6,9 @@ import uuid
 from os.path import expanduser
 from pathlib import Path
 from typing import List
-
+import sys
 from aries_cloudagent_vsw.commands import run_command
-from daemons import daemonizer
-
+import daemon
 from vsw import utils
 from vsw.log import Log
 
@@ -24,14 +23,12 @@ def main(args: List[str]) -> bool:
             utils.set_port_number(args.ports)
         start_local_tunnel(args.name)
         start_controller()
-        start_aca_py(wallet_key, args)
+        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
+            start_aca_py(wallet_key, args)
     except KeyboardInterrupt:
         print(" => Exit setup")
 
 
-@daemonizer.run(
-    pidfile="~/aca-py"
-)
 def start_aca_py(wallet_key, args):
     if args.provision:
         provision(wallet_key, args.name, args.non_endorser)

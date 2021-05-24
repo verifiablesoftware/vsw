@@ -172,9 +172,12 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "non_revoked": {"from": time_from, "to": time_to},
         "restrictions": [software_credential]
     }
+    test_names = ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult","testresultdetaildid",
+                  "testresultdetailurl", "testresultdetailhash", "comments", "softwaredid"]
+    if not requested_predicates or len(requested_predicates.values()) == 0:
+        test_names.append("ranking")
     req_test_attr = {
-        "names": ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult","testresultdetaildid",
-                  "testresultdetailurl", "testresultdetailhash", "comments", "softwaredid"],
+        "names": test_names,
         "non_revoked": {"from": time_from, "to": time_to},
         "restrictions": [test_credential]
     }
