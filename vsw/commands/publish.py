@@ -27,7 +27,7 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         with open(args.cred_file) as json_file:
             data = json.load(json_file)
-            logger.info(f'schema name: {args.schema}')
+            logger.debug(f'schema name: {args.schema}')
             if args.schema == vsw_config.get("test_schema_name"):
                 attest.publish(data)
             else:
@@ -50,8 +50,10 @@ def main(args: List[str]) -> bool:
                         print('The software package url is wrong, please check')
                         return
                 issue_credential(data)
-    except ConnectionError as e:
-        logger.error(str(e))
+    except requests.exceptions.RequestException:
+        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+    except ValueError as ve:
+        logger.error(ve)
     except KeyboardInterrupt:
         print(" ==> Exit publish!")
 
@@ -194,17 +196,23 @@ def get_credential_definition_id():
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("schema_id")}'
     response = requests.get(local)
     res = json.loads(response.text)
+    if len(res["credential_definition_ids"]) == 0:
+        raise ValueError('Not found credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
-    logger.info(f'cred_def_id: {cred_def_id}')
+    logger.debug(f'cred_def_id: {cred_def_id}')
     return cred_def_id
 
 
 def send_proposal(data):
     developer_did = get_public_did()
     connection = get_repo_connection()
-    logger.info(f'holder connection_id: {connection["connection_id"]}')
+    logger.debug(f'holder connection_id: {connection["connection_id"]}')
 
     digest = vsw.utils.generate_digest(data["softwareUrl"])
+    source_hash = vsw.utils.generate_digest(data["sourceUrl"])
+    if "sourceHash" in data and data["sourceHash"] != source_hash:
+        raise ValueError("Incorrect sourceHash value!")
+    cred_def_id = get_credential_definition_id()
     software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={
@@ -216,7 +224,7 @@ def send_proposal(data):
         "schema_name": data["schemaName"] or vsw_config.get("schema_name"),
         "schema_version": data["schemaVersion"] or vsw_config.get("schema_version"),
         "issuer_did": developer_did,
-        "cred_def_id": get_credential_definition_id(),
+        "cred_def_id": cred_def_id,
         "credential_proposal": {
             "@type": f"did:sov:{developer_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [
@@ -258,7 +266,7 @@ def send_proposal(data):
                 },
                 {
                     "name": "sourceHash",
-                    "value": data["sourceHash"]
+                    "value": source_hash
                 },
                 {
                     "name": "builderToolDidList",

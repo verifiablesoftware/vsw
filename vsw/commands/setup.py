@@ -61,6 +61,8 @@ def provision(wallet_key, name, non_endorser):
             '--genesis-file', str(config_path),
             '--accept-taa', '1',
             '--wallet-type', 'indy',
+            '--log-config', logger.aries_config_path,
+            '--log-file', logger.aries_log_file,
             '--wallet-name', wallet_name,
             '--wallet-key', wallet_key
         ]

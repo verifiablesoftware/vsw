@@ -33,8 +33,8 @@ def main(args: List[str]) -> bool:
         parser.add_argument("-d", "--revoke-date", required=False, help="The revoke date, %Y-%m-%d")
         parsed_args = parser.parse_args(args)
         execute(parsed_args.proof_request, parsed_args.revoke_date)
-    except ConnectionError as e:
-        logger.error(e)
+    except requests.exceptions.RequestException:
+        logger.error("Please check if you have executed 'vsw setup' to start agent!")
     except KeyboardInterrupt:
         print(" ==> Exit verify!")
 
@@ -52,23 +52,23 @@ def execute(proof_request, revoke_date):
             if "attr::softwareurl::value" in software_credential:
                 software_url = software_credential["attr::softwareurl::value"]
                 if not validators.url(software_url):
-                    print('The software package url is wrong, please check')
+                    logger.info('The software package url is wrong, please check')
                     return
             credentials = check_credential(software_credential)
             if len(credentials) == 0:
-                logger.error("No found matched credential, please check if the specified conditions are correct.")
+                logger.info("No found matched credential, please check if the specified conditions are correct.")
                 return;
         if test_credential:
             credentials = check_credential(test_credential)
             if len(credentials) == 0:
-                logger.error("No found matched attest credential, please check if the specified conditions are correct.")
+                logger.info("No found matched attest credential, please check if the specified conditions are correct.")
                 return;
         requested_predicates = {}
         if "requested_predicates" in data:
             requested_predicates = data["requested_predicates"]
         connection = get_client_connection()
         logger.info("Executing verify, please wait for response...")
-        logger.info(f'issuer connection_id: {connection["connection_id"]}')
+        logger.debug(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
         listener._listener._socket.settimeout(Constant.TIMEOUT)
@@ -86,7 +86,7 @@ def execute(proof_request, revoke_date):
                 if state == "verified":
                     if msg["verified"] == "false":
                         remove_proof_request(presentation_exchange_id)
-                        logger.error("Verified error, Verified result from indy is False!")
+                        logger.info("Verified error, Verified result from indy is False!")
                         listener.close()
                         break;
                     pres_req = msg["presentation_request"]
@@ -97,7 +97,7 @@ def execute(proof_request, revoke_date):
                         logger.info('Congratulation! verified successfully!')
                     else:
                         remove_proof_request(presentation_exchange_id)
-                        logger.error("Verified error, the name in presentation request is wrong")
+                        logger.info("Verified error, the name in presentation request is wrong")
                     listener.close()
                     break;
                 else:
@@ -127,7 +127,7 @@ def check_version(software_version):
     try:
         Version(software_version)
     except ValueError:
-        print("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
+        logger.info("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
         return False
     return True
 
@@ -202,7 +202,7 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
-    logger.info(proof_request_web_request)
+    logger.debug(proof_request_web_request)
     res = requests.post(vsw_url, json=proof_request_web_request)
     return json.loads(res.text)
 

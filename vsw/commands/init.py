@@ -22,6 +22,8 @@ def main(args: List[str]) -> bool:
             connection_repo()
         if args.credential_definition:
             do_credential_definition(args.schema)
+    except requests.exceptions.RequestException:
+        logger.error("Please check if you have executed 'vsw setup' to start agent!")
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
@@ -65,13 +67,13 @@ def connection_repo():
     remove_history_connection(vsw_config)
     vsw_repo_config = vsw.utils.get_repo_host()
     vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
-    logger.info(f'Create invitation to: {vsw_repo_url}')
+    logger.debug(f'Create invitation to: {vsw_repo_url}')
     response = requests.post(vsw_repo_url)
     res = json.loads(response.text)
-    logger.info(res)
+    logger.debug(res)
 
     local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
-    logger.info(f'Receive invitation {local_url}')
+    logger.debug(f'Receive invitation {local_url}')
     invitation = res["invitation"]
     body = {
         "label": invitation["label"],
@@ -81,7 +83,7 @@ def connection_repo():
     }
     ss = requests.post(local_url, json=body)
     invitation_response = json.loads(ss.text)
-    logger.info(invitation_response)
+    logger.debug(invitation_response)
 
     connection_id = invitation_response["connection_id"]
     while True:
@@ -104,14 +106,6 @@ def connection_repo():
             break;
 
 
-def get_connection(connection_id, vsw_config):
-    time.sleep(1)  # wait communicate complete automatically between agents
-    url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/{connection_id}'
-    connection_response = requests.get(url)
-    res = json.loads(connection_response.text)
-    return res
-
-
 def remove_history_connection(vsw_config):
     schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections'
     response = requests.get(schema_url)
@@ -119,7 +113,7 @@ def remove_history_connection(vsw_config):
     for result in results:
         schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{result["connection_id"]}/remove'
         requests.post(schema_url)
-        logger.info(f"Removed history connection id: {result['connection_id']}")
+        logger.debug(f"Removed history connection id: {result['connection_id']}")
 
 
 def remove_connection(connection_id, vsw_config):

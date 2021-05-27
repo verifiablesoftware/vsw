@@ -4,7 +4,6 @@ from typing import List
 from urllib.parse import urljoin
 from rich.console import Console
 import requests
-from urllib3.exceptions import NewConnectionError
 
 from vsw.log import Log
 from vsw.utils import get_vsw_agent, get_repo_host
@@ -45,8 +44,7 @@ def main(argv: List[str]) -> bool:
             console.print('-cd: list all credential definitions registered by the current DID')
     except KeyboardInterrupt:
         print(" ==> Exit list!")
-    except NewConnectionError as ce:
-        logger.error(str(ce))
+    except requests.exceptions.RequestException:
         logger.error("Please check if you have executed 'vsw setup' to start agent!")
     except Exception as e:
         logger.error("Failed to execute list: " + str(e))

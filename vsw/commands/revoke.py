@@ -34,6 +34,8 @@ def main(args: List[str]) -> bool:
                 return
 
         revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
+    except requests.exceptions.RequestException:
+        logger.error("Please check if you have executed 'vsw setup' to start agent!")
     except KeyboardInterrupt:
         print(" ==> Exit revoke!")
 
