@@ -213,6 +213,7 @@ def send_proposal(data):
     if "sourceHash" in data and data["sourceHash"] != source_hash:
         raise ValueError("Incorrect sourceHash value!")
     cred_def_id = get_credential_definition_id()
+
     software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
     res = requests.post(vsw_repo_url, json={

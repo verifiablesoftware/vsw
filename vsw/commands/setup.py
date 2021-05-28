@@ -1,15 +1,20 @@
 import argparse
 import configparser
-import getpass
+import json
 import os
+import sys
 import uuid
 from os.path import expanduser
 from pathlib import Path
 from typing import List
-import sys
-from aries_cloudagent_vsw.commands import run_command
+
 import daemon
+import requests
+from aries_cloudagent_vsw.commands import run_command
+from aries_cloudagent_vsw.core.error import BaseError
+
 from vsw import utils
+from vsw.commands import init
 from vsw.log import Log
 
 logger = Log(__name__).logger
@@ -17,14 +22,35 @@ logger = Log(__name__).logger
 
 def main(args: List[str]) -> bool:
     try:
-        wallet_key = getpass.getpass('Please enter wallet key: ')
         args = parse_args(args)
-        if args.ports:
-            utils.set_port_number(args.ports)
-        start_local_tunnel(args.name)
-        start_controller()
-        with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-            start_aca_py(wallet_key, args)
+        if args.subcommand == "newwallet":
+            wallet_name = args.name
+            wallet_key = args.key
+            provision(wallet_key, wallet_name, False)
+        elif args.subcommand == "endorser":
+            did = args.did
+            verkey = args.verkey
+            success = make_endorser(did, verkey)
+            if success:
+                logger.info(f"making DID:{did} as an ENDORSER successfully!")
+            else:
+                logger.error(f"making DID:{did} as an ENDORSER failed!")
+        elif args.subcommand == "wallet":
+            wallet_name = args.name
+            wallet_key = args.key
+            non_endorser = not args.endorser
+            if args.ports:
+                utils.set_port_number(args.ports)
+            start_local_tunnel(args.name)
+            start_controller()
+            with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
+                start_agent(wallet_key, wallet_name, non_endorser)
+        elif args.subcommand == "connection":
+            init.connection_repo()
+        elif args.subcommand == "creddef":
+            init.do_credential_definition()
+        else:
+            print("Incorrect sub command")
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -38,11 +64,31 @@ def start_aca_py(wallet_key, args):
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--name", required=False, help="The wallet name")
-    parser.add_argument('-p', '--provision', action='store_true')
-    parser.add_argument("-pn", "--ports", required=False,
+    parser.add_argument("-p", "--ports", required=False,
                         help="The ports number, format is (<endpoint_port>,<admin_port>,<webhook_port>)")
-    parser.add_argument("-ne", "--non-endorser", action='store_true')
+    subparsers = parser.add_subparsers(dest="subcommand")
+
+    new_wallet_parser = subparsers.add_parser('newwallet')
+    new_wallet_parser.add_argument('name', help='wallet name')
+    new_wallet_parser.add_argument('-k', '--key', required=True, help="wallet key")
+
+    wallet_parser = subparsers.add_parser('wallet')
+    wallet_parser.add_argument('name', help='wallet name')
+    wallet_parser.add_argument('-k', '--key', required=True, help="wallet key")
+    wallet_parser.add_argument('-e', '--endorser', action='store_true')
+
+    endorser_parser = subparsers.add_parser('endorser')
+    endorser_parser.add_argument('-d', '--did', help='DID')
+    endorser_parser.add_argument('-k', '--verkey', required=True, help="Verkey")
+
+    did_parser = subparsers.add_parser('did')
+    did_parser.add_argument('did', help='DID')
+
+    subparsers.add_parser('newdid')
+    subparsers.add_parser('connection')
+    creddef_parser = subparsers.add_parser('creddef')
+    creddef_parser.add_argument('-s', '--schema', help='The schema name')
+
     return parser.parse_args(args)
 
 
@@ -59,7 +105,6 @@ def provision(wallet_key, name, non_endorser):
             '--endpoint', endpoint,
             '--seed', get_seed(wallet_name),
             '--genesis-file', str(config_path),
-            '--accept-taa', '1',
             '--wallet-type', 'indy',
             '--log-config', logger.aries_config_path,
             '--log-file', logger.aries_log_file,
@@ -70,9 +115,8 @@ def provision(wallet_key, name, non_endorser):
             args.append('--wallet-local-did')
         run_command('provision', args)
     except BaseException as e:
-        logger.error(e.message)
-        logger.error("please check if your public DID and verkey is registered in the ledger!")
-        pass
+        logger.info(e.message)
+        logger.info("please check if your public DID and verkey is registered in the ledger!")
 
 
 def start_agent(wallet_key, name, non_endorser):
@@ -96,7 +140,6 @@ def start_agent(wallet_key, name, non_endorser):
                 '--webhook-url', configuration.get("webhook_url"),
                 '--tails-server-base-url', utils.get_tails_server().get("host"),
                 '--genesis-file', str(config_path),
-                '--accept-taa', '1',
                 '--wallet-type', 'indy',
                 '--wallet-name', wallet_name,
                 '--wallet-key', wallet_key,
@@ -118,7 +161,7 @@ def start_agent(wallet_key, name, non_endorser):
         if non_endorser:
             args.append('--wallet-local-did')
         run_command('start', args)
-    except BaseException as error:
+    except BaseError as error:
         logger.error("started vsw failed.")
         print('An exception occurred: {}'.format(error))
 
@@ -172,3 +215,16 @@ def start_controller():
     log_dir = Path(os.path.expanduser('~'))
     controller_log_file = str(Path(log_dir).joinpath("vsw_logs/vsw-controller.log").resolve())
     os.system(f'nohup python3 {controller_file} > {controller_log_file} 2>&1 &')
+
+
+def make_endorser(did, verkey):
+    configuration = utils.get_sovrin()
+    response = requests.post(configuration.get("url"), json={
+        "network": configuration.get("network"),
+        "did": did,
+        "verkey": verkey,
+        "paymentaddr": ""
+    })
+    logger.debug(response.text)
+    invitation_response = json.loads(response.text)
+    return invitation_response["statusCode"] == 200

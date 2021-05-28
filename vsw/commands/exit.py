@@ -11,7 +11,6 @@ def main(args: List[str]) -> bool:
     kill_lt()
     kill_controller()
     kill_vsw()
-    print("Exited vsw")
 
 
 def kill_vsw():
