@@ -17,7 +17,7 @@ def test_do_schema():
 
 
 def test_do_credential_definition():
-    init.do_credential_definition()
+    init.do_credential_definition("software-certificate")
 
 
 def test_connection_repo():

@@ -6,7 +6,7 @@ from pathlib import Path
 
 class Log:
 
-    def __init__(self, name: str = 'vsw', log_dir: str = None, level=logging.INFO):
+    def __init__(self, name: str = 'vsw', log_dir: str = None, level=logging.DEBUG):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
         self.logger.propagate = False

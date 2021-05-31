@@ -8,15 +8,19 @@ logger = Log(__name__).logger
 
 
 def main(args: List[str]) -> bool:
+    kill_all()
+
+
+def kill_all():
     kill_lt()
     kill_controller()
     kill_vsw()
 
 
 def kill_vsw():
-    out = os.popen("ps aux | grep setup").read()
+    out = os.popen("ps aux | grep commands/agent.py").read()
     for line in out.splitlines():
-        if 'setup' in line:
+        if 'python3' in line:
             pid = int(line.split()[1])
             subprocess.run(f'kill -9 {pid}', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 

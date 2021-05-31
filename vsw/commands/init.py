@@ -16,7 +16,6 @@ timeout = Constant.TIMEOUT
 
 def main(args: List[str]) -> bool:
     args = parse_args(args)
-    print(args)
     try:
         if args.connection:
             connection_repo()
@@ -46,6 +45,7 @@ def do_credential_definition(schema_name):
         "schema_id": schema_id,
         "tag": "default"
     })
+    logger.debug(res.text)
     credential_definition_res = json.loads(res.text)
     logger.info(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
 
