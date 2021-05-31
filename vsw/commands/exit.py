@@ -20,9 +20,9 @@ def kill_all():
 
 
 def kill_vsw():
-    out = os.popen("ps aux | grep setup").read()
+    out = os.popen("ps aux | grep agent.py").read()
     for line in out.splitlines():
-        if 'setup' in line:
+        if 'python3' in line:
             pid = int(line.split()[1])
             subprocess.run(f'kill -9 {pid}', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 

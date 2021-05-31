@@ -40,7 +40,7 @@ def main(args: List[str]) -> bool:
         elif args.subcommand == "connection":
             init.connection_repo()
         elif args.subcommand == "creddef":
-            init.do_credential_definition()
+            init.do_credential_definition(args.schema)
         else:
             print("Incorrect sub command")
     except KeyboardInterrupt:
@@ -64,7 +64,7 @@ def parse_args(args):
 
     subparsers.add_parser('connection')
     creddef_parser = subparsers.add_parser('creddef')
-    creddef_parser.add_argument('-s', '--schema', help='The schema name')
+    creddef_parser.add_argument('-s', '--schema', default="software-certificate", help='The schema name')
 
     return parser.parse_args(args)
 
