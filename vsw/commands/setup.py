@@ -2,20 +2,19 @@ import argparse
 import configparser
 import json
 import os
-import sys
+import time
 import uuid
 from os.path import expanduser
 from pathlib import Path
 from typing import List
 
-import daemon
 import requests
 from aries_cloudagent_vsw.commands import run_command
-from aries_cloudagent_vsw.core.error import BaseError
 
 from vsw import utils
 from vsw.commands import init
 from vsw.log import Log
+from vsw.utils import get_vsw_agent
 
 logger = Log(__name__).logger
 
@@ -26,25 +25,18 @@ def main(args: List[str]) -> bool:
         if args.subcommand == "newwallet":
             wallet_name = args.name
             wallet_key = args.key
-            provision(wallet_key, wallet_name, False)
-        elif args.subcommand == "endorser":
-            did = args.did
-            verkey = args.verkey
-            success = make_endorser(did, verkey)
-            if success:
-                logger.info(f"making DID:{did} as an ENDORSER successfully!")
-            else:
-                logger.error(f"making DID:{did} as an ENDORSER failed!")
+            provision(wallet_key, wallet_name)
         elif args.subcommand == "wallet":
-            wallet_name = args.name
-            wallet_key = args.key
-            non_endorser = not args.endorser
             if args.ports:
                 utils.set_port_number(args.ports)
             start_local_tunnel(args.name)
             start_controller()
-            with daemon.DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=logger.streams):
-                start_agent(wallet_key, wallet_name, non_endorser)
+            start_agent(args.name, args.key, get_seed(args.name))
+            ready = check_status()
+            if ready:
+                print("success")
+            else:
+                print("failed")
         elif args.subcommand == "connection":
             init.connection_repo()
         elif args.subcommand == "creddef":
@@ -53,13 +45,6 @@ def main(args: List[str]) -> bool:
             print("Incorrect sub command")
     except KeyboardInterrupt:
         print(" => Exit setup")
-
-
-def start_aca_py(wallet_key, args):
-    if args.provision:
-        provision(wallet_key, args.name, args.non_endorser)
-    else:
-        start_agent(wallet_key, args.name, args.non_endorser)
 
 
 def parse_args(args):
@@ -77,14 +62,6 @@ def parse_args(args):
     wallet_parser.add_argument('-k', '--key', required=True, help="wallet key")
     wallet_parser.add_argument('-e', '--endorser', action='store_true')
 
-    endorser_parser = subparsers.add_parser('endorser')
-    endorser_parser.add_argument('-d', '--did', help='DID')
-    endorser_parser.add_argument('-k', '--verkey', required=True, help="Verkey")
-
-    did_parser = subparsers.add_parser('did')
-    did_parser.add_argument('did', help='DID')
-
-    subparsers.add_parser('newdid')
     subparsers.add_parser('connection')
     creddef_parser = subparsers.add_parser('creddef')
     creddef_parser.add_argument('-s', '--schema', help='The schema name')
@@ -92,7 +69,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def provision(wallet_key, name, non_endorser):
+def provision(wallet_key, name):
     wallet_name = 'default'
     if name:
         wallet_name = name
@@ -106,64 +83,16 @@ def provision(wallet_key, name, non_endorser):
             '--seed', get_seed(wallet_name),
             '--genesis-file', str(config_path),
             '--wallet-type', 'indy',
+            '--accept-taa', '1',
             '--log-config', logger.aries_config_path,
             '--log-file', logger.aries_log_file,
             '--wallet-name', wallet_name,
             '--wallet-key', wallet_key
         ]
-        if non_endorser:
-            args.append('--wallet-local-did')
         run_command('provision', args)
     except BaseException as e:
         logger.info(e.message)
         logger.info("please check if your public DID and verkey is registered in the ledger!")
-
-
-def start_agent(wallet_key, name, non_endorser):
-    configuration = utils.get_vsw_agent()
-    config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
-    wallet_name = 'default'
-    admin_port = configuration.get("admin_port")
-    transport_port = configuration.get("inbound_transport_port")
-    logger.info('genesis_file: ' + str(config_path))
-
-    if name:
-        wallet_name = name
-    try:
-        args = ['--admin', configuration.get("admin_host"), admin_port,
-                '--inbound-transport', configuration.get("inbound_transport_protocol"),
-                configuration.get("inbound_transport_host"), transport_port,
-                '--outbound-transport', configuration.get('outbound_transport_protocol'),
-                '--endpoint', configuration.get("endpoint"),
-                '--label', configuration.get("label"),
-                '--seed', get_seed(wallet_name),
-                '--webhook-url', configuration.get("webhook_url"),
-                '--tails-server-base-url', utils.get_tails_server().get("host"),
-                '--genesis-file', str(config_path),
-                '--wallet-type', 'indy',
-                '--wallet-name', wallet_name,
-                '--wallet-key', wallet_key,
-                '--log-config', logger.aries_config_path,
-                '--log-file', logger.aries_log_file,
-                '--auto-accept-invites',
-                '--preserve-exchange-records',
-                '--auto-accept-requests',
-                '--auto-ping-connection',
-                '--auto-respond-messages',
-                '--auto-respond-credential-proposal',
-                '--auto-respond-credential-offer',
-                '--auto-respond-credential-request',
-                '--auto-store-credential',
-                '--auto-respond-presentation-request',
-                '--auto-verify-presentation',
-                '--auto-respond-presentation-proposal',
-                '--admin-insecure-mode']
-        if non_endorser:
-            args.append('--wallet-local-did')
-        run_command('start', args)
-    except BaseError as error:
-        logger.error("started vsw failed.")
-        print('An exception occurred: {}'.format(error))
 
 
 def get_seed(wallet_name):
@@ -191,7 +120,6 @@ def get_seed(wallet_name):
         with open(key_path, 'a') as configfile:
             config.write(configfile)
 
-    logger.info('seed:' + seed)
     return seed
 
 
@@ -217,14 +145,28 @@ def start_controller():
     os.system(f'nohup python3 {controller_file} > {controller_log_file} 2>&1 &')
 
 
-def make_endorser(did, verkey):
-    configuration = utils.get_sovrin()
-    response = requests.post(configuration.get("url"), json={
-        "network": configuration.get("network"),
-        "did": did,
-        "verkey": verkey,
-        "paymentaddr": ""
-    })
-    logger.debug(response.text)
-    invitation_response = json.loads(response.text)
-    return invitation_response["statusCode"] == 200
+def start_agent(name, key, seed):
+    agent_file = Path(__file__).parent.joinpath("agent.py").resolve()
+    log_dir = Path(os.path.expanduser('~'))
+    vsw_log_file = str(Path(log_dir).joinpath("vsw_logs/vsw.log").resolve())
+    os.system(f'nohup python3 {agent_file} {name} {key} {seed}> {vsw_log_file} 2>&1 &')
+
+
+def check_status():
+    vsw_config = get_vsw_agent()
+    times = 0
+    while times < 30:
+        try:
+            local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status/ready'
+            response = requests.get(local)
+            res = json.loads(response.text)
+            logger.debug(res)
+            if res["ready"]:
+                return True;
+            else:
+                return False
+        except requests.exceptions.RequestException:
+            time.sleep(1)
+            ++times;
+
+    return False

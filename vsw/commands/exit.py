@@ -13,6 +13,12 @@ def main(args: List[str]) -> bool:
     kill_vsw()
 
 
+def kill_all():
+    kill_lt()
+    kill_controller()
+    kill_vsw()
+
+
 def kill_vsw():
     out = os.popen("ps aux | grep setup").read()
     for line in out.splitlines():

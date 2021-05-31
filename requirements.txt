@@ -11,7 +11,7 @@ py-multicodec
 py-multibase
 tqdm >= 4.14
 pretend >= 1.0.9
-aries-cloudagent-vsw==0.0.2
+aries-cloudagent-vsw==0.0.3
 python3-indy>=1.11.1<2
 aiohttp~=3.6.2
 aiohttp-apispec==2.2.1
