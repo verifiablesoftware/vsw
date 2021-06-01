@@ -34,39 +34,56 @@ If you have already locally installed it before, need to uninstall it firstly.
 # How to run vsw
 1. `vsw setup`
 
-    -n, --name: The wallet name
-    -p: this will start agent, and print DID and verykey, for test environment, if you don't register DID and verkey, please go to https://selfserve.sovrin.org/ to register.
+    **newwallet:** create new wallet
     
-2. `vsw init`
-
-    -c,--connection, --connection: this option will init the connection with repo
+    &emsp;&emsp;&emsp;&emsp;name: the wallet name
+      
+    &emsp;&emsp;&emsp;&emsp;-k,--key: the wallet key
+      
+    **wallet:** start the created wallet
     
-    -s,--schema: this will init schema name and create credential definition
+    &emsp;&emsp;&emsp;&emsp;name: the wallet name
+    
+    &emsp;&emsp;&emsp;&emsp;-k,--key: the wallet key
+      
+    **connection:** create connection
+    
+    **creddef:** create credential definition
+    
+    &emsp;&emsp;&emsp;&emsp; -s,--schema: the schema name
+      
+2. `vsw publish`
 
-3. `vsw publish`
     publish your software credential
-    This needs you provide software name and version, software did information.
     
-4. `vsw verify`
-    Verify if the software credential is correct. the following parameters are needed.
-    -s,--software-name: The software name
-    -u,--url: The download url
-    -i,--issuer-did: The issuer did
+    -c,--cred-file: The cred json file path
+    
+3. `vsw verify`
 
-5. `vsw list`
+    Verify if the software credential is correct. the following parameters are needed.
+    
+    -p,--proof-request: The proof request json file path
+
+4. `vsw list`
 
     List all the necessary information in the console
-    -c, --connection: list the connections.
-    -w, --wallet: list the wallet information.
-    -sc, --schema: list the schema ids.
-    -s, --status: list the agent status.
-    -i, --issue_credential_records: list the issue credential records.
-    -p, --present_proof: list the present proof records.
-    -cs, --credentials: list the credential records.
-    --cd, --credential_definition: list all the credential definition records.      
     
-6. `vsw exit`
-    Exit agent
+    -c, --connection: list the connections.
+    
+    -w, --wallet: list the wallet information.
+    
+    -sc, --schema: list the schema ids.
+    
+    -s, --status: list the agent status.
+    
+    -p, --present_proof: list the present proof records.
+    
+    -cs, --credentials: list the credential records.
+    
+    --cd, --credential_definition: list all the credential definition records.
+    
+5. `vsw exit`
+    Exit aca-py agent, close vsw controller, localtunnel etc.
     
 
 # Verifiable Software

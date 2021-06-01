@@ -35,7 +35,7 @@ def main(args: List[str]) -> bool:
 
         revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
     except requests.exceptions.RequestException:
-        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+        logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except KeyboardInterrupt:
         print(" ==> Exit revoke!")
 
@@ -45,7 +45,7 @@ def print_help():
     print('vsw revoke [options]')
     print('-cei, --credential-exchange-id         The Credential Exchange Id')
     print('-reg, --credential-registry-id         The Credential Registry ID')
-    print('-cei, --credential-revocation-id       The Credential Revocation ID')
+    print('-rev, --credential-revocation-id       The Credential Revocation ID')
 
 
 def parse_args(args):
@@ -68,7 +68,7 @@ def revoke(credential_exchange_id, credential_registry_id, credential_revocation
     if is_publish:
         publish = "true"
     url = f'{vsw_url_host}/issue-credential/revoke?rev_reg_id={credential_registry_id}&cred_rev_id={credential_revocation_id}&publish={publish}'
-    logger.info(f'The request revoke url: {url}')
+    logger.debug(f'The request revoke url: {url}')
     revocation_res = requests.post(url)
     json.loads(revocation_res.text)
     logger.info("Revoke successfully!")

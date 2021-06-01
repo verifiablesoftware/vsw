@@ -7,9 +7,8 @@ from configparser import RawConfigParser
 from pathlib import Path
 from typing import Union
 
-import requests
-from multicodec import add_prefix
 from multibase import encode
+from multicodec import add_prefix
 
 from vsw.log import Log
 
@@ -19,6 +18,7 @@ logger = Log(__name__).logger
 class Constant:
     PORT_NUMBER = 49111
     TIMEOUT = 30
+    NOT_RUNNING_MSG = "vsw is not running"
 
 
 class ConfigReader:

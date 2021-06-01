@@ -51,7 +51,7 @@ def main(args: List[str]) -> bool:
                         return
                 issue_credential(data)
     except requests.exceptions.RequestException:
-        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+        logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except ValueError as ve:
         logger.error(ve)
     except KeyboardInterrupt:

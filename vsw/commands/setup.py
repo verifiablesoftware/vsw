@@ -25,8 +25,20 @@ def main(args: List[str]) -> bool:
         if args.subcommand == "newwallet":
             wallet_name = args.name
             wallet_key = args.key
-            provision(wallet_key, wallet_name)
+            if not wallet_name:
+                print("The wallet name is required!")
+                return
+            if not wallet_key:
+                print("The wallet key is required!")
+                return
+            provision(wallet_name, wallet_key)
         elif args.subcommand == "wallet":
+            if not args.name:
+                print("The wallet name is required!")
+                return
+            if not args.key:
+                print("The wallet key is required!")
+                return
             if args.ports:
                 utils.set_port_number(args.ports)
             start_local_tunnel(args.name)
@@ -69,13 +81,10 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def provision(wallet_key, name):
-    wallet_name = 'default'
-    if name:
-        wallet_name = name
+def provision(wallet_name, wallet_key):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
-    logger.info('genesis_file: ' + str(config_path))
+    logger.debug('genesis_file: ' + str(config_path))
     endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
     try:
         args = [

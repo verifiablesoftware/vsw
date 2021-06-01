@@ -28,7 +28,7 @@ def main(args: List[str]) -> bool:
             data = json.load(json_file)
             publish(data)
     except requests.exceptions.RequestException:
-        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+        logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except KeyboardInterrupt:
         print(" ==> Exit attest!")
 

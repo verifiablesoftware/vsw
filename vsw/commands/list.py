@@ -6,7 +6,7 @@ from rich.console import Console
 import requests
 
 from vsw.log import Log
-from vsw.utils import get_vsw_agent, get_repo_host
+from vsw.utils import get_vsw_agent, get_repo_host, Constant
 
 logger = Log(__name__).logger
 console = Console()
@@ -45,7 +45,7 @@ def main(argv: List[str]) -> bool:
     except KeyboardInterrupt:
         print(" ==> Exit list!")
     except requests.exceptions.RequestException:
-        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+        logger.error(Constant.NOT_RUNNING_MSG)
     except Exception as e:
         logger.error("Failed to execute list: " + str(e))
 

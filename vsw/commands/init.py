@@ -23,7 +23,7 @@ def main(args: List[str]) -> bool:
         if args.credential_definition:
             do_credential_definition(args.schema)
     except requests.exceptions.RequestException:
-        logger.error("Please check if you have executed 'vsw setup' to start agent!")
+        logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except KeyboardInterrupt:
         print(" ==> Exit init")
 
