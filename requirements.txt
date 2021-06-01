@@ -6,7 +6,6 @@ setuptools-scm >= 1.15
 rich
 terminaltables
 version-parser
-py-multicodec
 py-multibase
 tqdm >= 4.14
 pretend >= 1.0.9
