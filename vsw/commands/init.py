@@ -38,12 +38,26 @@ def get_schema_id_by_name(vsw_config, schema_name):
         return vsw_config.get("schema_id")
 
 
+def check_credential_definition(schema_id):
+    cd_check_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions/created?schema_id={schema_id}'
+    resp = requests.get(cd_check_url)
+    check_res = json.loads(resp.text)
+    if len(check_res["credential_definition_ids"]) > 0:
+        return check_res["credential_definition_ids"][0]
+    else:
+        return None
+
+
 def do_credential_definition(schema_name):
     if schema_name != software_certificate and schema_name != test_certificate:
         print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
         return;
     schema_id = get_schema_id_by_name(vsw_config, schema_name)
-
+    # check if created
+    check_result = check_credential_definition(schema_id)
+    if check_result:
+        print(f'vsw: error: creddef already existed, {check_result}')
+        return;
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
     res = requests.post(credential_definition_url, json={
         "revocation_registry_size": 100,

@@ -25,6 +25,10 @@ def test_connection_repo():
     init.connection_repo()
 
 
+def test_check_credential_definition():
+    init.check_credential_definition("UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3")
+
+
 def test_list_schema():
     list.get_schema(vsw_config)
     list.get_credential_definition(vsw_config)
