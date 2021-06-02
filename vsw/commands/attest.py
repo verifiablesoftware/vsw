@@ -29,6 +29,8 @@ def main(args: List[str]) -> bool:
             publish(data)
     except requests.exceptions.RequestException:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
+    except ValueError as ve:
+        logger.error(ve)
     except KeyboardInterrupt:
         print(" ==> Exit attest!")
 
@@ -37,19 +39,19 @@ def publish(data):
     if "testSpecUrl" in data:
         test_spec_url = data["testSpecUrl"]
         if test_spec_url and not validators.url(test_spec_url):
-            print('The testSpecUrl is wrong, please check')
+            print('vsw: error: the testSpecUrl is wrong, please check')
             return
     if "testResultDetailUrl" in data:
         test_result_detail_url = data["testResultDetailUrl"]
         if test_result_detail_url and not validators.url(test_result_detail_url):
-            print('The testResultDetailUrl is wrong, please check')
+            print('vsw: error: the testResultDetailUrl is wrong, please check')
             return
     if "testSpecDid" in data or "testSpecUrl" in data:
         if "testResult" not in data:
-            print("The testResult is mandatory if specify testSpecDid or testSpecUrl")
+            print("vsw: error: the testResult is mandatory if specify testSpecDid or testSpecUrl")
             return
     if "testSpecDid" not in data and "testSpecUrl" not in data and "ranking" not in data:
-        print("The rank is mandatory if not specify testSpec")
+        print("vsw: error: the rank is mandatory if not specify testSpec")
         return
     issue_credential(data)
 
@@ -64,6 +66,8 @@ def get_credential_definition_id():
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("test_schema_id")}'
     response = requests.get(local)
     res = json.loads(response.text)
+    if len(res["credential_definition_ids"]) == 0:
+        raise ValueError('Not found attest credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
     logger.info(f'cred_def_id: {cred_def_id}')
     return cred_def_id

@@ -23,13 +23,13 @@ def main(args: List[str]) -> bool:
         credential_registry_id = args.credential_registry_id
         credential_revocation_id = args.credential_revocation_id
         if not credential_exchange_id and not credential_registry_id and not credential_revocation_id:
-            print('Either the Credential Exchange ID, or Credential Registry ID and Credential '
-                  'Revocation ID are required.')
+            print('vsw: error: either the credential exchange id, or credential registry id and credential '
+                  'revocation id are required.')
             print_help()
             return
         elif not credential_exchange_id:
             if not credential_registry_id or not credential_revocation_id:
-                print('The Credential Registry ID and Credential Revocation ID are both required.')
+                print('vsw: error: the credential registry id and credential revocation id are both required.')
                 print_help()
                 return
 

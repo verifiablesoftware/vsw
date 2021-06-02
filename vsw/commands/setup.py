@@ -116,7 +116,7 @@ def get_seed(wallet_name):
         try:
             seed = config[wallet_name]['key']
         except:
-            logger.warn('not found seed')
+            logger.debug('not found seed')
     else:
         if os.path.exists(key_folder) is False:
             os.makedirs(key_folder)

@@ -15,6 +15,8 @@ from multiprocessing.connection import Listener
 from vsw.commands import attest
 
 vsw_config = vsw.utils.get_vsw_agent()
+software_certificate = vsw_config.get("schema_name")
+test_certificate = vsw_config.get("test_schema_name")
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
@@ -27,18 +29,22 @@ def main(args: List[str]) -> bool:
         args = parse_args(args)
         with open(args.cred_file) as json_file:
             data = json.load(json_file)
-            logger.debug(f'schema name: {args.schema}')
+            schema_name = args.schema
+            logger.debug(f'schema name: {schema_name}')
+            if schema_name != software_certificate and schema_name != test_certificate:
+                print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
+                return;
             if args.schema == vsw_config.get("test_schema_name"):
                 attest.publish(data)
             else:
                 if "softwareName" not in data:
-                    print("softwareName is mandatory")
+                    print("vsw: error: softwareName is mandatory")
                     return
                 if "softwareVersion" not in data:
-                    print("softwareVersion is mandatory")
+                    print("vsw: error: softwareVersion is mandatory")
                     return
                 if "softwareUrl" not in data:
-                    print("softwareUrl is mandatory")
+                    print("vsw: error: softwareUrl is mandatory")
                     return
                 if "softwareVersion" in data:
                     software_version = data["softwareVersion"]
@@ -47,7 +53,7 @@ def main(args: List[str]) -> bool:
                 if "softwareUrl" in data:
                     software_url = data["softwareUrl"]
                     if software_url and not validators.url(software_url):
-                        print('The software package url is wrong, please check')
+                        print('vsw: error: the software package url is wrong, please check')
                         return
                 issue_credential(data)
     except requests.exceptions.RequestException:
@@ -61,7 +67,7 @@ def main(args: List[str]) -> bool:
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--cred-file", required=True, help="The software credential json file path")
-    parser.add_argument('-s', '--schema', default='software-certificate', help="The schema name")
+    parser.add_argument('-s', '--schema', default=software_certificate, help="The schema name")
     return parser.parse_args(args)
 
 
@@ -69,7 +75,7 @@ def check_version(software_version):
     try:
         Version(software_version)
     except ValueError:
-        print("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
+        print("vsw: error: the software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
         return False
     return True
 

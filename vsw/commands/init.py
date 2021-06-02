@@ -12,6 +12,9 @@ from multiprocessing.connection import Listener
 
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
+vsw_config = vsw.utils.get_vsw_agent()
+software_certificate = vsw_config.get("schema_name")
+test_certificate = vsw_config.get("test_schema_name")
 
 
 def main(args: List[str]) -> bool:
@@ -36,7 +39,9 @@ def get_schema_id_by_name(vsw_config, schema_name):
 
 
 def do_credential_definition(schema_name):
-    vsw_config = vsw.utils.get_vsw_agent()
+    if schema_name != software_certificate and schema_name != test_certificate:
+        print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
+        return;
     schema_id = get_schema_id_by_name(vsw_config, schema_name)
 
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
@@ -54,7 +59,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("-cd", "--credential-definition", action='store_true')
     parser.add_argument('-c', '--connection', action='store_true')
-    parser.add_argument('-s', '--schema', default='software-certificate', help="The schema name")
+    parser.add_argument('-s', '--schema', default=software_certificate, help="The schema name")
 
     return parser.parse_args(args)
 

@@ -72,15 +72,8 @@ def get_credential_definition(vsw_config):
 
 def get_credentials(repo_url_host, vsw_config):
     did = get_public_did(vsw_config)
-    repo = urljoin(f'{repo_url_host}', '/credentials?wql={"attr::developerdid::value":"'+did+'"}')
+    repo = urljoin(f'{repo_url_host}', '/credentials?wql={"issuer_did":"'+did+'"}')
     response = requests.get(repo)
-    res = json.loads(response.text)
-    console.print(res)
-
-
-def get_issue_credential_records(vsw_config):
-    local = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/issue-credential/records'
-    response = requests.get(local)
     res = json.loads(response.text)
     console.print(res)
 

@@ -52,16 +52,16 @@ def execute(proof_request, revoke_date):
             if "attr::softwareurl::value" in software_credential:
                 software_url = software_credential["attr::softwareurl::value"]
                 if not validators.url(software_url):
-                    logger.info('The software package url is wrong, please check')
+                    print('vsw: error: the software package url is wrong, please check')
                     return
             credentials = check_credential(software_credential)
             if len(credentials) == 0:
-                logger.info("No found matched credential, please check if the specified conditions are correct.")
+                print("vsw: error: No found matched credential, please check if the specified conditions are correct.")
                 return;
         if test_credential:
             credentials = check_credential(test_credential)
             if len(credentials) == 0:
-                logger.info("No found matched attest credential, please check if the specified conditions are correct.")
+                print("vsw: error: No found matched attest credential, please check if the specified conditions are correct.")
                 return;
         requested_predicates = {}
         if "requested_predicates" in data:
@@ -127,7 +127,7 @@ def check_version(software_version):
     try:
         Version(software_version)
     except ValueError:
-        logger.info("The software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
+        print("vsw: error: the software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
         return False
     return True
 
@@ -214,4 +214,4 @@ def get_client_connection():
     if len(connections) > 0:
         return connections[-1]
     else:
-        raise ConnectionError("Not found active vsw connection! Have you executed vsw init -c?")
+        raise ConnectionError("vsw: error: Not found active vsw connection! Have you executed vsw init -c?")
