@@ -2,9 +2,9 @@
   "requested_attributes": [
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "attr::testerdid::value": "CEvdgMrSrQaKgZkUoHt5S9",
+      "attr::testerdid::value": "HEKMez9mir6QWWru57neCB",
       "attr::testspecdid::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::softwaredid::value": "UESGGgjHpiMFZFfHXnTh8S",
+      "attr::softwaredid::value": "BHC2VWDpKjXdZRjjEypw4G",
       "attr::testspecurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
       "attr::testresult::value": "pass",
       "attr::testresultdetaildid::value": "2ukrFWzuNVsKVHtHVwSLZh",

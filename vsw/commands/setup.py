@@ -12,7 +12,7 @@ import requests
 from aries_cloudagent_vsw.commands import run_command
 
 from vsw import utils
-from vsw.commands import init
+from vsw.commands import init,exit
 from vsw.log import Log
 from vsw.utils import get_vsw_agent
 
@@ -39,6 +39,7 @@ def main(args: List[str]) -> bool:
             if not args.key:
                 print("The wallet key is required!")
                 return
+            exit.kill_all()
             if args.ports:
                 utils.set_port_number(args.ports)
             start_local_tunnel(args.name)

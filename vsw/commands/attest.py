@@ -135,7 +135,7 @@ def get_public_did():
 def send_proposal(data):
     tester_did = get_public_did()
     connection = get_repo_connection()
-    logger.info(f'holder connection_id: {connection["connection_id"]}')
+    logger.debug(f'holder connection_id: {connection["connection_id"]}')
 
     test_spec_hash = vsw.utils.generate_digest(data["testSpecUrl"])
     test_result_detail_hash = vsw.utils.generate_digest(data["testResultDetailUrl"])
