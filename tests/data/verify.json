@@ -15,8 +15,8 @@
       "attr::sourcehash::value": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
       "attr::buildertooldidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
       "attr::dependencydidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::buildlog::value": "symbio test log",
-      "attr::builderdid::value": "2ukrFWzuNVsKVHtHVwSLZh"
+      "attr::buildlog::value": "",
+      "attr::builderdid::value": ""
     }
   ]
 }

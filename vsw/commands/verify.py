@@ -42,8 +42,11 @@ def main(args: List[str]) -> bool:
 def execute(proof_request, revoke_date):
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_credential = get_software_credential(data["requested_attributes"])
-        test_credential = get_test_credential(data["requested_attributes"])
+        software_credential_dict = get_software_credential(data["requested_attributes"])
+        software_credential_search = software_credential_dict["search_cred"]
+        print(f'software_credential_search: {software_credential_search}')
+        software_credential = software_credential_dict["cred"]
+
         if software_credential:
             if "attr::softwareversion::value" in software_credential:
                 software_version = software_credential["attr::softwareversion::value"]
@@ -54,14 +57,18 @@ def execute(proof_request, revoke_date):
                 if not validators.url(software_url):
                     print('vsw: error: the software package url is wrong, please check')
                     return
-            credentials = check_credential(software_credential)
+            credentials = check_credential(software_credential_search)
             if len(credentials) == 0:
                 print("vsw: error: No found matched credential, please check if the specified conditions are correct.")
                 return;
+        test_credential_dict = get_test_credential(data["requested_attributes"])
+        test_credential_search = test_credential_dict["search_cred"]
+        test_credential = test_credential_dict["cred"]
         if test_credential:
-            credentials = check_credential(test_credential)
+            credentials = check_credential(test_credential_search)
             if len(credentials) == 0:
-                print("vsw: error: No found matched attest credential, please check if the specified conditions are correct.")
+                print(
+                    "vsw: error: No found matched attest credential, please check if the specified conditions are correct.")
                 return;
         requested_predicates = {}
         if "requested_predicates" in data:
@@ -72,7 +79,8 @@ def execute(proof_request, revoke_date):
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
         listener._listener._socket.settimeout(Constant.TIMEOUT)
-        proof_response = send_request(connection["connection_id"], software_credential, test_credential, requested_predicates, revoke_date)
+        proof_response = send_request(connection["connection_id"], software_credential_search, test_credential_search,
+                                      requested_predicates, revoke_date)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
 
@@ -84,6 +92,7 @@ def execute(proof_request, revoke_date):
                 conn.close()
                 logger.info(f"waiting state update, current state is: {state}")
                 if state == "verified":
+                    logger.info(msg)
                     if msg["verified"] == "false":
                         remove_proof_request(presentation_exchange_id)
                         logger.info("Verified error, Verified result from indy is False!")
@@ -109,18 +118,29 @@ def execute(proof_request, revoke_date):
                 break;
 
 
+def remove_empty_from_dict(d):
+    if type(d) is dict:
+        return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if v and remove_empty_from_dict(v))
+    elif type(d) is list:
+        return [remove_empty_from_dict(v) for v in d if v and remove_empty_from_dict(v)]
+    else:
+        return d
+
+
 def get_software_credential(data):
     for cred in data:
         if cred["schema_id"] == vsw_config.get("schema_id"):
-            return cred
-    return None
+            search_cred = remove_empty_from_dict(cred)
+            return {"cred": cred, "search_cred": search_cred}
+    return {"cred": None, "search_cred": None}
 
 
 def get_test_credential(data):
     for cred in data:
         if cred["schema_id"] == vsw_config.get("test_schema_id"):
-            return cred
-    return None
+            search_cred = remove_empty_from_dict(cred)
+            return {"cred": cred, "search_cred": search_cred}
+    return {"cred": None, "search_cred": None}
 
 
 def check_version(software_version):
@@ -172,7 +192,7 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "non_revoked": {"from": time_from, "to": time_to},
         "restrictions": [software_credential]
     }
-    test_names = ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult","testresultdetaildid",
+    test_names = ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult", "testresultdetaildid",
                   "testresultdetailurl", "testresultdetailhash", "comments", "softwaredid"]
     if not requested_predicates or len(requested_predicates.values()) == 0:
         test_names.append("ranking")
