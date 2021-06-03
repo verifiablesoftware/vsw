@@ -12,7 +12,7 @@ import validators
 import vsw.utils
 from vsw.log import Log
 from vsw.utils import Constant
-
+from vsw.commands import exit
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
@@ -23,10 +23,11 @@ timeout = Constant.TIMEOUT
 
 def main(args: List[str]) -> bool:
     try:
-        args = parse_args(args)
-        with open(args.attest_file) as json_file:
-            data = json.load(json_file)
-            publish(data)
+        if exit.check_vsw_is_running():
+            args = parse_args(args)
+            with open(args.attest_file) as json_file:
+                data = json.load(json_file)
+                publish(data)
     except requests.exceptions.RequestException:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except ValueError as ve:
@@ -67,14 +68,13 @@ def get_credential_definition_id():
     response = requests.get(local)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
-        raise ValueError('Not found attest credential definition id!')
+        raise ValueError('vsw: error: Not found attest credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
     logger.info(f'cred_def_id: {cred_def_id}')
     return cred_def_id
 
 
 def issue_credential(data):
-    logger.info("executing publish, please waiting for response")
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     listener._listener._socket.settimeout(Constant.TIMEOUT)

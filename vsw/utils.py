@@ -18,7 +18,7 @@ logger = Log(__name__).logger
 class Constant:
     PORT_NUMBER = 49111
     TIMEOUT = 30
-    NOT_RUNNING_MSG = "vsw is not running"
+    NOT_RUNNING_MSG = "vsw: error: vsw is not running"
 
 
 class ConfigReader:
@@ -74,13 +74,6 @@ def get_vsw_agent():
     config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
     config_reader = ConfigReader(config_path)
     config_dict = config_reader.to_dict('vsw-agent')
-    return config_dict
-
-
-def get_sovrin():
-    config_path = Path(__file__).parent.joinpath("conf/vsw.ini").resolve()
-    config_reader = ConfigReader(config_path)
-    config_dict = config_reader.to_dict('sovrin')
     return config_dict
 
 

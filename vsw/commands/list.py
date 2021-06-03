@@ -7,47 +7,48 @@ import requests
 
 from vsw.log import Log
 from vsw.utils import get_vsw_agent, get_repo_host, Constant
-
+from vsw.commands import exit
 logger = Log(__name__).logger
 console = Console()
 
 
 def main(argv: List[str]) -> bool:
-    args = parse_args(argv)
-    vsw_config = get_vsw_agent()
-    vsw_repo_config = get_repo_host()
-    repo_url_host = vsw_repo_config.get("host")
-    try:
-        if args.connection:
-            get_connections(vsw_config)
-        elif args.wallet:
-            get_wallet(vsw_config)
-        elif args.schema:
-            get_schema(vsw_config)
-        elif args.status:
-            get_status(vsw_config)
-        elif args.credentials:
-            get_credentials(repo_url_host, vsw_config)
-        elif args.credential_definition:
-            get_credential_definition(vsw_config)
-        elif args.present_proof:
-            get_present_proof(vsw_config)
-        else:
-            console.print('Usage:')
-            console.print('vsw list [options]')
-            console.print('-c: list all connections')
-            console.print('-w: list all DIDs in the wallet')
-            console.print('-sc: list all supported schema')
-            console.print('-s: show agent status')
-            console.print('-p: list all presentation proof records')
-            console.print('-cs: list all credentials issued by the current DID')
-            console.print('-cd: list all credential definitions registered by the current DID')
-    except KeyboardInterrupt:
-        print(" ==> Exit list!")
-    except requests.exceptions.RequestException:
-        logger.error(Constant.NOT_RUNNING_MSG)
-    except Exception as e:
-        logger.error("Failed to execute list: " + str(e))
+    if exit.check_vsw_is_running():
+        args = parse_args(argv)
+        vsw_config = get_vsw_agent()
+        vsw_repo_config = get_repo_host()
+        repo_url_host = vsw_repo_config.get("host")
+        try:
+            if args.connection:
+                get_connections(vsw_config)
+            elif args.wallet:
+                get_wallet(vsw_config)
+            elif args.schema:
+                get_schema(vsw_config)
+            elif args.status:
+                get_status(vsw_config)
+            elif args.credentials:
+                get_credentials(repo_url_host, vsw_config)
+            elif args.credential_definition:
+                get_credential_definition(vsw_config)
+            elif args.present_proof:
+                get_present_proof(vsw_config)
+            else:
+                console.print('Usage:')
+                console.print('vsw list [options]')
+                console.print('-c: list all connections')
+                console.print('-w: list all DIDs in the wallet')
+                console.print('-sc: list all supported schema')
+                console.print('-s: show agent status')
+                console.print('-p: list all presentation proof records')
+                console.print('-cs: list all credentials issued by the current DID')
+                console.print('-cd: list all credential definitions registered by the current DID')
+        except KeyboardInterrupt:
+            print(" ==> Exit list!")
+        except requests.exceptions.RequestException:
+            logger.error(Constant.NOT_RUNNING_MSG)
+        except Exception as e:
+            logger.error("Failed to execute list: " + str(e))
 
 
 def parse_args(args):

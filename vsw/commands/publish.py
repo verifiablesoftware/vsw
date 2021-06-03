@@ -12,7 +12,7 @@ import validators
 from vsw.utils import Constant
 from version_parser import Version
 from multiprocessing.connection import Listener
-from vsw.commands import attest
+from vsw.commands import attest,exit
 
 vsw_config = vsw.utils.get_vsw_agent()
 software_certificate = vsw_config.get("schema_name")
@@ -26,36 +26,37 @@ timeout = Constant.TIMEOUT
 
 def main(args: List[str]) -> bool:
     try:
-        args = parse_args(args)
-        with open(args.cred_file) as json_file:
-            data = json.load(json_file)
-            schema_name = args.schema
-            logger.debug(f'schema name: {schema_name}')
-            if schema_name != software_certificate and schema_name != test_certificate:
-                print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
-                return;
-            if args.schema == vsw_config.get("test_schema_name"):
-                attest.publish(data)
-            else:
-                if "softwareName" not in data:
-                    print("vsw: error: softwareName is mandatory")
-                    return
-                if "softwareVersion" not in data:
-                    print("vsw: error: softwareVersion is mandatory")
-                    return
-                if "softwareUrl" not in data:
-                    print("vsw: error: softwareUrl is mandatory")
-                    return
-                if "softwareVersion" in data:
-                    software_version = data["softwareVersion"]
-                    if check_version(software_version) is False:
-                        return;
-                if "softwareUrl" in data:
-                    software_url = data["softwareUrl"]
-                    if software_url and not validators.url(software_url):
-                        print('vsw: error: the software package url is wrong, please check')
+        if exit.check_vsw_is_running():
+            args = parse_args(args)
+            with open(args.cred_file) as json_file:
+                data = json.load(json_file)
+                schema_name = args.schema
+                logger.debug(f'schema name: {schema_name}')
+                if schema_name != software_certificate and schema_name != test_certificate:
+                    print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
+                    return;
+                if args.schema == vsw_config.get("test_schema_name"):
+                    attest.publish(data)
+                else:
+                    if "softwareName" not in data:
+                        print("vsw: error: softwareName is mandatory")
                         return
-                issue_credential(data)
+                    if "softwareVersion" not in data:
+                        print("vsw: error: softwareVersion is mandatory")
+                        return
+                    if "softwareUrl" not in data:
+                        print("vsw: error: softwareUrl is mandatory")
+                        return
+                    if "softwareVersion" in data:
+                        software_version = data["softwareVersion"]
+                        if check_version(software_version) is False:
+                            return;
+                    if "softwareUrl" in data:
+                        software_url = data["softwareUrl"]
+                        if software_url and not validators.url(software_url):
+                            print('vsw: error: the software package url is wrong, please check')
+                            return
+                    issue_credential(data)
     except requests.exceptions.RequestException:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except ValueError as ve:
@@ -81,7 +82,6 @@ def check_version(software_version):
 
 
 def issue_credential(data):
-    logger.info("executing publish, please waiting for response")
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     listener._listener._socket.settimeout(Constant.TIMEOUT)
@@ -186,7 +186,7 @@ def generate_new_did(download_url):
     ledger_res = requests.post(urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"))
     write_did_ledger_res = json.loads(ledger_res.text)
     if write_did_ledger_res["success"] is False:
-        logger.err("write did to ledger failed!")
+        logger.err("vsw: error: write did to ledger failed!")
         raise Exception('write did to ledger failed!')
     # Set DID Endpoint
     did_endpoint_res = requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
@@ -203,7 +203,7 @@ def get_credential_definition_id():
     response = requests.get(local)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
-        raise ValueError('Not found credential definition id!')
+        raise ValueError('vsw: error: Not found credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
     logger.debug(f'cred_def_id: {cred_def_id}')
     return cred_def_id
@@ -217,7 +217,7 @@ def send_proposal(data):
     digest = vsw.utils.generate_digest(data["softwareUrl"])
     source_hash = vsw.utils.generate_digest(data["sourceUrl"])
     if "sourceHash" in data and data["sourceHash"] != source_hash:
-        raise ValueError("Incorrect sourceHash value!")
+        raise ValueError("vsw: error: incorrect sourceHash value!")
     cred_def_id = get_credential_definition_id()
 
     software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])

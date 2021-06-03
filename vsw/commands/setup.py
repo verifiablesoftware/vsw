@@ -26,18 +26,18 @@ def main(args: List[str]) -> bool:
             wallet_name = args.name
             wallet_key = args.key
             if not wallet_name:
-                print("The wallet name is required!")
+                print("vsw: error: the wallet name is required!")
                 return
             if not wallet_key:
-                print("The wallet key is required!")
+                print("vsw: error: the wallet key is required!")
                 return
             provision(wallet_name, wallet_key)
         elif args.subcommand == "wallet":
             if not args.name:
-                print("The wallet name is required!")
+                print("vsw: error: the wallet name is required!")
                 return
             if not args.key:
-                print("The wallet key is required!")
+                print("vsw: error: the wallet key is required!")
                 return
             exit.kill_all()
             if args.ports:
@@ -51,11 +51,13 @@ def main(args: List[str]) -> bool:
             else:
                 print("failed")
         elif args.subcommand == "connection":
-            init.connection_repo()
+            if exit.check_vsw_is_running():
+                init.connection_repo()
         elif args.subcommand == "creddef":
-            init.do_credential_definition(args.schema)
+            if exit.check_vsw_is_running():
+                init.do_credential_definition(args.schema)
         else:
-            print("Incorrect sub command")
+            print("vsw: error: incorrect sub command")
     except KeyboardInterrupt:
         print(" => Exit setup")
 
@@ -102,7 +104,7 @@ def provision(wallet_name, wallet_key):
         run_command('provision', args)
     except BaseException as e:
         logger.info(e.message)
-        logger.info("please check if your public DID and verkey is registered in the ledger!")
+        logger.info("vsw: error: please check if your public DID and verkey is registered in the ledger!")
 
 
 def get_seed(wallet_name):
@@ -177,6 +179,6 @@ def check_status():
                 return False
         except requests.exceptions.RequestException:
             time.sleep(1)
-            ++times;
+            times += 1
 
     return False

@@ -4,7 +4,7 @@ from typing import List
 from urllib.parse import urljoin
 
 import requests
-
+from vsw.commands import exit
 import vsw.utils
 from vsw.log import Log
 
@@ -18,22 +18,23 @@ timeout = 60
 
 def main(args: List[str]) -> bool:
     try:
-        args = parse_args(args)
-        credential_exchange_id = args.credential_exchange_id
-        credential_registry_id = args.credential_registry_id
-        credential_revocation_id = args.credential_revocation_id
-        if not credential_exchange_id and not credential_registry_id and not credential_revocation_id:
-            print('vsw: error: either the credential exchange id, or credential registry id and credential '
-                  'revocation id are required.')
-            print_help()
-            return
-        elif not credential_exchange_id:
-            if not credential_registry_id or not credential_revocation_id:
-                print('vsw: error: the credential registry id and credential revocation id are both required.')
+        if exit.check_vsw_is_running():
+            args = parse_args(args)
+            credential_exchange_id = args.credential_exchange_id
+            credential_registry_id = args.credential_registry_id
+            credential_revocation_id = args.credential_revocation_id
+            if not credential_exchange_id and not credential_registry_id and not credential_revocation_id:
+                print('vsw: error: either the credential exchange id, or credential registry id and credential '
+                      'revocation id are required.')
                 print_help()
                 return
+            elif not credential_exchange_id:
+                if not credential_registry_id or not credential_revocation_id:
+                    print('vsw: error: the credential registry id and credential revocation id are both required.')
+                    print_help()
+                    return
 
-        revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
+            revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
     except requests.exceptions.RequestException:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except KeyboardInterrupt:
@@ -59,7 +60,6 @@ def parse_args(args):
 
 
 def revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, is_publish):
-    logger.info("executing revoke, please waiting for response")
     if credential_exchange_id:
         res = get_credential_record(credential_exchange_id)
         credential_registry_id = res["revoc_reg_id"]
