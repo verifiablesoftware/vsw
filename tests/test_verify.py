@@ -4,7 +4,7 @@ from vsw.commands import verify
 
 
 def test_main():
-    verify.execute("/Users/Felix/development/vsw-workspace/vsw/dist/verify.json")
+    verify.execute("/Users/Felix/development/vsw-workspace/vsw/dist/verify.json", None)
 
 
 def test_retrieve_results():
@@ -12,7 +12,7 @@ def test_retrieve_results():
 
 
 def test_check_credential():
-    verify.check_credential("1234", "python")
+    verify.check_credential("/Users/Felix/development/vsw-workspace/vsw/dist/verify.json")
 
 
 def test_get_software_credential():

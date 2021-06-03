@@ -14,8 +14,8 @@ from aries_cloudagent_vsw.commands import run_command
 from vsw import utils
 from vsw.commands import init,exit
 from vsw.log import Log
-from vsw.utils import get_vsw_agent
-
+vsw_config = utils.get_vsw_agent()
+software_certificate = vsw_config.get("schema_name")
 logger = Log(__name__).logger
 
 
@@ -79,7 +79,7 @@ def parse_args(args):
 
     subparsers.add_parser('connection')
     creddef_parser = subparsers.add_parser('creddef')
-    creddef_parser.add_argument('-s', '--schema', default="software-certificate", help='The schema name')
+    creddef_parser.add_argument('-s', '--schema', default=software_certificate, help='The schema name')
 
     return parser.parse_args(args)
 
@@ -165,7 +165,6 @@ def start_agent(name, key, seed):
 
 
 def check_status():
-    vsw_config = get_vsw_agent()
     times = 0
     while times < 30:
         try:

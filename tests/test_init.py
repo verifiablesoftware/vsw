@@ -12,12 +12,8 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 
 
-def test_do_schema():
-    init.do_schema("software-certificate")
-
-
 def test_do_credential_definition():
-    init.do_credential_definition()
+    init.do_credential_definition("softwareCertificate")
 
 
 def test_connection_repo():

@@ -45,7 +45,6 @@ def execute(proof_request, revoke_date):
         data = json.load(json_file)
         software_credential_dict = get_software_credential(data["requested_attributes"])
         software_credential_search = software_credential_dict["search_cred"]
-        print(f'software_credential_search: {software_credential_search}')
         software_credential = software_credential_dict["cred"]
 
         if software_credential:
