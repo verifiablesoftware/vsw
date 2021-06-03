@@ -68,7 +68,7 @@ def get_credential_definition(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?issuer_did={did}'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_credentials(repo_url_host, vsw_config):
@@ -76,7 +76,7 @@ def get_credentials(repo_url_host, vsw_config):
     repo = urljoin(f'{repo_url_host}', '/credentials?wql={"issuer_did":"'+did+'"}')
     response = requests.get(repo)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_public_did(vsw_config):
@@ -90,7 +90,7 @@ def get_status(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_schema(vsw_config):
@@ -99,33 +99,33 @@ def get_schema(vsw_config):
     response = requests.get(local)
     res = json.loads(response.text)
     console.print(f"======vsw software certificate schema_id: {schema_id}======")
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 
     test_schema_id = vsw_config.get("test_schema_id")
     test_local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/schemas/{test_schema_id}'
     test_response = requests.get(test_local)
     test_res = json.loads(test_response.text)
     console.print(f"======vsw attest schema_id: {test_schema_id}======")
-    console.print(test_res)
+    console.print(json.dumps(test_res, indent=4, sort_keys=True))
 
 
 def get_wallet(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/wallet/did'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_present_proof(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/present-proof/records'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res))
 
 
 def get_connections(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(res)
+    console.print(json.dumps(res, indent=4, sort_keys=True))
 

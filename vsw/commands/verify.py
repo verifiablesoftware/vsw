@@ -92,7 +92,7 @@ def execute(proof_request, revoke_date):
                 conn.close()
                 logger.info(f"waiting state update, current state is: {state}")
                 if state == "verified":
-                    logger.info(msg)
+                    logger.info(json.dumps(msg))
                     if msg["verified"] == "false":
                         remove_proof_request(presentation_exchange_id)
                         logger.info("Verified error, Verified result from indy is False!")
