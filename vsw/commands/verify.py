@@ -16,7 +16,7 @@ from version_parser import Version
 from vsw.utils import Constant
 import vsw.utils
 from vsw.log import Log
-from vsw.commands import attest,exit
+from vsw.commands import exit
 
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
@@ -24,6 +24,7 @@ vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_po
 repo_url_host = vsw_repo_config.get("host")
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
+TITLE = "Proof of Test Certificate"
 
 
 def main(args: List[str]) -> bool:
@@ -99,7 +100,7 @@ def execute(proof_request, revoke_date):
                         break;
                     pres_req = msg["presentation_request"]
                     is_proof_of_software_certificate = (
-                            pres_req["name"] == "Proof of Software Certificate"
+                            pres_req["name"] == TITLE
                     )
                     if is_proof_of_software_certificate:
                         logger.info('Congratulation! verified successfully!')
@@ -208,11 +209,11 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         request_attributes["1_test_certificate_uuid"] = req_test_attr
     if requested_predicates:
         for p in requested_predicates.values():
-            p["restrictions"] = [{"cred_def_id": attest.get_credential_definition_id()}]
+            p["restrictions"] = [{"schema_id": vsw_config.get("test_schema_id")}]
             p["non_revoked"] = {"from": time_from, "to": time_to}
 
     indy_proof_request = {
-        "name": "Proof of Software Certificate",
+        "name": TITLE,
         "version": "1.0",
         "requested_attributes": request_attributes,
         "requested_predicates": requested_predicates
@@ -233,4 +234,4 @@ def get_client_connection():
     if len(connections) > 0:
         return connections[-1]
     else:
-        raise ConnectionError("vsw: error: Not found active vsw connection! Have you executed vsw init -c?")
+        raise ConnectionError("vsw: error: Not found active vsw connection! Have you executed vsw setup connection?")

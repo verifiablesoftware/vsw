@@ -128,7 +128,7 @@ def get_repo_connection():
         else:
             raise ConnectionError("Not found related repo active connection!")
     else:
-        raise ConnectionError("Not found active vsw connection! Have you executed vsw init -c?")
+        raise ConnectionError("Not found active vsw connection! Have you executed vsw setup connection?")
 
 
 def get_public_did():
