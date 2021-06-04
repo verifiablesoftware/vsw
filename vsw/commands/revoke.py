@@ -20,21 +20,14 @@ def main(args: List[str]) -> bool:
     try:
         if exit.check_vsw_is_running():
             args = parse_args(args)
-            credential_exchange_id = args.credential_exchange_id
-            credential_registry_id = args.credential_registry_id
-            credential_revocation_id = args.credential_revocation_id
-            if not credential_exchange_id and not credential_registry_id and not credential_revocation_id:
-                print('vsw: error: either the credential exchange id, or credential registry id and credential '
-                      'revocation id are required.')
+            revocation_registry_id = args.rev_reg_id
+            credential_revocation_id = args.cred_rev_id
+            if not revocation_registry_id or not credential_revocation_id:
+                print('vsw: error: the credential registry id and credential revocation id are both required.')
                 print_help()
                 return
-            elif not credential_exchange_id:
-                if not credential_registry_id or not credential_revocation_id:
-                    print('vsw: error: the credential registry id and credential revocation id are both required.')
-                    print_help()
-                    return
 
-            revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, args.publish)
+            revoke(revocation_registry_id, credential_revocation_id, args.publish)
     except requests.exceptions.RequestException:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except KeyboardInterrupt:
@@ -44,30 +37,24 @@ def main(args: List[str]) -> bool:
 def print_help():
     print('Usage:')
     print('vsw revoke [options]')
-    print('-cei, --credential-exchange-id         The Credential Exchange Id')
-    print('-reg, --credential-registry-id         The Credential Registry ID')
-    print('-rev, --credential-revocation-id       The Credential Revocation ID')
+    print('-reg, --rev_reg_id       Revocation registry identifier')
+    print('-rev, --cred_rev_id      The Credential Revocation identifier')
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-cei", "--credential-exchange-id", required=False, help="The credential Exchange ID")
-    parser.add_argument("-reg", "--credential-registry-id", required=False, help="The Credential Registry ID ")
-    parser.add_argument("-rev", "--credential-revocation-id", required=False, help="The Credential Revocation ID")
+    parser.add_argument("-reg", "--rev-reg-id", required=False, help="Revocation registry identifier")
+    parser.add_argument("-rev", "--cred_rev_id", required=False, help="Credential revocation identifier")
     parser.add_argument("-p", "--publish", required=False, default=True,  help="If publish revocation immediately")
 
     return parser.parse_args(args)
 
 
-def revoke(credential_exchange_id, credential_registry_id, credential_revocation_id, is_publish):
-    if credential_exchange_id:
-        res = get_credential_record(credential_exchange_id)
-        credential_registry_id = res["revoc_reg_id"]
-        credential_revocation_id = res["revocation_id"]
+def revoke(revocation_registry_id, credential_revocation_id, is_publish):
     publish = "false"
     if is_publish:
         publish = "true"
-    url = f'{vsw_url_host}/issue-credential/revoke?rev_reg_id={credential_registry_id}&cred_rev_id={credential_revocation_id}&publish={publish}'
+    url = f'{vsw_url_host}/issue-credential/revoke?rev_reg_id={revocation_registry_id}&cred_rev_id={credential_revocation_id}&publish={publish}'
     logger.debug(f'The request revoke url: {url}')
     revocation_res = requests.post(url)
     json.loads(revocation_res.text)

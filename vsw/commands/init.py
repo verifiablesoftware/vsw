@@ -111,7 +111,7 @@ def connection_repo():
             msg = conn.recv()
             state = msg["state"]
             conn.close()
-            logger.info(f'waiting state change, current state is: {state}')
+            logger.debug(f'waiting state change, current state is: {state}')
             if state == 'active':
                 logger.info("Created connection successfully!")
                 listener.close()

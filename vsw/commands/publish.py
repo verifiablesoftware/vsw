@@ -93,7 +93,7 @@ def issue_credential(data):
             conn = listener.accept()
             msg = conn.recv()
             state = msg["state"]
-            logger.info(f'waiting state change, current state is: {state}')
+            logger.debug(f'waiting state change, current state is: {state}')
             conn.close()
             if state == 'credential_acked':
                 logger.info("Congratulation, execute publish successfully!")

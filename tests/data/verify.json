@@ -2,21 +2,21 @@
   "requested_attributes": [
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
-      "issuer_did": "CEvdgMrSrQaKgZkUoHt5S9",
-      "attr::softwarename::value": "symbio_test",
-      "attr::softwareversion::value": "1.0.0",
-      "attr::softwaredid::value": "BHC2VWDpKjXdZRjjEypw4G",
-      "attr::developerdid::value": "CEvdgMrSrQaKgZkUoHt5S9",
-      "attr::softwareurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::softwarehash::value": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
-      "attr::mediatype::value": "application/vnd.oci.image.manifest.v1+json",
-      "attr::sourcedid::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::sourceurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::sourcehash::value": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
-      "attr::buildertooldidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::dependencydidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::buildlog::value": "",
-      "attr::builderdid::value": ""
+      "issuer_did": "HEKMez9mir6QWWru57neCB",
+      "softwareName": "symbio_test",
+      "softwareVersion": "1.0.0",
+      "softwareDid": "M7hecJmg1n7CX4ULX8Zkrd",
+      "developerDid": "HEKMez9mir6QWWru57neCB",
+      "softwareUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "softwareHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "sourceDid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "sourceUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "sourceHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+      "builderToolDidList": "2ukrFWzuNVsKVHtHVwSLZh",
+      "dependencyDidList": "2ukrFWzuNVsKVHtHVwSLZh",
+      "buildLog": "",
+      "builderDid": ""
     }
   ]
 }

@@ -120,7 +120,15 @@ def get_present_proof(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/present-proof/records'
     response = requests.get(local)
     res = json.loads(response.text)
-    console.print(json.dumps(res))
+    sorted_res = res["results"]
+    sorted_res.sort(key=lambda p: p["created_at"])
+    if len(sorted_res) > 0:
+        console.print("======presentation_request========")
+        console.print(json.dumps(sorted_res[-1]["presentation_request"], indent=4, sort_keys=True))
+        console.print("======requested_proof========")
+        console.print(json.dumps(sorted_res[-1]["presentation"]["requested_proof"], indent=4, sort_keys=True))
+    else:
+        console.print(json.dumps(res))
 
 
 def get_connections(vsw_config):
@@ -128,4 +136,3 @@ def get_connections(vsw_config):
     response = requests.get(local)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))
-

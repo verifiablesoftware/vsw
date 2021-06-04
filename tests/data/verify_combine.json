@@ -3,31 +3,31 @@
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
       "issuer_did": "FaoRmvWv5a96aDsDmpdGT5",
-      "attr::softwarename::value": "symbio_test",
-      "attr::softwareversion::value": "1.0.0",
-      "attr::softwaredid::value": "EG9d3RTiHrYeBkmX3wbjE6",
-      "attr::developerdid::value": "FaoRmvWv5a96aDsDmpdGT5",
-      "attr::softwareurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::softwarehash::value": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
-      "attr::mediatype::value": "application/vnd.oci.image.manifest.v1+json",
-      "attr::sourcedid::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::sourceurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::sourcehash::value": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
-      "attr::buildertooldidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::dependencydidlist::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::buildlog::value": "symbio test log",
-      "attr::builderdid::value": "2ukrFWzuNVsKVHtHVwSLZh"
+      "softwarename": "symbio_test",
+      "softwareversion": "1.0.0",
+      "softwaredid": "EG9d3RTiHrYeBkmX3wbjE6",
+      "developerdid": "FaoRmvWv5a96aDsDmpdGT5",
+      "softwareurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "softwarehash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+      "mediatype": "application/vnd.oci.image.manifest.v1+json",
+      "sourcedid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "sourceurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "sourcehash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+      "buildertooldidlist": "2ukrFWzuNVsKVHtHVwSLZh",
+      "dependencydidlist": "2ukrFWzuNVsKVHtHVwSLZh",
+      "buildlog": "symbio test log",
+      "builderdid": "2ukrFWzuNVsKVHtHVwSLZh"
     },
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "attr::testerdid::value": "FaoRmvWv5a96aDsDmpdGT5",
-      "attr::testspecdid::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::softwaredid::value": "BHC2VWDpKjXdZRjjEypw4G",
-      "attr::testspecurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::testresult::value": "pass",
-      "attr::testresultdetaildid::value": "2ukrFWzuNVsKVHtHVwSLZh",
-      "attr::testresultdetailurl::value": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "attr::comments::value": "useful software tool"
+      "testerdid": "FaoRmvWv5a96aDsDmpdGT5",
+      "testspecdid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "softwaredid": "BHC2VWDpKjXdZRjjEypw4G",
+      "testspecurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "testresult": "pass",
+      "testresultdetaildid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "testresultdetailurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "comments": "useful software tool"
     }
   ]
 }

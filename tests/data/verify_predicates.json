@@ -3,23 +3,24 @@
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
       "issuer_did": "A9cEertJWkV6zKDTwcuEho",
-      "attr::softwarename::value": "vsw",
-      "attr::softwareversion::value": "0.0.11",
-      "attr::softwaredid::value": "P9VxHNTAmn8LHnbXP95i4q"
+      "softwarename": "vsw",
+      "softwareversion": "0.0.11",
+      "softwaredid": "P9VxHNTAmn8LHnbXP95i4q"
     },
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "attr::testerdid::value": "8ombbMgjNRDXYf2ZhfvdzM",
-      "attr::softwaredid::value": "P9VxHNTAmn8LHnbXP95i4q",
-      "attr::testspecurl::value": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
-      "attr::testresult::value": "Pass"
+      "testerdid": "8ombbMgjNRDXYf2ZhfvdzM",
+      "softwaredid": "P9VxHNTAmn8LHnbXP95i4q",
+      "testspecurl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+      "testresult": "Pass"
     }
   ],
   "requested_predicates": {
     "1_ranking_GE_uuid": {
       "name": "ranking",
       "p_type": ">=",
-      "p_value": 3
+      "p_value": 3,
+      "restrictions": []
     }
   }
 }

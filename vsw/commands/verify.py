@@ -8,7 +8,9 @@ from multiprocessing.connection import Listener
 from typing import List
 from urllib import parse
 from urllib.parse import urljoin
+from rich.console import Console
 
+console = Console()
 import requests
 import validators
 from aries_cloudagent_vsw.messaging.util import str_to_epoch
@@ -90,9 +92,12 @@ def execute(proof_request, revoke_date):
                 msg = conn.recv()
                 state = msg["state"]
                 conn.close()
-                logger.info(f"waiting state update, current state is: {state}")
+                logger.debug(f"waiting state update, current state is: {state}")
                 if state == "verified":
-                    logger.info(json.dumps(msg))
+                    console.print("======presentation_request========")
+                    console.print(json.dumps(msg["presentation_request"], indent=4, sort_keys=True))
+                    console.print("======requested_proof========")
+                    console.print(json.dumps(msg["presentation"]["requested_proof"], indent=4, sort_keys=True))
                     if msg["verified"] == "false":
                         remove_proof_request(presentation_exchange_id)
                         logger.info("Verified error, Verified result from indy is False!")
@@ -127,8 +132,19 @@ def remove_empty_from_dict(d):
         return d
 
 
+def replace_attr_fields(cred):
+    new_cred = {}
+    for key,value in cred.items():
+        if key not in ["schema_id", "schema_issuer_did", "schema_issuer_did", "schema_name", "schema_version", "cred_def_id", "issuer_did"]:
+            new_cred[f'attr::{key.lower()}::value'] = value
+        else:
+            new_cred[key] = value
+    return new_cred
+
+
 def get_software_credential(data):
     for cred in data:
+        cred = replace_attr_fields(cred)
         if cred["schema_id"] == vsw_config.get("schema_id"):
             search_cred = remove_empty_from_dict(cred)
             return {"cred": cred, "search_cred": search_cred}
@@ -137,6 +153,7 @@ def get_software_credential(data):
 
 def get_test_credential(data):
     for cred in data:
+        cred = replace_attr_fields(cred)
         if cred["schema_id"] == vsw_config.get("test_schema_id"):
             search_cred = remove_empty_from_dict(cred)
             return {"cred": cred, "search_cred": search_cred}
@@ -209,7 +226,6 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         request_attributes["1_test_certificate_uuid"] = req_test_attr
     if requested_predicates:
         for p in requested_predicates.values():
-            p["restrictions"] = [{"schema_id": vsw_config.get("test_schema_id")}]
             p["non_revoked"] = {"from": time_from, "to": time_to}
 
     indy_proof_request = {
