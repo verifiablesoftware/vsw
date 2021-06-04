@@ -87,7 +87,7 @@ def parse_args(args):
 def provision(wallet_name, wallet_key):
     configuration = utils.get_vsw_agent()
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
-    logger.debug('genesis_file: ' + str(config_path))
+    logger.info('genesis_file: ' + str(config_path))
     endpoint = f'{configuration.get("outbound_transport_protocol")}://{configuration.get("inbound_transport_host")}:{configuration.get("inbound_transport_port")}/'
     try:
         args = [
@@ -119,7 +119,7 @@ def get_seed(wallet_name):
         try:
             seed = config[wallet_name]['key']
         except:
-            logger.debug('not found seed')
+            logger.info('not found seed')
     else:
         if os.path.exists(key_folder) is False:
             os.makedirs(key_folder)
@@ -171,7 +171,7 @@ def check_status():
             local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status/ready'
             response = requests.get(local)
             res = json.loads(response.text)
-            logger.debug(res)
+            logger.info(res)
             if res["ready"]:
                 return True;
             else:

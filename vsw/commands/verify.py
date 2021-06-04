@@ -77,7 +77,7 @@ def execute(proof_request, revoke_date):
         if "requested_predicates" in data:
             requested_predicates = data["requested_predicates"]
         connection = get_client_connection()
-        logger.debug(f'issuer connection_id: {connection["connection_id"]}')
+        logger.info(f'issuer connection_id: {connection["connection_id"]}')
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
         listener._listener._socket.settimeout(Constant.TIMEOUT)
@@ -92,7 +92,7 @@ def execute(proof_request, revoke_date):
                 msg = conn.recv()
                 state = msg["state"]
                 conn.close()
-                logger.debug(f"waiting state update, current state is: {state}")
+                logger.info(f"waiting state update, current state is: {state}")
                 if state == "verified":
                     console.print("======presentation_request========")
                     console.print(json.dumps(msg["presentation_request"], indent=4, sort_keys=True))
@@ -100,7 +100,7 @@ def execute(proof_request, revoke_date):
                     console.print(json.dumps(msg["presentation"]["requested_proof"], indent=4, sort_keys=True))
                     if msg["verified"] == "false":
                         remove_proof_request(presentation_exchange_id)
-                        logger.info("Verified error, Verified result from indy is False!")
+                        print("Verified error, Verified result from indy is False!")
                         listener.close()
                         break;
                     pres_req = msg["presentation_request"]
@@ -108,17 +108,18 @@ def execute(proof_request, revoke_date):
                             pres_req["name"] == TITLE
                     )
                     if is_proof_of_software_certificate:
-                        logger.info('Congratulation! verified successfully!')
+                        print('Congratulation! verified successfully!')
                     else:
                         remove_proof_request(presentation_exchange_id)
-                        logger.info("Verified error, the name in presentation request is wrong")
+                        print("Verified error, the name in presentation request is wrong")
                     listener.close()
                     break;
                 else:
                     time.sleep(0.5)
-            except socket.timeout:
+            except socket.timeout as e:
                 remove_proof_request(presentation_exchange_id)
-                logger.error("Request timeout, Verified error!")
+                print("Request timeout, Verified error!")
+                logger.error(e)
                 listener.close()
                 break;
 
@@ -238,7 +239,7 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
-    logger.debug(proof_request_web_request)
+    logger.info(proof_request_web_request)
     res = requests.post(vsw_url, json=proof_request_web_request)
     return json.loads(res.text)
 

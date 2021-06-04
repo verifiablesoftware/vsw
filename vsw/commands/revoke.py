@@ -55,10 +55,10 @@ def revoke(revocation_registry_id, credential_revocation_id, is_publish):
     if is_publish:
         publish = "true"
     url = f'{vsw_url_host}/issue-credential/revoke?rev_reg_id={revocation_registry_id}&cred_rev_id={credential_revocation_id}&publish={publish}'
-    logger.debug(f'The request revoke url: {url}')
+    logger.info(f'The request revoke url: {url}')
     revocation_res = requests.post(url)
-    json.loads(revocation_res.text)
-    logger.info("Revoke successfully!")
+    logger.info(revocation_res.text)
+    print("Revoke successfully!")
 
 
 def get_credential_record(cred_ex_id):

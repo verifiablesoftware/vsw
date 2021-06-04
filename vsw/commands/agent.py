@@ -17,7 +17,7 @@ def start_agent(argv):
     config_path = Path(__file__).parent.parent.joinpath("conf/genesis.txt").resolve()
     admin_port = configuration.get("admin_port")
     transport_port = configuration.get("inbound_transport_port")
-    logger.debug('genesis_file: ' + str(config_path))
+    logger.info('genesis_file: ' + str(config_path))
     try:
         args = ['--admin', configuration.get("admin_host"), admin_port,
                 '--inbound-transport', configuration.get("inbound_transport_protocol"),
@@ -51,7 +51,7 @@ def start_agent(argv):
         run_command('start', args)
     except BaseException as error:
         logger.error("started vsw failed.")
-        print('An exception occurred: {}'.format(error))
+        logger.error('An exception occurred: {}'.format(error))
 
 
 if __name__ == '__main__':

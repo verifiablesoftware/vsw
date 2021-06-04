@@ -2,8 +2,6 @@ import os
 import subprocess
 from typing import List
 
-import requests
-
 from vsw.log import Log
 from vsw.utils import Constant
 

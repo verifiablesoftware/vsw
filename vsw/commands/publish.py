@@ -31,7 +31,7 @@ def main(args: List[str]) -> bool:
             with open(args.cred_file) as json_file:
                 data = json.load(json_file)
                 schema_name = args.schema
-                logger.debug(f'schema name: {schema_name}')
+                logger.info(f'schema name: {schema_name}')
                 if schema_name != software_certificate and schema_name != test_certificate:
                     print(f"vsw: error: the schema name must be either {software_certificate} or {test_certificate}")
                     return;
@@ -61,6 +61,7 @@ def main(args: List[str]) -> bool:
         logger.error(vsw.utils.Constant.NOT_RUNNING_MSG)
     except ValueError as ve:
         logger.error(ve)
+        print(f"vsw: error: {ve}")
     except KeyboardInterrupt:
         print(" ==> Exit publish!")
 
@@ -93,17 +94,18 @@ def issue_credential(data):
             conn = listener.accept()
             msg = conn.recv()
             state = msg["state"]
-            logger.debug(f'waiting state change, current state is: {state}')
+            logger.info(f'waiting state change, current state is: {state}')
             conn.close()
             if state == 'credential_acked':
-                logger.info("Congratulation, execute publish successfully!")
+                print("Congratulation, execute publish successfully!")
                 listener.close()
                 break
             else:
                 time.sleep(0.5)
-        except socket.timeout:
+        except socket.timeout as e:
             remove_credential(credential_exchange_id)
-            logger.error("Request timeout, there might be some issue during publishing")
+            logger.error(e)
+            print("vsw: error: request timeout, there might be some issue during publishing")
             listener.close();
             break;
 
@@ -205,14 +207,14 @@ def get_credential_definition_id():
     if len(res["credential_definition_ids"]) == 0:
         raise ValueError('vsw: error: Not found credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
-    logger.debug(f'cred_def_id: {cred_def_id}')
+    logger.info(f'cred_def_id: {cred_def_id}')
     return cred_def_id
 
 
 def send_proposal(data):
     developer_did = get_public_did()
     connection = get_repo_connection()
-    logger.debug(f'holder connection_id: {connection["connection_id"]}')
+    logger.info(f'holder connection_id: {connection["connection_id"]}')
 
     digest = vsw.utils.generate_digest(data["softwareUrl"])
     source_hash = vsw.utils.generate_digest(data["sourceUrl"])

@@ -90,14 +90,15 @@ def issue_credential(data):
             logger.info(f'waiting state change, current state is: {state}')
             conn.close()
             if state == 'credential_acked':
-                logger.info("Congratulation, execute publish successfully!")
+                print("Congratulation, execute publish successfully!")
                 listener.close()
                 break
             else:
                 time.sleep(0.5)
-        except socket.timeout:
+        except socket.timeout as e:
             remove_credential(credential_exchange_id)
-            logger.error("Request timeout, there might be some issue during publishing")
+            print("Request timeout, there might be some issue during publishing")
+            logger.error(e)
             listener.close()
             break;
 
@@ -135,7 +136,7 @@ def get_public_did():
 def send_proposal(data):
     tester_did = get_public_did()
     connection = get_repo_connection()
-    logger.debug(f'holder connection_id: {connection["connection_id"]}')
+    logger.info(f'holder connection_id: {connection["connection_id"]}')
 
     test_spec_hash = vsw.utils.generate_digest(data["testSpecUrl"])
     test_result_detail_hash = vsw.utils.generate_digest(data["testResultDetailUrl"])

@@ -66,7 +66,8 @@ def do_credential_definition(schema_name):
         "tag": "default"
     })
     credential_definition_res = json.loads(res.text)
-    logger.info(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
+    logger.info(credential_definition_res)
+    print(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
 
 
 def parse_args(args):
@@ -86,13 +87,13 @@ def connection_repo():
     remove_history_connection(vsw_config)
     vsw_repo_config = vsw.utils.get_repo_host()
     vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
-    logger.debug(f'Create invitation to: {vsw_repo_url}')
+    logger.info(f'Create invitation to: {vsw_repo_url}')
     response = requests.post(vsw_repo_url)
     res = json.loads(response.text)
-    logger.debug(res)
+    logger.info(res)
 
     local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
-    logger.debug(f'Receive invitation {local_url}')
+    logger.info(f'Receive invitation {local_url}')
     invitation = res["invitation"]
     body = {
         "label": invitation["label"],
@@ -102,7 +103,7 @@ def connection_repo():
     }
     ss = requests.post(local_url, json=body)
     invitation_response = json.loads(ss.text)
-    logger.debug(invitation_response)
+    logger.info(invitation_response)
 
     connection_id = invitation_response["connection_id"]
     while True:
@@ -111,16 +112,17 @@ def connection_repo():
             msg = conn.recv()
             state = msg["state"]
             conn.close()
-            logger.debug(f'waiting state change, current state is: {state}')
+            logger.info(f'waiting state change, current state is: {state}')
             if state == 'active':
-                logger.info("Created connection successfully!")
+                print("Created connection successfully!")
                 listener.close()
                 break
             else:
                 time.sleep(0.5)
-        except socket.timeout:
+        except socket.timeout as e:
             remove_connection(connection_id, vsw_config)
-            logger.error("Request timeout, there might be some issue during initializing connection.")
+            logger.error(e)
+            print("vsw: error: request timeout, there might be some issue during initializing connection.")
             listener.close()
             break;
 
@@ -132,7 +134,7 @@ def remove_history_connection(vsw_config):
     for result in results:
         schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{result["connection_id"]}/remove'
         requests.post(schema_url)
-        logger.debug(f"Removed history connection id: {result['connection_id']}")
+        logger.info(f"Removed history connection id: {result['connection_id']}")
 
 
 def remove_connection(connection_id, vsw_config):

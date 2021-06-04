@@ -24,14 +24,11 @@ class Log:
 
         file_handler = logging.FileHandler(file_path, encoding='utf-8')
         file_handler.setFormatter(formatter)
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setFormatter(formatter)
 
         self.logger.addHandler(file_handler)
-        self.logger.addHandler(stream_handler)
         aries_handler = logging.FileHandler(aries_config_path)
         aries_log_handler = logging.FileHandler(aries_log_file)
-        streams = [file_handler.stream, stream_handler.stream, aries_handler.stream, aries_log_handler.stream]
+        streams = [file_handler.stream, aries_handler.stream, aries_log_handler.stream]
         self.logger.streams = streams
         self.logger.aries_config_path = aries_config_path
         self.logger.aries_log_file = aries_log_file
