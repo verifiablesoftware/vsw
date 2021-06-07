@@ -43,6 +43,7 @@ def save_endpoint(sub_domain):
     parser = configparser.ConfigParser()
     parser.read(Path(__file__).parent.joinpath("conf/vsw.ini").resolve())
     parser.set("vsw-agent", "endpoint", endpoint)
+    parser.set("vsw-agent", "seed", sub_domain)
     with open(Path(__file__).parent.joinpath("conf/vsw.ini").resolve(), 'w') as configfile:
         parser.write(configfile)
     return endpoint
@@ -85,7 +86,7 @@ def get_tails_server():
 
 
 def generate_digest(url):
-    if url is None:
+    if url is None or url == "":
         return ""
     with urllib.request.urlopen(url) as response:
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:

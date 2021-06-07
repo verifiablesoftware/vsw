@@ -1,6 +1,7 @@
 import json
 
 import requests
+from requests.auth import HTTPBasicAuth
 
 import vsw
 
@@ -52,3 +53,11 @@ def test_remove_all_connection():
 def test_clean_history_data():
     test_remove_all_connection()
     test_publish.test_clean_all_records()
+
+
+def test_api_key():
+    schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/status/ready'
+    custom_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
+    response = requests.get(schema_url, headers=custom_header)
+    results = json.loads(response.text)
+    print(results)

@@ -15,6 +15,7 @@ from vsw import utils
 from vsw.commands import init,exit
 from vsw.log import Log
 vsw_config = utils.get_vsw_agent()
+client_header = {"x-api-key": vsw_config.get("seed")}
 software_certificate = vsw_config.get("schema_name")
 logger = Log(__name__).logger
 
@@ -169,7 +170,7 @@ def check_status():
     while times < 30:
         try:
             local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status/ready'
-            response = requests.get(local)
+            response = requests.get(url=local, headers=client_header)
             res = json.loads(response.text)
             logger.info(res)
             if res["ready"]:

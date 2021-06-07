@@ -47,7 +47,7 @@ def start_agent(argv):
                 '--auto-respond-presentation-request',
                 '--auto-verify-presentation',
                 '--auto-respond-presentation-proposal',
-                '--admin-insecure-mode']
+                '--admin-api-key', seed]
         run_command('start', args)
     except BaseException as error:
         logger.error("started vsw failed.")

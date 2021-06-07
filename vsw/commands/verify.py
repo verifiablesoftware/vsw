@@ -24,6 +24,8 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 TITLE = "Proof of Test Certificate"
@@ -173,13 +175,13 @@ def check_version(software_version):
 def check_credential(data):
     wql = json.dumps(data)
     repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
-    res = requests.get(repo_url)
+    res = requests.get(url=repo_url, headers=repo_header)
     return json.loads(res.text)["results"]
 
 
 def remove_proof_request(presentation_exchange_id):
     vsw_url = urljoin(vsw_url_host, f"/present-proof/records/{presentation_exchange_id}/remove")
-    requests.post(vsw_url)
+    requests.post(url=vsw_url, headers=client_header)
 
 
 def retrieve_result(presentation_exchange_id):
@@ -190,7 +192,7 @@ def retrieve_result(presentation_exchange_id):
 
 def get_vsw_proof(pres_ex_id):
     vsw_url = urljoin(vsw_url_host, f"/present-proof/records/{pres_ex_id}")
-    res = requests.get(vsw_url)
+    res = requests.get(url=vsw_url, headers=client_header)
     return json.loads(res.text)
 
 
@@ -240,12 +242,12 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "proof_request": indy_proof_request
     }
     logger.info(proof_request_web_request)
-    res = requests.post(vsw_url, json=proof_request_web_request)
+    res = requests.post(url=vsw_url, json=proof_request_web_request, headers=client_header)
     return json.loads(res.text)
 
 
 def get_client_connection():
-    connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
+    connection_response = requests.get(url=f'{vsw_url_host}/connections?state=active', headers=client_header)
     res = json.loads(connection_response.text)
     connections = res["results"]
     if len(connections) > 0:

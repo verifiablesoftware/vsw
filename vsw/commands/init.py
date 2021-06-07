@@ -5,6 +5,7 @@ import time
 from typing import List
 
 import requests
+
 from vsw.utils import Constant
 import vsw.utils
 from vsw.log import Log
@@ -13,6 +14,9 @@ from multiprocessing.connection import Listener
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 vsw_config = vsw.utils.get_vsw_agent()
+vsw_repo_config = vsw.utils.get_repo_host()
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 software_certificate = vsw_config.get("schema_name")
 test_certificate = vsw_config.get("test_schema_name")
 
@@ -40,7 +44,7 @@ def get_schema_id_by_name(vsw_config, schema_name):
 
 def check_credential_definition(schema_id):
     cd_check_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions/created?schema_id={schema_id}'
-    resp = requests.get(cd_check_url)
+    resp = requests.get(url=cd_check_url, headers=client_header)
     check_res = json.loads(resp.text)
     if len(check_res["credential_definition_ids"]) > 0:
         return check_res["credential_definition_ids"][0]
@@ -59,12 +63,12 @@ def do_credential_definition(schema_name):
         print(f'vsw: error: creddef already existed, {check_result}')
         return;
     credential_definition_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/credential-definitions'
-    res = requests.post(credential_definition_url, json={
+    res = requests.post(url=credential_definition_url, json={
         "revocation_registry_size": 100,
         "support_revocation": True,
         "schema_id": schema_id,
         "tag": "default"
-    })
+    }, headers=client_header)
     credential_definition_res = json.loads(res.text)
     logger.info(credential_definition_res)
     print(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
@@ -85,10 +89,9 @@ def connection_repo():
     listener._listener._socket.settimeout(Constant.TIMEOUT)
     vsw_config = vsw.utils.get_vsw_agent()
     remove_history_connection(vsw_config)
-    vsw_repo_config = vsw.utils.get_repo_host()
     vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
     logger.info(f'Create invitation to: {vsw_repo_url}')
-    response = requests.post(vsw_repo_url)
+    response = requests.post(url=vsw_repo_url, headers=repo_header)
     res = json.loads(response.text)
     logger.info(res)
 
@@ -101,7 +104,7 @@ def connection_repo():
         "recipientKeys": invitation["recipientKeys"],
         "@id": invitation["@id"]
     }
-    ss = requests.post(local_url, json=body)
+    ss = requests.post(url=local_url, json=body, headers=client_header)
     invitation_response = json.loads(ss.text)
     logger.info(invitation_response)
 
@@ -129,14 +132,14 @@ def connection_repo():
 
 def remove_history_connection(vsw_config):
     schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections'
-    response = requests.get(schema_url)
+    response = requests.get(url=schema_url, headers=client_header)
     results = json.loads(response.text)["results"]
     for result in results:
         schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{result["connection_id"]}/remove'
-        requests.post(schema_url)
+        requests.post(url=schema_url, headers=client_header)
         logger.info(f"Removed history connection id: {result['connection_id']}")
 
 
 def remove_connection(connection_id, vsw_config):
     schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/connections/{connection_id}/remove'
-    requests.post(schema_url)
+    requests.post(url=schema_url, headers=client_header)

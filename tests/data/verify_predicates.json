@@ -3,16 +3,16 @@
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
       "issuer_did": "A9cEertJWkV6zKDTwcuEho",
-      "softwarename": "vsw",
-      "softwareversion": "0.0.11",
-      "softwaredid": "P9VxHNTAmn8LHnbXP95i4q"
+      "softwareName": "vsw",
+      "softwareVersion": "0.0.11",
+      "softwareDid": "P9VxHNTAmn8LHnbXP95i4q"
     },
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "testerdid": "8ombbMgjNRDXYf2ZhfvdzM",
-      "softwaredid": "P9VxHNTAmn8LHnbXP95i4q",
-      "testspecurl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
-      "testresult": "Pass"
+      "testerDid": "8ombbMgjNRDXYf2ZhfvdzM",
+      "softwareDid": "P9VxHNTAmn8LHnbXP95i4q",
+      "testSpecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+      "testResult": "Pass"
     }
   ],
   "requested_predicates": {

@@ -20,6 +20,8 @@ test_certificate = vsw_config.get("test_schema_name")
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 
@@ -112,17 +114,18 @@ def issue_credential(data):
 
 def remove_credential(credential_exchange_id):
     url = urljoin(repo_url_host, f"/issue-credential/records/{credential_exchange_id}/remove")
-    requests.post(url)
+    requests.post(url=url, headers=repo_header)
 
 
 def get_repo_connection():
-    vsw_connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
+    vsw_connection_response = requests.get(url=f'{vsw_url_host}/connections?state=active', headers=client_header)
     res = json.loads(vsw_connection_response.text)
     connections = res["results"]
     if len(connections) > 0:
         last_connection = connections[-1]
         repo_connection_response = requests.get(
-            f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}')
+            url=f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}',
+            headers=repo_header)
         repo_res = json.loads(repo_connection_response.text)
         repo_connections = repo_res["results"]
         if len(repo_connections) > 0:
@@ -135,7 +138,7 @@ def get_repo_connection():
 
 def get_public_did():
     url = urljoin(vsw_url_host, "/wallet/did/public")
-    response = requests.get(url)
+    response = requests.get(url=url, headers=client_header)
     res = json.loads(response.text)
     return res["result"]["did"]
 
@@ -143,7 +146,7 @@ def get_public_did():
 def get_credential(developer_did, software_name):
     wql = json.dumps({"attr::developerdid::value": developer_did, "attr::softwarename::value": software_name})
     repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
-    res = requests.get(repo_url)
+    res = requests.get(url=repo_url, headers=repo_header)
     try:
         return json.loads(res.text)["results"]
     except BaseException:
@@ -180,29 +183,29 @@ def generate_software_did(developer_did, software_name, software_version, downlo
 
 def generate_new_did(download_url):
     # Create a DID
-    create_did_res = requests.post(urljoin(vsw_url_host, "/wallet/did/create"))
+    create_did_res = requests.post(url=urljoin(vsw_url_host, "/wallet/did/create"), headers=client_header)
     res = json.loads(create_did_res.text)
     did = res["result"]["did"]
     verkey = res["result"]["verkey"]
     # Write DID to ledger by NYM
-    ledger_res = requests.post(urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"))
+    ledger_res = requests.post(url=urljoin(vsw_url_host, f"/ledger/register-nym?did={did}&verkey={verkey}"), headers=client_header)
     write_did_ledger_res = json.loads(ledger_res.text)
     if write_did_ledger_res["success"] is False:
         logger.err("vsw: error: write did to ledger failed!")
         raise Exception('write did to ledger failed!')
     # Set DID Endpoint
-    did_endpoint_res = requests.post(urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
+    did_endpoint_res = requests.post(url=urljoin(vsw_url_host, f"/wallet/set-did-endpoint"), json={
         "did": did,
         "endpoint_type": "Endpoint",
         "endpoint": download_url  # not support :h1 format
-    })
+    }, headers=client_header)
     logger.info(f'Created new software-did: {did}')
     return did
 
 
 def get_credential_definition_id():
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("schema_id")}'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
         raise ValueError('vsw: error: Not found credential definition id!')
@@ -217,14 +220,16 @@ def send_proposal(data):
     logger.info(f'holder connection_id: {connection["connection_id"]}')
 
     digest = vsw.utils.generate_digest(data["softwareUrl"])
-    source_hash = vsw.utils.generate_digest(data["sourceUrl"])
+    source_url = data.get("sourceUrl", "")
+    source_hash = vsw.utils.generate_digest(source_url)
     if "sourceHash" in data and data["sourceHash"] != source_hash:
         raise ValueError("vsw: error: incorrect sourceHash value!")
+
     cred_def_id = get_credential_definition_id()
 
     software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
-    res = requests.post(vsw_repo_url, json={
+    res = requests.post(url=vsw_repo_url, headers=repo_header, json={
         "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,
@@ -263,15 +268,15 @@ def send_proposal(data):
                 },
                 {
                     "name": "mediaType",
-                    "value": data["mediaType"]
+                    "value": data.get("mediaType", "")
                 },
                 {
                     "name": "sourceDid",
-                    "value": data["sourceDid"]
+                    "value": data.get("sourceDid", "")
                 },
                 {
                     "name": "sourceUrl",
-                    "value": data["sourceUrl"]
+                    "value": source_url
                 },
                 {
                     "name": "sourceHash",
@@ -279,19 +284,19 @@ def send_proposal(data):
                 },
                 {
                     "name": "builderToolDidList",
-                    "value": data["builderToolDidList"]
+                    "value": data.get("builderToolDidList", "")
                 },
                 {
                     "name": "dependencyDidList",
-                    "value": data["dependencyDidList"]
+                    "value": data.get("dependencyDidList", "")
                 },
                 {
                     "name": "buildLog",
-                    "value": data["buildLog"]
+                    "value": data.get("buildLog", "")
                 },
                 {
                     "name": "builderDid",
-                    "value": data["builderDid"]
+                    "value": data.get("builderDid", "")
                 }
             ]
         },

@@ -10,14 +10,16 @@ from vsw.utils import get_vsw_agent, get_repo_host, Constant
 from vsw.commands import exit
 logger = Log(__name__).logger
 console = Console()
+vsw_config = get_vsw_agent()
+vsw_repo_config = get_repo_host()
+repo_url_host = vsw_repo_config.get("host")
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 
 
 def main(argv: List[str]) -> bool:
     if exit.check_vsw_is_running():
         args = parse_args(argv)
-        vsw_config = get_vsw_agent()
-        vsw_repo_config = get_repo_host()
-        repo_url_host = vsw_repo_config.get("host")
         try:
             if args.connection:
                 get_connections(vsw_config)
@@ -66,7 +68,7 @@ def parse_args(args):
 def get_credential_definition(vsw_config):
     did = get_public_did(vsw_config)
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?issuer_did={did}'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
@@ -74,21 +76,21 @@ def get_credential_definition(vsw_config):
 def get_credentials(repo_url_host, vsw_config):
     did = get_public_did(vsw_config)
     repo = urljoin(f'{repo_url_host}', '/credentials?wql={"issuer_did":"'+did+'"}')
-    response = requests.get(repo)
+    response = requests.get(url=repo, headers=repo_header)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_public_did(vsw_config):
     url = urljoin(f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}', "/wallet/did/public")
-    response = requests.get(url)
+    response = requests.get(url=url, headers=client_header)
     res = json.loads(response.text)
     return res["result"]["did"]
 
 
 def get_status(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
@@ -96,14 +98,14 @@ def get_status(vsw_config):
 def get_schema(vsw_config):
     schema_id = vsw_config.get("schema_id")
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/schemas/{schema_id}'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     console.print(f"======vsw software certificate schema_id: {schema_id}======")
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
     test_schema_id = vsw_config.get("test_schema_id")
     test_local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/schemas/{test_schema_id}'
-    test_response = requests.get(test_local)
+    test_response = requests.get(url=test_local, headers=client_header)
     test_res = json.loads(test_response.text)
     console.print(f"======vsw attest schema_id: {test_schema_id}======")
     console.print(json.dumps(test_res, indent=4, sort_keys=True))
@@ -111,14 +113,14 @@ def get_schema(vsw_config):
 
 def get_wallet(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/wallet/did'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
 def get_present_proof(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/present-proof/records'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     sorted_res = res["results"]
     sorted_res.sort(key=lambda p: p["created_at"])
@@ -133,6 +135,6 @@ def get_present_proof(vsw_config):
 
 def get_connections(vsw_config):
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     console.print(json.dumps(res, indent=4, sort_keys=True))

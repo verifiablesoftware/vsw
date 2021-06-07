@@ -12,6 +12,8 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = 60
 
@@ -56,13 +58,13 @@ def revoke(revocation_registry_id, credential_revocation_id, is_publish):
         publish = "true"
     url = f'{vsw_url_host}/issue-credential/revoke?rev_reg_id={revocation_registry_id}&cred_rev_id={credential_revocation_id}&publish={publish}'
     logger.info(f'The request revoke url: {url}')
-    revocation_res = requests.post(url)
+    revocation_res = requests.post(url=url, headers=client_header)
     logger.info(revocation_res.text)
     print("Revoke successfully!")
 
 
 def get_credential_record(cred_ex_id):
     url = urljoin(repo_url_host, f"/issue-credential/records/{cred_ex_id}")
-    credential_response = requests.get(url)
+    credential_response = requests.get(url=url, headers=repo_header)
     res = json.loads(credential_response.text)
     return res

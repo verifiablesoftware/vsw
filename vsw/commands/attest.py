@@ -17,6 +17,8 @@ vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 repo_url_host = vsw_repo_config.get("host")
+client_header = {"x-api-key": vsw_config.get("seed")}
+repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 
@@ -65,7 +67,7 @@ def parse_args(args):
 
 def get_credential_definition_id():
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("test_schema_id")}'
-    response = requests.get(local)
+    response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
         raise ValueError('vsw: error: Not found attest credential definition id!')
@@ -105,17 +107,17 @@ def issue_credential(data):
 
 def remove_credential(credential_exchange_id):
     url = urljoin(repo_url_host, f"/issue-credential/records/{credential_exchange_id}/remove")
-    requests.post(url)
+    requests.post(url=url, headers=repo_header)
 
 
 def get_repo_connection():
-    vsw_connection_response = requests.get(f'{vsw_url_host}/connections?state=active')
+    vsw_connection_response = requests.get(url=f'{vsw_url_host}/connections?state=active', headers=client_header)
     res = json.loads(vsw_connection_response.text)
     connections = res["results"]
     if len(connections) > 0:
         last_connection = connections[-1]
         repo_connection_response = requests.get(
-            f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}')
+            url=f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}', headers=repo_header)
         repo_res = json.loads(repo_connection_response.text)
         repo_connections = repo_res["results"]
         if len(repo_connections) > 0:
@@ -128,7 +130,7 @@ def get_repo_connection():
 
 def get_public_did():
     url = urljoin(vsw_url_host, "/wallet/did/public")
-    response = requests.get(url)
+    response = requests.get(url=url, headers=client_header)
     res = json.loads(response.text)
     return res["result"]["did"]
 
@@ -141,7 +143,7 @@ def send_proposal(data):
     test_spec_hash = vsw.utils.generate_digest(data["testSpecUrl"])
     test_result_detail_hash = vsw.utils.generate_digest(data["testResultDetailUrl"])
     vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
-    res = requests.post(vsw_repo_url, json={
+    res = requests.post(url=vsw_repo_url, headers=repo_header, json={
         "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,

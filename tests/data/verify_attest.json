@@ -2,13 +2,13 @@
   "requested_attributes": [
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "testerdid": "HEKMez9mir6QWWru57neCB",
-      "testspecdid": "2ukrFWzuNVsKVHtHVwSLZh",
-      "softwaredid": "BHC2VWDpKjXdZRjjEypw4G",
-      "testspecurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-      "testresult": "pass",
-      "testresultdetaildid": "2ukrFWzuNVsKVHtHVwSLZh",
-      "testresultdetailurl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "testerDid": "HEKMez9mir6QWWru57neCB",
+      "testSpecDid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "softwareDid": "BHC2VWDpKjXdZRjjEypw4G",
+      "testSpecUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+      "testResult": "pass",
+      "testResultDetailDid": "2ukrFWzuNVsKVHtHVwSLZh",
+      "testResultDetailUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
       "comments": "useful software tool"
     }
   ]
