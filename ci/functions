@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# exit successfully
+
+success() { echo "OK" ; exit 0 ; }
+
+# fail() - fail test
+
+# usage  : fail [-soft] "message"
+# returns: 10 on soft fail, 11 on hard fail, 0 on success
+
+fail() {
+	[[ "${1:-}" == "-soft" ]] && {
+		shift
+		echo "SOFT FAIL: $*"
+		exit 10
+	} || {
+		echo "FAIL: $*"
+		echo ""
+		echo "Dumping logs:"
+		for file in /root/logs/*.log ; do
+			echo ""
+			echo "${file}:"
+			echo "" 
+			cat ${file}
+		done
+		exit 11
+	}
+}
+
+# pwgen() - generate a password
+
+# usage  : pwgen [length]
+# returns: random alphanumeric string of length [length] or 64 if unspecified
+
+pwgen() {
+	[[ "${1:-}" != "" ]] && LEN="$1" || LEN=64
+	dd if=/dev/urandom bs=$((LEN*64)) count=1 2>/dev/null | tr -c -d [:alnum:] | cut -b 1-${LEN}
+}
+
+# prettyprinting
+
+header() {
+
+	echo ""
+	echo "*** $* ***"
+	echo ""
+}
+
+# waitfor() - wait for a process to finish for given number of seconds
+
+# usage: waitfor <seconds> <pid>
+# returns: 0 if process exits within timeframe
+#          1 if process is still active
+
+# example:
+#
+# RESPONSE="$(example-command)" &
+# waitfor 10 $!
+
+# NOTE: this is for a single subprocess only
+
+waitfor() {
+
+	local c=$1
+	while ((c > 0)) ; do
+		r=0
+		ps h -o pid $2 >/dev/null || { r=$? ; break ; }
+		sleep 1
+		let c--
+	done
+	echo ""
+	[[ $r == 0 ]] && return 1 || return 0
+	return 1
+}
+
+# trap script failure to exit vsw client
+
+vswClientExit() { vsw exit ; }
+
+#trap vswClientExit ERR
+
+declare -a DID
+declare -a VER
+declare -a pass
+[[ -f "/root/.indy_client/pw" ]] && source "/root/.indy_client/pw"

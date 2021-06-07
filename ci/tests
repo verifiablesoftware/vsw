@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -euo pipefail
+
+	echo "Running tests."
+
+for script in /root/tests/[[:digit:]][[:digit:]]-* ; do
+
+	echo ""
+	echo "---"
+	echo $(basename $script)
+
+	r=0
+
+	/bin/bash $script || r=$?
+
+	[[ $r == 0 ]] && continue
+
+	case $r in
+		10)
+			echo WARN: soft fail, continue.
+		;;
+		11)
+			echo ERROR: hard fail, stop.
+			exit 1
+		;;
+		124)
+			echo TIMEOUT: stop.
+			exit 1
+		;;
+		*)
+			echo Error ${r}: stop.
+			exit 1
+	esac
+done
+

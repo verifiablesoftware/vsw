@@ -1,0 +1,53 @@
+#!/bin/bash
+
+source $(dirname $0)/functions
+
+for i in $(seq 1 1) ; do
+
+	#
+	# generate wallets and their passwords
+	#
+
+	header "Generating wallet for user $i"
+
+	pass[$i]="$(pwgen)"
+	RESP="$(vsw setup --ports $HTTP_PORT,$ADMIN_PORT,$WEBHOOK_PORT newwallet -k ${pass[$i]} user1)" || fail "wallet generation failed for user $i, error $?"
+	DID[$i]="$(echo "$RESP" | grep -e "^Created new public DID:" | cut -d " " -f 5)"
+	VER[$i]="$(echo "$RESP" | grep "^Verkey: " | cut -d " " -f 2)"
+
+	[[ ${DID[$i]} != "" ]] || fail "Empty DID for user $i"
+	echo User $i DID ${DID[$i]}
+	echo User $i VER ${VER[$i]:0:10} ...
+	echo User $i PSW ${pass[$i]:0:10} ...
+	echo "pass[$i]=\"${pass[$i]}\"" >> /root/.indy_client/pw
+	echo "VER[$i]=\"${DID[$i]}\"" >> /root/.indy_client/pw
+	echo "DID[$i]=\"${VER[$i]}\"" >> /root/.indy_client/pw
+
+	#
+	# register DID in Buildernet
+	#
+
+	header "Registering DID for user $i"
+
+	RESP="$(curl \
+	    --silent \
+	    --header "Content-Type: application/json" \
+	    --request POST \
+	    --data "{\"network\":\"buildernet\",\"did\":\"$DID1\",\"verkey\":\"$VER1\",\"paymentaddr\":\"\"}" \
+	    https://selfserve.sovrin.org/nym)"
+	r=$?
+	[[ $r == 0 ]] || fail "curl fails with error code $r"
+
+	STATUS="$(echo $RESP | jq .statusCode)"
+	[[ $STATUS == 200 ]] && echo "Registration successful." || { echo $RESP ; fail "registration failed, status $STATUS" ; }
+
+done
+
+header "shortened dump of our user database"
+
+cut -b 1-15 /root/.indy_client/pw | sed -e s/$/.../g
+
+vsw exit
+
+echo PASS
+

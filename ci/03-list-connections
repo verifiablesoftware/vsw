@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source $(dirname $0)/functions
+
+#
+# list connections
+#
+
+# vsw setup --ports $HTTP_PORT,$ADMIN_PORT,$WEBHOOK_PORT wallet -k ${pass[1]} user1
+
+vsw list -c || fail "vsw list -c failed, error $?"
+
+echo PASS
+

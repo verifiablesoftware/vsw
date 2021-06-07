@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# configuration options:
+# IMG_VERSION - internal image version for the testing env
+# VSW_VERSION - specific version of the client to use for tests
+
+IMG_VERSION=0.2.20
+VSW_VERSION=0.0.20
+
+[[ "$1" != "" ]] && CMD="$@" || CMD="/root/tests/tests"
+
+docker build --build-arg VSW_VERSION=$VSW_VERSION -t vsw-tests:${IMG_VERSION} . || { echo "Container build failed with error $?." ; exit 1 ; }
+
+#	-v $PWD/wallets:/root/.indy_client \
+
+docker run \
+	--network host \
+	--rm \
+	-i \
+	vsw-tests:${IMG_VERSION} \
+	$CMD
+
+exit $?
