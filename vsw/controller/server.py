@@ -11,7 +11,7 @@ from vsw.utils import Constant
 
 app = Flask(__name__)
 
-log_folder = str(Path(os.path.expanduser('~')).joinpath("logs").resolve())
+log_folder = str(Path(os.path.expanduser('~')).joinpath("vsw_logs").resolve())
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
 controller_log_file = str(Path(os.path.expanduser('~')).joinpath("vsw_logs/vsw-controller.log").resolve())
