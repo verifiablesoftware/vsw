@@ -15,7 +15,6 @@ from vsw import utils
 from vsw.commands import init,exit
 from vsw.log import Log
 vsw_config = utils.get_vsw_agent()
-client_header = {"x-api-key": vsw_config.get("seed")}
 software_certificate = vsw_config.get("schema_name")
 logger = Log(__name__).logger
 
@@ -45,8 +44,9 @@ def main(args: List[str]) -> bool:
                 utils.set_port_number(args.ports)
             start_local_tunnel(args.name)
             start_controller()
-            start_agent(args.name, args.key, get_seed(args.name))
-            ready = check_status()
+            seed = get_seed(args.name)
+            start_agent(args.name, args.key, seed)
+            ready = check_status(seed)
             if ready:
                 print("success")
             else:
@@ -165,11 +165,12 @@ def start_agent(name, key, seed):
     os.system(f'nohup python3 {agent_file} {name} {key} {seed}> {vsw_log_file} 2>&1 &')
 
 
-def check_status():
+def check_status(seed):
     times = 0
     while times < 30:
         try:
             local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status/ready'
+            client_header = {"x-api-key": seed}
             response = requests.get(url=local, headers=client_header)
             res = json.loads(response.text)
             logger.info(res)

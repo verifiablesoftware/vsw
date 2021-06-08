@@ -6,17 +6,17 @@ if which node > /dev/null
      echo "Sorry, you have not installed Nodejs, please go to https://nodejs.org/en/ to install it firstly."
      exit 0
 fi
-if [ ! -d /usr/local/localtunnel-master ]; then
-    cd ~
+cd ~
+if [ ! -d ~/localtunnel-master ]; then
     if [ ! -f ~/master.zip ]; then
       echo "Downloading localtunnel client source code"
       wget https://github.com/localtunnel/localtunnel/archive/master.zip
     fi
     echo "Unzip client source code"
-    unzip -o master.zip -d /usr/local/
-    cd /usr/local/localtunnel-master
+    unzip master.zip
+    cd ~/localtunnel-master
     npm install -g localtunnel
-    rm -rf ~/master.zip
+    rm -rf master.zip
 fi
-cd /usr/local/localtunnel-master
+cd ~/localtunnel-master
 npx localtunnel --port $1 --subdomain $2
