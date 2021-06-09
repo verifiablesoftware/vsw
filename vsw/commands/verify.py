@@ -118,6 +118,8 @@ def execute(proof_request, revoke_date):
 
 
 def arrange_request_attribute(request_attribute):
+    if not request_attribute:
+        return None
     restrictions = request_attribute.get("restrictions")
     arranged_restrictions = []
     for restriction in restrictions:
@@ -205,13 +207,13 @@ def send_request(client_conn_id, software_request_attribute, test_request_attrib
     request_attributes = {}
     if software_request_attribute:
         request_attributes["0_software_certificate_uuid"] = {
-            "names": map(lambda x:x.lower(), software_request_attribute["names"]),
+            "names": list(map(str.lower,software_request_attribute["names"])),
             "non_revoked": {"from": time_from, "to": time_to},
             "restrictions": software_request_attribute["restrictions"]
         }
     if test_request_attribute:
         request_attributes["1_test_certificate_uuid"] = {
-            "names": map(lambda x:x.lower(), test_request_attribute["names"]),
+            "names": list(map(str.lower,test_request_attribute["names"])),
             "non_revoked": {"from": time_from, "to": time_to},
             "restrictions": test_request_attribute["restrictions"]
         }
