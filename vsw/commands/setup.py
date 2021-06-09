@@ -65,8 +65,6 @@ def main(args: List[str]) -> bool:
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--ports", required=False,
-                        help="The ports number, format is (<endpoint_port>,<admin_port>,<webhook_port>)")
     subparsers = parser.add_subparsers(dest="subcommand")
 
     new_wallet_parser = subparsers.add_parser('newwallet')
@@ -77,6 +75,8 @@ def parse_args(args):
     wallet_parser.add_argument('name', help='wallet name')
     wallet_parser.add_argument('-k', '--key', required=True, help="wallet key")
     wallet_parser.add_argument('-e', '--endorser', action='store_true')
+    wallet_parser.add_argument("-p", "--ports", required=False,
+                        help="The ports number, format is (<endpoint_port>,<admin_port>,<webhook_port>)")
 
     subparsers.add_parser('connection')
     creddef_parser = subparsers.add_parser('creddef')
