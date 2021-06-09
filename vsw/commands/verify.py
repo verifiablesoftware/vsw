@@ -1,13 +1,13 @@
 import argparse
 import calendar
-from datetime import datetime, timezone
 import json
 import socket
 import time
+from datetime import datetime, timezone
 from multiprocessing.connection import Listener
 from typing import List
-from urllib import parse
 from urllib.parse import urljoin
+
 from rich.console import Console
 
 console = Console()
@@ -48,33 +48,24 @@ def main(args: List[str]) -> bool:
 def execute(proof_request, revoke_date):
     with open(proof_request) as json_file:
         data = json.load(json_file)
-        software_credential_dict = get_software_credential(data["requested_attributes"])
-        software_credential_search = software_credential_dict["search_cred"]
-        software_credential = software_credential_dict["cred"]
+        requested_attributes = data["requested_attributes"]
+        software_request_attribute = get_software_requested_attribute(requested_attributes)
+        test_request_attribute = get_test_request_attribute(requested_attributes)
+        software_request_attribute = arrange_request_attribute(software_request_attribute)
+        test_request_attribute = arrange_request_attribute(test_request_attribute)
 
-        if software_credential:
-            if "attr::softwareversion::value" in software_credential:
-                software_version = software_credential["attr::softwareversion::value"]
-                if check_version(software_version) is False:
-                    return;
-            if "attr::softwareurl::value" in software_credential:
-                software_url = software_credential["attr::softwareurl::value"]
-                if not validators.url(software_url):
-                    print('vsw: error: the software package url is wrong, please check')
-                    return
-            credentials = check_credential(software_credential_search)
-            if len(credentials) == 0:
-                print("vsw: error: No found matched credential, please check if the specified conditions are correct.")
-                return;
-        test_credential_dict = get_test_credential(data["requested_attributes"])
-        test_credential_search = test_credential_dict["search_cred"]
-        test_credential = test_credential_dict["cred"]
-        if test_credential:
-            credentials = check_credential(test_credential_search)
-            if len(credentials) == 0:
-                print(
-                    "vsw: error: No found matched attest credential, please check if the specified conditions are correct.")
-                return;
+        if software_request_attribute and software_request_attribute.get("restrictions"):
+            for restriction in software_request_attribute.get("restrictions"):
+                if "attr::softwareversion::value" in restriction:
+                    software_version = restriction["attr::softwareversion::value"]
+                    if check_version(software_version) is False:
+                        return;
+                if "attr::softwareurl::value" in restriction:
+                    software_url = restriction["attr::softwareurl::value"]
+                    if not validators.url(software_url):
+                        print('vsw: error: the software package url is wrong, please check')
+                        return
+
         requested_predicates = {}
         if "requested_predicates" in data:
             requested_predicates = data["requested_predicates"]
@@ -83,7 +74,7 @@ def execute(proof_request, revoke_date):
         address = ('localhost', Constant.PORT_NUMBER)
         listener = Listener(address)
         listener._listener._socket.settimeout(Constant.TIMEOUT)
-        proof_response = send_request(connection["connection_id"], software_credential_search, test_credential_search,
+        proof_response = send_request(connection["connection_id"], software_request_attribute, test_request_attribute,
                                       requested_predicates, revoke_date)
         presentation_exchange_id = proof_response["presentation_exchange_id"]
         logger.info(f'presentation_exchange_id: {presentation_exchange_id}')
@@ -126,6 +117,17 @@ def execute(proof_request, revoke_date):
                 break;
 
 
+def arrange_request_attribute(request_attribute):
+    restrictions = request_attribute.get("restrictions")
+    arranged_restrictions = []
+    for restriction in restrictions:
+        restriction = remove_empty_from_dict(restriction)
+        restriction = replace_attr_fields(restriction)
+        arranged_restrictions.append(restriction)
+    request_attribute["restrictions"] = arranged_restrictions
+    return request_attribute
+
+
 def remove_empty_from_dict(d):
     if type(d) is dict:
         return dict((k, remove_empty_from_dict(v)) for k, v in d.items() if v and remove_empty_from_dict(v))
@@ -135,32 +137,33 @@ def remove_empty_from_dict(d):
         return d
 
 
-def replace_attr_fields(cred):
-    new_cred = {}
-    for key,value in cred.items():
-        if key not in ["schema_id", "schema_issuer_did", "schema_issuer_did", "schema_name", "schema_version", "cred_def_id", "issuer_did"]:
-            new_cred[f'attr::{key.lower()}::value'] = value
+def replace_attr_fields(restriction : dict):
+    new_restriction = {}
+    for key, value in restriction.items():
+        if key not in ["schema_id", "schema_issuer_did", "schema_name", "schema_version",
+                       "cred_def_id", "issuer_did"]:
+            new_restriction[f'attr::{key.lower()}::value'] = value
         else:
-            new_cred[key] = value
-    return new_cred
+            new_restriction[key] = value
+    return new_restriction
 
 
-def get_software_credential(data):
-    for cred in data:
-        cred = replace_attr_fields(cred)
-        if cred["schema_id"] == vsw_config.get("schema_id"):
-            search_cred = remove_empty_from_dict(cred)
-            return {"cred": cred, "search_cred": search_cred}
-    return {"cred": None, "search_cred": None}
+def get_software_requested_attribute(requested_attributes):
+    for req_attr in requested_attributes:
+        restrictions = req_attr["restrictions"]
+        for restriction in restrictions:
+            if restriction["schema_id"] == vsw_config.get("schema_id"):
+                return req_attr
+    return None
 
 
-def get_test_credential(data):
-    for cred in data:
-        cred = replace_attr_fields(cred)
-        if cred["schema_id"] == vsw_config.get("test_schema_id"):
-            search_cred = remove_empty_from_dict(cred)
-            return {"cred": cred, "search_cred": search_cred}
-    return {"cred": None, "search_cred": None}
+def get_test_request_attribute(requested_attributes):
+    for req_attr in requested_attributes:
+        restrictions = req_attr["restrictions"]
+        for restriction in restrictions:
+            if restriction["schema_id"] == vsw_config.get("test_schema_id"):
+                return req_attr
+    return None
 
 
 def check_version(software_version):
@@ -170,13 +173,6 @@ def check_version(software_version):
         print("vsw: error: the software version format is incorrect. the correct format should be 'MAJOR.MINOR.PATCH'")
         return False
     return True
-
-
-def check_credential(data):
-    wql = json.dumps(data)
-    repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
-    res = requests.get(url=repo_url, headers=repo_header)
-    return json.loads(res.text)["results"]
 
 
 def remove_proof_request(presentation_exchange_id):
@@ -196,7 +192,7 @@ def get_vsw_proof(pres_ex_id):
     return json.loads(res.text)
 
 
-def send_request(client_conn_id, software_credential, test_credential, requested_predicates, revoke_date):
+def send_request(client_conn_id, software_request_attribute, test_request_attribute, requested_predicates, revoke_date):
     vsw_url = f'{vsw_url_host}/present-proof/send-request'
     NOW_8601 = datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(" ", "seconds")
     NOW_EPOCH = str_to_epoch(NOW_8601)
@@ -205,30 +201,29 @@ def send_request(client_conn_id, software_credential, test_credential, requested
 
     if revoke_date:
         time_to = calendar.timegm(datetime.strptime(revoke_date, '%Y-%m-%d').timetuple())
-    req_attr = {
-        "names": ["softwarename", "softwareversion", "developerdid", "softwaredid", "softwarehash", "softwareurl",
-                  "mediatype", "sourcedid", "sourceurl", "sourcehash", "buildertooldidlist", "dependencydidlist",
-                  "buildlog", "builderdid"],
-        "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": [software_credential]
-    }
-    test_names = ["testerdid", "testspecdid", "testspecurl", "testspechash", "testresult", "testresultdetaildid",
-                  "testresultdetailurl", "testresultdetailhash", "comments", "softwaredid"]
-    if not requested_predicates or len(requested_predicates.values()) == 0:
-        test_names.append("ranking")
-    req_test_attr = {
-        "names": test_names,
-        "non_revoked": {"from": time_from, "to": time_to},
-        "restrictions": [test_credential]
-    }
 
     request_attributes = {}
-    if software_credential:
-        request_attributes["0_software_certificate_uuid"] = req_attr
-    if test_credential:
-        request_attributes["1_test_certificate_uuid"] = req_test_attr
+    if software_request_attribute:
+        request_attributes["0_software_certificate_uuid"] = {
+            "names": map(lambda x:x.lower(), software_request_attribute["names"]),
+            "non_revoked": {"from": time_from, "to": time_to},
+            "restrictions": software_request_attribute["restrictions"]
+        }
+    if test_request_attribute:
+        request_attributes["1_test_certificate_uuid"] = {
+            "names": map(lambda x:x.lower(), test_request_attribute["names"]),
+            "non_revoked": {"from": time_from, "to": time_to},
+            "restrictions": test_request_attribute["restrictions"]
+        }
     if requested_predicates:
         for p in requested_predicates.values():
+            for key, value in p.items():
+                if key == "restrictions":
+                    arranged_restrictions = []
+                    for rp_restriction in value:
+                        arranged_restrictions.append(replace_attr_fields(rp_restriction))
+                    p["restrictions"] = arranged_restrictions
+                    break;
             p["non_revoked"] = {"from": time_from, "to": time_to}
 
     indy_proof_request = {
@@ -241,7 +236,7 @@ def send_request(client_conn_id, software_credential, test_credential, requested
         "connection_id": client_conn_id,
         "proof_request": indy_proof_request
     }
-    logger.info(proof_request_web_request)
+    logger.info(json.dumps(proof_request_web_request))
     res = requests.post(url=vsw_url, json=proof_request_web_request, headers=client_header)
     return json.loads(res.text)
 

@@ -45,6 +45,8 @@ If you have already locally installed it before, need to uninstall it firstly.
     &emsp;&emsp;&emsp;&emsp;name: the wallet name
     
     &emsp;&emsp;&emsp;&emsp;-k,--key: the wallet key
+    
+    &emsp;&emsp;&emsp;&emsp;-p,--ports: The ports number, format is (<endpoint_port>,<admin_port>,<webhook_port>)
       
     **connection:** create connection
     
