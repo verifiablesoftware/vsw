@@ -4,15 +4,15 @@
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
       "softwareName": "vsw",
       "softwareVersion": "0.0.11",
-      "issuer_did": "8JPc3RHRakGSCyBkwCuaG9",
-      "softwareDid": "Nq5NQ9Sh1VzcfLKfCD3LBR"
+      "issuer_did": "MXNhcPST626WSqAj5pMorh",
+      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h"
     },
     {
       "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
       "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
       "testResult": "Pass",
-      "softwareDid": "Nq5NQ9Sh1VzcfLKfCD3LBR",
-      "testerDid": "9VTtZvn3CVYaUuWMvo5G9h"
+      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h",
+      "testerDid": "9BsvDaG1at5auNiYbDqmDF"
     }
   ]
 }
