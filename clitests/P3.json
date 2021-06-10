@@ -1,0 +1,15 @@
+{
+  "schemaName": "testCertificate",
+  "schemaVersion": "0.1",
+  "schemaID": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
+  "softwareName": "vsw",
+  "softwareVersion": "0.0.11",
+  "testSpecDid": "",
+  "testSpecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+  "testResult": "Pass",
+  "testResultDetailDid": "",
+  "testResultDetailUrl": "https://github.com/verifiablesoftware/vsw-repo/actions",
+  "ranking": "3",
+  "comments": "Tested vsw 0.0.11",
+  "softwareDid": "Nq5NQ9Sh1VzcfLKfCD3LBR"
+}
