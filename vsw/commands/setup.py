@@ -7,7 +7,7 @@ import uuid
 from os.path import expanduser
 from pathlib import Path
 from typing import List
-
+from vsw.dao import vsw_dao
 import requests
 from aries_cloudagent_vsw.commands import run_command
 
@@ -152,6 +152,7 @@ def start_local_tunnel(name):
 
 
 def start_controller():
+    vsw_dao.init()
     controller_file = Path(__file__).parent.parent.joinpath("controller/server.py").resolve()
     log_dir = Path(os.path.expanduser('~'))
     controller_log_file = str(Path(log_dir).joinpath("vsw_logs/vsw-controller.log").resolve())

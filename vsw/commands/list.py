@@ -4,7 +4,7 @@ from typing import List
 from urllib.parse import urljoin
 from rich.console import Console
 import requests
-
+from vsw.dao import vsw_dao
 from vsw.log import Log
 from vsw.utils import get_vsw_agent, get_repo_host, Constant
 from vsw.commands import exit
@@ -30,7 +30,7 @@ def main(argv: List[str]) -> bool:
             elif args.status:
                 get_status(vsw_config)
             elif args.credentials:
-                get_credentials(repo_url_host, vsw_config)
+                get_credentials(vsw_config)
             elif args.credential_definition:
                 get_credential_definition(vsw_config)
             elif args.present_proof:
@@ -73,12 +73,17 @@ def get_credential_definition(vsw_config):
     console.print(json.dumps(res, indent=4, sort_keys=True))
 
 
-def get_credentials(repo_url_host, vsw_config):
+def get_credentials(vsw_config):
     did = get_public_did(vsw_config)
-    repo = urljoin(f'{repo_url_host}', '/credentials?wql={"issuer_did":"'+did+'"}')
-    response = requests.get(url=repo, headers=repo_header)
-    res = json.loads(response.text)
-    console.print(json.dumps(res, indent=4, sort_keys=True))
+    res = vsw_dao.get_credential_by_issuer_did(did)
+    results = []
+    for row in res:
+        json_object = json.loads(row[0])
+        results.append(json_object)
+
+    console.print(json.dumps({
+        "results": results
+    }, indent=4, sort_keys=True))
 
 
 def get_public_did(vsw_config):

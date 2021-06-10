@@ -5,8 +5,8 @@ import time
 from typing import List
 from vsw.log import Log
 from urllib.parse import urljoin
+from vsw.dao import vsw_dao
 import vsw.utils
-from urllib import parse
 import requests
 import validators
 from vsw.utils import Constant
@@ -19,11 +19,12 @@ software_certificate = vsw_config.get("schema_name")
 test_certificate = vsw_config.get("test_schema_name")
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
-repo_url_host = vsw_repo_config.get("host")
 client_header = {"x-api-key": vsw_config.get("seed")}
 repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
+developer_did = ''
+software_name = ""
 
 
 def main(args: List[str]) -> bool:
@@ -40,6 +41,8 @@ def main(args: List[str]) -> bool:
                 if args.schema == vsw_config.get("test_schema_name"):
                     attest.publish(data)
                 else:
+                    global software_name
+                    software_name = data.get("softwareName", "")
                     if "softwareName" not in data:
                         print("vsw: error: softwareName is mandatory")
                         return
@@ -88,7 +91,7 @@ def issue_credential(data):
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     listener._listener._socket.settimeout(Constant.TIMEOUT)
-    proposal_response = send_proposal(data)
+    proposal_response = send_offer(data)
     credential_exchange_id = proposal_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
     while True:
@@ -105,33 +108,19 @@ def issue_credential(data):
             else:
                 time.sleep(0.5)
         except socket.timeout as e:
-            remove_credential(credential_exchange_id)
             logger.error(e)
             print("vsw: error: request timeout, there might be some issue during publishing")
             listener.close();
             break;
 
 
-def remove_credential(credential_exchange_id):
-    url = urljoin(repo_url_host, f"/issue-credential/records/{credential_exchange_id}/remove")
-    requests.post(url=url, headers=repo_header)
-
-
-def get_repo_connection():
+def get_connection():
     vsw_connection_response = requests.get(url=f'{vsw_url_host}/connections?state=active', headers=client_header)
     res = json.loads(vsw_connection_response.text)
     connections = res["results"]
     if len(connections) > 0:
         last_connection = connections[-1]
-        repo_connection_response = requests.get(
-            url=f'{repo_url_host}/connections?state=active&my_did={last_connection["their_did"]}&their_did={last_connection["my_did"]}',
-            headers=repo_header)
-        repo_res = json.loads(repo_connection_response.text)
-        repo_connections = repo_res["results"]
-        if len(repo_connections) > 0:
-            return repo_connections[-1]
-        else:
-            raise ConnectionError("Not found related repo active connection!")
+        return last_connection
     else:
         raise ConnectionError("Not found active vsw connection! Have you executed vsw setup connection?")
 
@@ -143,14 +132,12 @@ def get_public_did():
     return res["result"]["did"]
 
 
-def get_credential(developer_did, software_name):
-    wql = json.dumps({"attr::developerdid::value": developer_did, "attr::softwarename::value": software_name})
-    repo_url = f"{repo_url_host}/credentials?wql={parse.quote(wql)}"
-    res = requests.get(url=repo_url, headers=repo_header)
-    try:
-        return json.loads(res.text)["results"]
-    except BaseException:
-        return None
+def get_credentials():
+    results = vsw_dao.get_credential_by_issuer_did_and_name(developer_did, software_name)
+    credentials = []
+    for result in results:
+        credentials.append(result["content"])
+    return credentials
 
 
 def is_same_version(software_version, exist_software_version):
@@ -164,8 +151,8 @@ def is_same_version(software_version, exist_software_version):
         return False
 
 
-def generate_software_did(developer_did, software_name, software_version, download_url):
-    credentials = get_credential(developer_did, software_name)
+def generate_software_did(software_version, download_url):
+    credentials = get_credentials()
     if len(credentials) > 0:
         logger.info(f'The software name {software_name} is existed.')
         same_version = False
@@ -214,10 +201,11 @@ def get_credential_definition_id():
     return cred_def_id
 
 
-def send_proposal(data):
+def send_offer(data):
+    global developer_did
     developer_did = get_public_did()
-    connection = get_repo_connection()
-    logger.info(f'holder connection_id: {connection["connection_id"]}')
+    connection = get_connection()
+    logger.info(f'vsw client connection_id: {connection["connection_id"]}')
 
     digest = vsw.utils.generate_digest(data["softwareUrl"])
     source_url = data.get("sourceUrl", "")
@@ -227,9 +215,9 @@ def send_proposal(data):
 
     cred_def_id = get_credential_definition_id()
 
-    software_did = generate_software_did(developer_did, data["softwareName"], data["softwareVersion"], data["softwareUrl"])
-    vsw_repo_url = f'{repo_url_host}/issue-credential/send-proposal'
-    res = requests.post(url=vsw_repo_url, headers=repo_header, json={
+    software_did = generate_software_did(data["softwareVersion"], data["softwareUrl"])
+    send_offer_url = f'{vsw_url_host}/issue-credential/send-offer'
+    res = requests.post(url=send_offer_url, headers=client_header, json={
         "comment": "execute vsw publish cli",
         "auto_remove": False,
         "trace": True,
@@ -239,7 +227,7 @@ def send_proposal(data):
         "schema_version": data["schemaVersion"] or vsw_config.get("schema_version"),
         "issuer_did": developer_did,
         "cred_def_id": cred_def_id,
-        "credential_proposal": {
+        "credential_preview": {
             "@type": f"did:sov:{developer_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [
                 {
