@@ -1,0 +1,15 @@
+{
+  "schemaName": "softwareCertificate",
+  "schemaVersion": "0.3",
+  "schemaID": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
+  "softwareName": "vsw",
+  "softwareVersion": "0.0.11",
+  "softwareUrl": "https://files.pythonhosted.org/packages/af/a2/269b2d19a6b9fd6dc2b504f91c7562fe9878b6edfecdc4a23407b0e9f872/vsw-0.0.11-py3-none-any.whl",
+  "sourceDid": "",
+  "sourceUrl": "https://files.pythonhosted.org/packages/7e/27/300a61d019fec87cc9104da199262bd01d15298dc8c21c79b0cb5ffddd5a/vsw-0.0.11.tar.gz",
+  "mediaType": "",
+  "builderToolDidList": "",
+  "dependencyDidList": "",
+  "buildLog": "",
+  "builderDid": ""
+}

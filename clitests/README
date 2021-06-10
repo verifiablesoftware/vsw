@@ -1,0 +1,6 @@
+
+The scripts are for testing vsw using the client tool in Ubuntu Bionic.
+If you wish to run it in a Docker container, "start" shows how to start the container.
+"test1-install" installs everything you need for a Ubuntu Bionic container, which is also test1.
+"alltests" runs all the actual test cases.
+

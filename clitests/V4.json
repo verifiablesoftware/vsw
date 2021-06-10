@@ -1,0 +1,11 @@
+{
+  "requested_attributes": [
+    {
+      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
+      "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+      "ranking": "4",
+      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h",
+      "testerDid": "9BsvDaG1at5auNiYbDqmDF"
+    }
+  ]
+}

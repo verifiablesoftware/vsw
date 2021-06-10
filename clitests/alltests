@@ -1,0 +1,233 @@
+#!/bin/bash
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+echo "${bold}test2${normal}"
+echo "test2: create a new wallet"
+echo "Creating newwallet: wallet1 (developer)..."
+vsw setup newwallet wallet1 -k 12345
+echo "Opening wallet1..."
+vsw setup wallet wallet1 -k 12345
+DDID=$(vsw list -w|jq '.results[].did')
+DDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$DDID")
+echo "Developer's DID is $DDID"
+
+#test3: setup connection, setup cred defs
+echo "${bold}test3${normal}"
+echo "Making connection with Repo..."
+vsw setup connection
+vsw list -c
+vsw list -w
+echo "Creating cred defs..."
+vsw setup creddef -s softwareCertificate
+vsw setup creddef -s testCertificate
+vsw list -cd
+#Do I need to remember CDs?
+
+
+echo "${bold}test4${normal}"
+#test4: publish software creds
+echo "Issuing 2 software credentials..."
+
+vsw publish -c ./P1.json -s softwareCertificate
+#I need the softwareDid and rec_reg_is and cred_rev_id
+SDID=$(vsw list -cs|jq '.results[]["attrs"].softwareDid')
+SDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$SDID")
+echo "SDID = $SDID"
+REV_REG_ID=$(vsw list -cs|jq '.results[0].rev_reg_id')
+CRED_REV_ID=$(vsw list -cs|jq '.results[0].cred_rev_id')
+REV_REG_ID=$(sed -e 's/^"//' -e 's/"$//' <<<"$REV_REG_ID")
+CRED_REV_ID=$(sed -e 's/^"//' -e 's/"$//' <<<"$CRED_REV_ID")
+
+echo "REV_REG_ID = $REV_REG_ID"
+echo "CRED_REV_ID = $CRED_REV_ID"
+
+#I don't need to remember the second
+vsw publish -c ./P2.json -s softwareCertificate
+
+vsw list -cs
+
+echo "Closing wallet1 (developer)..."
+vsw exit
+
+echo "${bold}test5${normal}"
+#test5: create second wallet for the tester
+echo "Creating newwallet: wallet2..."
+vsw setup newwallet wallet2 -k 12345
+echo "Opening wallet2..."
+vsw setup wallet wallet2 -k 12345
+
+TDID=$(vsw list -w|jq '.results[].did')
+TDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$TDID")
+echo "TDID = $TDID"
+
+echo "Making connection..."
+vsw setup connection
+vsw list -c
+vsw list -w
+echo "Making creddef..."
+vsw setup creddef -s testCertificate
+vsw list -cd
+
+echo "${bold}test6${normal}"
+#test6: publish test creds
+echo "Issuing test credentials..."
+#get rid of double quotes
+
+#I need to replace the softwareDid with $SDID
+jq 'del(."softwareDid")' ./P3.json > tmp.$$.json && mv tmp.$$.json ./P3.json
+
+jq --arg sdid $SDID '. + {"softwareDid": $sdid}' ./P3.json> tmp.$$.json && mv tmp.$$.json ./P3.json
+
+jq 'del(."softwareDid")' ./P4.json > tmp.$$.json && mv tmp.$$.json ./P4.json
+
+jq --arg sdid $SDID '. + {"softwareDid": $sdid}' ./P4.json> tmp.$$.json && mv tmp.$$.json ./P4.json
+
+vsw publish -c ./P3.json -s testCertificate
+vsw publish -c ./P4.json -s testCertificate
+vsw list -cs
+
+echo "Closing tester wallet2..."
+vsw exit
+
+echo "${bold}test7${normal}"
+#test7: create the third wallet for the verifier
+echo "Creating newwallet: wallet3 (verifier)..."
+vsw setup newwallet wallet3 -k 12345
+echo "Opening wallet3..."
+vsw setup wallet wallet3 -k 12345
+
+VDID=$(vsw list -w|jq '.results[].did')
+VDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$VDID")
+echo "VDID = $VDID"
+
+echo "Making connection..."
+vsw setup connection
+vsw list -c
+vsw list -w
+
+echo "${bold}test8${normal}"
+#test8: verify vsw 0.0.11
+#replace issuer_did with $DDID
+jq 'del(.requested_attributes[]["issuer_did"])' ./V1.json > tmp.$$.json && mv tmp.$$.json ./V1.json
+
+jq --arg ddid $DDID '."requested_attributes"[] += {"issuer_did": $ddid}' ./V1.json> tmp.$$.json && mv tmp.$$.json ./V1.json
+
+vsw verify -p ./V1.json
+
+echo "${bold}test9${normal}"
+#test9: verify vsw 0.0.12
+#replace issuer_did with $DDID
+jq 'del(.requested_attributes[]["issuer_did"])' ./V2.json > tmp.$$.json && mv tmp.$$.json ./V2.json
+
+jq --arg ddid $DDID '."requested_attributes"[] += {"issuer_did": $ddid}' ./V2.json> tmp.$$.json && mv tmp.$$.json ./V2.json
+
+vsw verify -p ./V2.json
+
+echo "${bold}test10${normal}"
+#test10: verify test vsw 0.0.11
+#replace softwareDid with $SDID
+jq 'del(.requested_attributes[]["softwareDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
+
+jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
+
+#replace testerDid with $TDID
+jq 'del(.requested_attributes[]["testerDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
+
+jq --arg tdid $TDID '."requested_attributes"[] += {"testerDid": $tdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
+
+vsw verify -p ./V3.json
+
+echo "${bold}test11${normal}"
+#test11: verify test vsw 0.0.12
+#replace softwareDid with $SDID
+jq 'del(.requested_attributes[]["softwareDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
+
+jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
+
+#replace testerDid with $TDID
+jq 'del(.requested_attributes[]["testerDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
+
+jq --arg tdid $TDID '."requested_attributes"[] += {"testerDid": $tdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
+
+vsw verify -p ./V4.json
+
+echo "${bold}test12${normal}"
+#test12: verify software and test vsw 0.0.11
+# replace issuer_did, softwareDid, testerDid
+jq 'del(.requested_attributes[0]["issuer_did"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+
+jq --arg ddid $DDID '."requested_attributes"[0] += {"issuer_did": $ddid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+
+jq 'del(.requested_attributes[]["softwareDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+
+jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+
+jq 'del(.requested_attributes[1]["testerDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+
+jq --arg tdid $TDID '."requested_attributes"[1] += {"testerDid": $tdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+
+vsw verify -p ./V5.json
+
+echo "${bold}test13${normal}"
+#test13: verify software and test vsw 0.0.11, and ranking >= 3
+
+jq 'del(.requested_attributes[0]["issuer_did"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq --arg ddid $DDID '."requested_attributes"[0] += {"issuer_did": $ddid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq 'del(.requested_attributes[]["softwareDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq 'del(.requested_attributes[1]["testerDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq --arg tdid $TDID '."requested_attributes"[1] += {"testerDid": $tdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq 'del(."requested_predicates"."1_ranking_GE_uuid"."restrictions"[]["issuer_did"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq --arg tdid $TDID '."requested_predicates"."1_ranking_GE_uuid"."restrictions"[] += {"issuer_did": $tdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+vsw verify -p ./V6.json
+
+echo "${bold}Skipping test14-19${normal}"
+#test 14, 15, 16, 17, 18, 19 are negative tests. skipped for now.
+echo "Closing wallet3 (tester)..."
+vsw exit
+
+#test20: test revocation 
+echo "${bold}test20: revocation${normal}"
+echo "Opening wallet1 (developer)..."
+
+#read rev_reg_id and cred_rev_id
+vsw setup wallet wallet1 -k 12345
+echo "Revoking -reg $REV_REG_ID  -rev $CRED_REV_ID"
+vsw revoke -reg $REV_REG_ID  -rev $CRED_REV_ID
+echo "Closing wallet1 ..."
+vsw exit
+
+#test21: test verify fail for revoked credential
+echo "${bold}test21${normal}"
+echo "Opening wallet3 (tester) ..."
+vsw setup wallet wallet3 -k 12345
+
+vsw verify -p ./V1.json
+echo "The above test should fail"
+
+#test22: make sure the remaining unrevoked credential is still good
+echo "${bold}test22${normal}"
+vsw verify -p ./V2.json
+echo "The above test should pass"
+vsw verify -p ./V3.json
+echo "The above test should pass"
+vsw verify -p ./V4.json
+echo "The above test should pass"
+vsw verify -p ./V5.json
+echo "The above test should fail"
+vsw verify -p ./V6.json
+echo "The above test should fail"
+
+echo "All tests done."
+echo "Closing wallet3..."
+vsw exit
+
+#end

@@ -1,0 +1,7 @@
+docker run \
+  --name tester\
+  -p 8020:8020 \
+  -v $PATHTOVSW/vsw/clitests:/workspace \
+  -it --rm \
+  ubuntu:bionic /bin/bash
+

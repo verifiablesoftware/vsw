@@ -1,0 +1,21 @@
+#!/bin/bash
+echo "${bold}test1${normal}"
+echo "test1: Starting installation..."
+apt-get update
+apt install -y python3-pip
+pip3 install vsw
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88
+apt-get install -y software-properties-common
+add-apt-repository "deb https://repo.sovrin.org/sdk/deb bionic stable"
+apt-get update
+apt-get install -y libindy
+apt install curl -y
+
+curl -sL https://deb.nodesource.com/setup_12.x | bash -
+apt install -y nodejs
+apt install -y wget
+apt-get install -y unzip
+apt install -y jq
+echo "Done installation"
+vsw --version
+

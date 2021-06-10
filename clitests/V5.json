@@ -1,0 +1,18 @@
+{
+  "requested_attributes": [
+    {
+      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
+      "softwareName": "vsw",
+      "softwareVersion": "0.0.11",
+      "issuer_did": "MXNhcPST626WSqAj5pMorh",
+      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h"
+    },
+    {
+      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
+      "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+      "testResult": "Pass",
+      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h",
+      "testerDid": "9BsvDaG1at5auNiYbDqmDF"
+    }
+  ]
+}
