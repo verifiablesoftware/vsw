@@ -6,15 +6,12 @@ from rich.console import Console
 import requests
 from vsw.dao import vsw_dao
 from vsw.log import Log
-from vsw.utils import get_vsw_agent, get_repo_host, Constant
+from vsw.utils import get_vsw_agent, Constant
 from vsw.commands import exit
 logger = Log(__name__).logger
 console = Console()
 vsw_config = get_vsw_agent()
-vsw_repo_config = get_repo_host()
-repo_url_host = vsw_repo_config.get("host")
 client_header = {"x-api-key": vsw_config.get("seed")}
-repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 
 
 def main(argv: List[str]) -> bool:

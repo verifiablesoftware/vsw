@@ -21,11 +21,8 @@ from vsw.log import Log
 from vsw.commands import exit
 
 vsw_config = vsw.utils.get_vsw_agent()
-vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
-repo_url_host = vsw_repo_config.get("host")
 client_header = {"x-api-key": vsw_config.get("seed")}
-repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 TITLE = "Proof of Test Certificate"

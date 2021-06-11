@@ -17,10 +17,8 @@ from vsw.commands import attest,exit
 vsw_config = vsw.utils.get_vsw_agent()
 software_certificate = vsw_config.get("schema_name")
 test_certificate = vsw_config.get("test_schema_name")
-vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
 client_header = {"x-api-key": vsw_config.get("seed")}
-repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 logger = Log(__name__).logger
 timeout = Constant.TIMEOUT
 developer_did = ''
