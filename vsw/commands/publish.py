@@ -131,10 +131,11 @@ def get_public_did():
 
 
 def get_credentials():
-    results = vsw_dao.get_credential_by_issuer_did_and_name(developer_did, software_name)
+    res = vsw_dao.get_credential_by_issuer_did_and_name(developer_did, software_name)
     credentials = []
-    for result in results:
-        credentials.append(result["content"])
+    for row in res:
+        json_object = json.loads(row[0])
+        credentials.append(json_object)
     return credentials
 
 

@@ -98,15 +98,6 @@ def ping():
     return Response(status=200)
 
 
-if __name__ == '__main__':
-    configuration = utils.get_vsw_agent()
-    webhook_port = configuration.get("webhook_port")
-    app.logger.info(f"Started controller, http://127.0.0.1:{webhook_port}")
-    server = make_server('127.0.0.1', int(webhook_port), app)
-    server.serve_forever()
-    app.run()
-
-
 def save_credential(msg):
     state = msg["state"]
     if state == 'credential_acked':
@@ -127,3 +118,13 @@ def save_credential(msg):
         software_name = attrs.get("softwareName", "")
         software_did = attrs.get("softwareDid", "")
         vsw_dao.save_credential(issuer_did, software_name, software_did, "success", content)
+
+
+if __name__ == '__main__':
+    configuration = utils.get_vsw_agent()
+    webhook_port = configuration.get("webhook_port")
+    app.logger.info(f"Started controller, http://127.0.0.1:{webhook_port}")
+    server = make_server('127.0.0.1', int(webhook_port), app)
+    server.serve_forever()
+    app.run()
+

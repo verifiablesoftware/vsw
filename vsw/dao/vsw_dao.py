@@ -11,7 +11,7 @@ def init():
         os.makedirs(str(Path(os.path.expanduser('~'))) + "/.indy_client/vsw/")
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
-    sql = 'CREATE TABLE IF NOT EXISTS credentials (issuer_did TEXT NOT NULL, software_name TEXT, software_did TEXT, status TEXT, content TEXT);'
+    sql = 'CREATE TABLE IF NOT EXISTS credentials (issuer_did TEXT NOT NULL, software_name TEXT, software_did TEXT, status TEXT, content TEXT,  sqltime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL);'
     c.execute(sql)
     conn.commit()
     c.close()
@@ -42,7 +42,7 @@ def get_credential_by_issuer_did(issuer_did):
 def get_credential_by_issuer_did_and_name(issuer_did, software_name):
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
-    sql = "select * from credentials where issuer_did= ? and software_name= ? "
+    sql = "select content from credentials where issuer_did= ? and software_name= ? "
     c.execute(sql, (issuer_did, software_name))
     results = c.fetchall()
     c.close()
