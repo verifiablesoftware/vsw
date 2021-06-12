@@ -2,8 +2,7 @@ import sqlite3
 import json
 import os
 from pathlib import Path
-home = str(Path.home())
-db_file = Path(home).joinpath(f".indy_client/vsw/sqlite.db").resolve()
+db_file = str(Path.home().joinpath(f".indy_client/vsw/sqlite.db"))
 
 
 def init():
