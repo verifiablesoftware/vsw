@@ -207,6 +207,7 @@ echo "Opening wallet1 (developer)..."
 vsw setup wallet wallet1 -k 12345
 echo "Revoking -rev $REV_REG_ID  -cred $CRED_REV_ID"
 vsw revoke -rev $REV_REG_ID  -cred $CRED_REV_ID
+
 echo "Closing wallet1 ..."
 vsw exit
 

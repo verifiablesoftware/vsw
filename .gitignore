@@ -7,3 +7,4 @@ vsw.egg-info
 .pytest_cache
 **/**/_pycache_/*
 logs/
+localtunnel-master

@@ -9,9 +9,7 @@ import vsw
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 vsw_url_host = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}'
-repo_url_host = vsw_repo_config.get("host")
 local_conn_id = "45c40084-edcb-42e9-ab39-6b7bf9c0cb2f"
-repo_conn_id = "569ee27c-17b3-4629-ad40-ef2a4c6fb653"
 credential_definition_id = "CqdPVBFnDs6uUzrrd8Prmw:3:CL:2950:default"
 cred_ex_id = "151c7bfb-a672-4507-99eb-aabd9bb3a494"
 
@@ -74,34 +72,3 @@ def test_clean_all_records():
             url = f'{vsw_url_host}/present-proof/records/{presentation_exchange_id}/remove'
             res = requests.post(url)
             print(f'Removed present proof records {presentation_exchange_id}')
-
-    repo = f'{repo_url_host}/issue-credential/records'
-    response = requests.get(repo)
-    results = json.loads(response.text)["results"]
-    if len(results) > 0:
-        for result in results:
-            credential_exchange_id = result["credential_exchange_id"]
-            url = f'{repo_url_host}/issue-credential/records/{credential_exchange_id}/remove'
-            res = requests.post(url)
-            print(f'Removed credential records {credential_exchange_id}')
-
-    repo = f'{repo_url_host}/present-proof/records'
-    response = requests.get(repo)
-    results = json.loads(response.text)["results"]
-    if len(results) > 0:
-        for result in results:
-            presentation_exchange_id = result["presentation_exchange_id"]
-            url = f'{repo_url_host}/present-proof/records/{presentation_exchange_id}/remove'
-            res = requests.post(url)
-            print(f'Removed present proof records {presentation_exchange_id}')
-
-    # Remove Credential
-    repo = f'{repo_url_host}/credentials?count={100}'
-    response = requests.get(repo)
-    results = json.loads(response.text)["results"]
-    if len(results) > 0:
-        for result in results:
-            referent = result["referent"]
-            url = f'{repo_url_host}/credential/{referent}/remove'
-            requests.post(url)
-            print(f'Removed referent {referent}')

@@ -1,7 +1,6 @@
 import json
 
 import requests
-from requests.auth import HTTPBasicAuth
 
 import vsw
 
@@ -10,7 +9,6 @@ from vsw.commands import list
 from tests import test_publish
 
 vsw_config = vsw.utils.get_vsw_agent()
-vsw_repo_config = vsw.utils.get_repo_host()
 
 
 def test_do_credential_definition():
@@ -40,14 +38,6 @@ def test_remove_all_connection():
         requests.post(schema_url)
         print(f"Remove connection id: {result['connection_id']}")
 
-    repo_schema_url = f'{vsw_repo_config.get("host")}/connections'
-    response = requests.get(repo_schema_url)
-    results = json.loads(response.text)["results"]
-    for result in results:
-        vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/{result["connection_id"]}/remove'
-        requests.post(vsw_repo_url)
-        print(f"Remove repo connection id: {result['connection_id']}")
-
 
 # clean all history data
 def test_clean_history_data():
@@ -57,7 +47,7 @@ def test_clean_history_data():
 
 def test_api_key():
     schema_url = f'http://{vsw_config.get("admin_host")}:{vsw_config.get("admin_port")}/status/ready'
-    custom_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
+    custom_header = {"x-api-key": vsw_config.get("seed")}
     response = requests.get(schema_url, headers=custom_header)
     results = json.loads(response.text)
     print(results)

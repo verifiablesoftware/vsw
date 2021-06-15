@@ -4,7 +4,6 @@ from typing import List
 
 from vsw.log import Log
 from vsw.utils import Constant
-
 logger = Log(__name__).logger
 
 

@@ -11,19 +11,23 @@
         "testResultDetailUrl",
         "testResultDetailHash",
         "comments",
-        "softwareDid"
+        "softwareDid",
+        "ranking"
       ],
       "restrictions": [
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-          "testerDid": "FaoRmvWv5a96aDsDmpdGT5",
-          "testSpecDid": "2ukrFWzuNVsKVHtHVwSLZh",
-          "softwareDid": "BHC2VWDpKjXdZRjjEypw4G",
-          "testSpecUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+          "comments": "useful software tool",
+          "ranking": "4",
+          "softwareDid": "7YUEmNNbto94Lu3jsar6JD",
           "testResult": "pass",
-          "testResultDetailDid": "2ukrFWzuNVsKVHtHVwSLZh",
+          "testResultDetailDid": "7YUEmNNbto94Lu3jsar6JD",
+          "testResultDetailHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
           "testResultDetailUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-          "comments": "useful software tool"
+          "testSpecDid": "7YUEmNNbto94Lu3jsar6JD",
+          "testSpecHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+          "testSpecUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+          "testerDid": "15aw2quRZJio3jn358Spsd"
         }
       ]
     }

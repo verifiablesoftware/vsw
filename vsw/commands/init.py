@@ -16,7 +16,6 @@ timeout = Constant.TIMEOUT
 vsw_config = vsw.utils.get_vsw_agent()
 vsw_repo_config = vsw.utils.get_repo_host()
 client_header = {"x-api-key": vsw_config.get("seed")}
-repo_header = {"x-api-key": vsw_repo_config.get("x-api-key")}
 software_certificate = vsw_config.get("schema_name")
 test_certificate = vsw_config.get("test_schema_name")
 
@@ -89,9 +88,9 @@ def connection_repo():
     listener._listener._socket.settimeout(Constant.TIMEOUT)
     vsw_config = vsw.utils.get_vsw_agent()
     remove_history_connection(vsw_config)
-    vsw_repo_url = f'{vsw_repo_config.get("host")}/connections/create-invitation?alias={vsw_repo_config.get("label")}&auto_accept=true'
+    vsw_repo_url = f'{vsw_repo_config.get("host")}/controller/invitation'
     logger.info(f'Create invitation to: {vsw_repo_url}')
-    response = requests.post(url=vsw_repo_url, headers=repo_header)
+    response = requests.get(url=vsw_repo_url)
     res = json.loads(response.text)
     logger.info(res)
 

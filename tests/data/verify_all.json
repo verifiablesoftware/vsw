@@ -20,21 +20,21 @@
       "restrictions": [
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
-          "issuer_did": "FaoRmvWv5a96aDsDmpdGT5",
-          "softwareName": "symbio_test",
-          "softwareVersion": "1.0.0",
-          "softwareDid": "EG9d3RTiHrYeBkmX3wbjE6",
-          "developerDid": "FaoRmvWv5a96aDsDmpdGT5",
-          "softwareUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-          "softwareHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
-          "mediaType": "application/vnd.oci.image.manifest.v1+json",
-          "sourceDid": "2ukrFWzuNVsKVHtHVwSLZh",
-          "sourceUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-          "sourceHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+          "issuer_did": "15aw2quRZJio3jn358Spsd",
+          "buildLog": "symbio test log",
+          "builderDid": "2ukrFWzuNVsKVHtHVwSLZh",
           "builderToolDidList": "2ukrFWzuNVsKVHtHVwSLZh",
           "dependencyDidList": "2ukrFWzuNVsKVHtHVwSLZh",
-          "buildLog": "symbio test log",
-          "builderDid": "2ukrFWzuNVsKVHtHVwSLZh"
+          "developerDid": "15aw2quRZJio3jn358Spsd",
+          "mediaType": "application/vnd.oci.image.manifest.v1+json",
+          "softwareDid": "7YUEmNNbto94Lu3jsar6JD",
+          "softwareHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+          "softwareName": "symbio_test",
+          "softwareUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+          "softwareVersion": "1.0.0",
+          "sourceDid": "2ukrFWzuNVsKVHtHVwSLZh",
+          "sourceHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+          "sourceUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz"
         }
       ]
     },
@@ -54,14 +54,16 @@
       "restrictions": [
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-          "testerDid": "FaoRmvWv5a96aDsDmpdGT5",
-          "testSpecDid": "2ukrFWzuNVsKVHtHVwSLZh",
-          "softwareDid": "BHC2VWDpKjXdZRjjEypw4G",
-          "testSpecUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+          "comments": "useful software tool",
+          "softwareDid": "7YUEmNNbto94Lu3jsar6JD",
           "testResult": "pass",
-          "testResultDetailDid": "2ukrFWzuNVsKVHtHVwSLZh",
+          "testResultDetailDid": "7YUEmNNbto94Lu3jsar6JD",
+          "testResultDetailHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
           "testResultDetailUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
-          "comments": "useful software tool"
+          "testSpecDid": "7YUEmNNbto94Lu3jsar6JD",
+          "testSpecHash": "z2d9pM8uz5CPu3tZ7xmyyNPVVWyMLzNLdXSRuHfhd5EiVB1VVey2hR3UaGQ9PhAx1Wh4yuMPc6zsE1LiJDNVdxSy5N",
+          "testSpecUrl": "https://files.pythonhosted.org/packages/9d/5e/1420669f433ca41315685fb9bdc6fe2869a6e525cb6483805f3f4c9d61ad/excel-1.0.0.tar.gz",
+          "testerDid": "15aw2quRZJio3jn358Spsd"
         }
       ]
     }
@@ -74,8 +76,8 @@
       "restrictions": [
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-          "issuer_did": "FaoRmvWv5a96aDsDmpdGT5",
-          "softwareDid": "BHC2VWDpKjXdZRjjEypw4G"
+          "issuer_did": "15aw2quRZJio3jn358Spsd",
+          "testerDid": "7YUEmNNbto94Lu3jsar6JD"
         }
       ]
     }
