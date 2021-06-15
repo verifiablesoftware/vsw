@@ -194,7 +194,7 @@ def get_credential_definition_id():
     response = requests.get(url=local, headers=client_header)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
-        raise ValueError('vsw: error: Not found credential definition id!')
+        raise ValueError('Not found credential definition id!')
     cred_def_id = res["credential_definition_ids"][-1]
     logger.info(f'cred_def_id: {cred_def_id}')
     return cred_def_id

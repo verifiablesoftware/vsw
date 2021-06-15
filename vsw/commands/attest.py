@@ -77,8 +77,8 @@ def issue_credential(data):
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     listener._listener._socket.settimeout(Constant.TIMEOUT)
-    proposal_response = send_offer(data)
-    credential_exchange_id = proposal_response["credential_exchange_id"]
+    offer_response = send_offer(data)
+    credential_exchange_id = offer_response["credential_exchange_id"]
     logger.info(f'credential_exchange_id: {credential_exchange_id}')
 
     while True:
@@ -137,7 +137,7 @@ def send_offer(data):
         "schema_version": data["schemaVersion"] or vsw_config.get("test_schema_version"),
         "issuer_did": tester_did,
         "cred_def_id": get_credential_definition_id(),
-        "credential_proposal": {
+        "credential_preview": {
             "@type": f"did:sov:{tester_did};spec/issue-credential/1.0/credential-preview",
             "attributes": [
                 {
@@ -150,11 +150,11 @@ def send_offer(data):
                 },
                 {
                     "name": "testSpecDid",
-                    "value": data["testSpecDid"]
+                    "value": data.get("testSpecDid", "")
                 },
                 {
                     "name": "testSpecUrl",
-                    "value": data["testSpecUrl"]
+                    "value": data.get("testSpecUrl", "")
                 },
                 {
                     "name": "testSpecHash",
@@ -162,15 +162,15 @@ def send_offer(data):
                 },
                 {
                     "name": "testResult",
-                    "value": data["testResult"]
+                    "value": data.get("testResult", "")
                 },
                 {
                     "name": "testResultDetailDid",
-                    "value": data["testResultDetailDid"]
+                    "value": data.get("testResultDetailDid", "")
                 },
                 {
                     "name": "testResultDetailUrl",
-                    "value": data["testResultDetailUrl"]
+                    "value": data.get("testResultDetailUrl", "")
                 },
                 {
                     "name": "testResultDetailHash",
@@ -178,11 +178,11 @@ def send_offer(data):
                 },
                 {
                     "name": "ranking",
-                    "value": data["ranking"]
+                    "value": data.get("ranking", "")
                 },
                 {
                     "name": "comments",
-                    "value": data["comments"]
+                    "value": data.get("comments", "")
                 }
             ]
         },
