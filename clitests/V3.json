@@ -1,11 +1,28 @@
 {
   "requested_attributes": [
     {
-      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
-      "testResult": "Pass",
-      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h",
-      "testerDid": "9BsvDaG1at5auNiYbDqmDF"
+      "names": [
+        "testerDid",
+        "testSpecDid",
+        "testSpecUrl",
+        "testSpecHash",
+        "testResult",
+        "testResultDetailDid",
+        "testResultDetailUrl",
+        "testResultDetailHash",
+        "comments",
+        "softwareDid",
+        "ranking"
+      ],
+      "restrictions": [
+        {
+          "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
+          "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+          "testResult": "Pass",
+          "softwareDid": "8gaKPGRxukBaFcqey1n218",
+          "testerDid": "2Bi6tsLd6djb6XxGgfrbye"
+        }
+      ]
     }
   ]
 }

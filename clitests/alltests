@@ -109,84 +109,89 @@ vsw list -w
 echo "${bold}test8${normal}"
 #test8: verify vsw 0.0.11
 #replace issuer_did with $DDID
-jq 'del(.requested_attributes[]["issuer_did"])' ./V1.json > tmp.$$.json && mv tmp.$$.json ./V1.json
+jq 'del(.requested_attributes[]."restrictions"[]["issuer_did"])' ./V1.json > tmp.$$.json && mv tmp.$$.json ./V1.json
 
-jq --arg ddid $DDID '."requested_attributes"[] += {"issuer_did": $ddid}' ./V1.json> tmp.$$.json && mv tmp.$$.json ./V1.json
+jq --arg ddid $DDID '."requested_attributes"[]."restrictions"[] += {"issuer_did": $ddid}' ./V1.json> tmp.$$.json && mv tmp.$$.json ./V1.json
 
 vsw verify -p ./V1.json
 
 echo "${bold}test9${normal}"
 #test9: verify vsw 0.0.12
 #replace issuer_did with $DDID
-jq 'del(.requested_attributes[]["issuer_did"])' ./V2.json > tmp.$$.json && mv tmp.$$.json ./V2.json
+jq 'del(.requested_attributes[]."restrictions"[]["issuer_did"])' ./V2.json > tmp.$$.json && mv tmp.$$.json ./V2.json
 
-jq --arg ddid $DDID '."requested_attributes"[] += {"issuer_did": $ddid}' ./V2.json> tmp.$$.json && mv tmp.$$.json ./V2.json
+jq --arg ddid $DDID '."requested_attributes"[]."restrictions"[] += {"issuer_did": $ddid}' ./V2.json> tmp.$$.json && mv tmp.$$.json ./V2.json
 
 vsw verify -p ./V2.json
 
 echo "${bold}test10${normal}"
 #test10: verify test vsw 0.0.11
 #replace softwareDid with $SDID
-jq 'del(.requested_attributes[]["softwareDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
+jq 'del(.requested_attributes[]."restrictions"[]["softwareDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
 
-jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
+jq --arg sdid $SDID '."requested_attributes"[]."restrictions"[] += {"softwareDid": $sdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
 
 #replace testerDid with $TDID
-jq 'del(.requested_attributes[]["testerDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
+jq 'del(.requested_attributes[]."restrictions"[]["testerDid"])' ./V3.json > tmp.$$.json && mv tmp.$$.json ./V3.json
 
-jq --arg tdid $TDID '."requested_attributes"[] += {"testerDid": $tdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
+jq --arg tdid $TDID '."requested_attributes"[]."restrictions"[] += {"testerDid": $tdid}' ./V3.json> tmp.$$.json && mv tmp.$$.json ./V3.json
 
 vsw verify -p ./V3.json
 
 echo "${bold}test11${normal}"
 #test11: verify test vsw 0.0.12
 #replace softwareDid with $SDID
-jq 'del(.requested_attributes[]["softwareDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
+jq 'del(.requested_attributes[]."restrictions"[]["softwareDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
 
-jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
+jq --arg sdid $SDID '."requested_attributes"[]."restrictions"[] += {"softwareDid": $sdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
 
 #replace testerDid with $TDID
-jq 'del(.requested_attributes[]["testerDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
+jq 'del(.requested_attributes[]."restrictions"[]["testerDid"])' ./V4.json > tmp.$$.json && mv tmp.$$.json ./V4.json
 
-jq --arg tdid $TDID '."requested_attributes"[] += {"testerDid": $tdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
+jq --arg tdid $TDID '."requested_attributes"[]."restrictions"[] += {"testerDid": $tdid}' ./V4.json> tmp.$$.json && mv tmp.$$.json ./V4.json
 
 vsw verify -p ./V4.json
 
 echo "${bold}test12${normal}"
 #test12: verify software and test vsw 0.0.11
 # replace issuer_did, softwareDid, testerDid
-jq 'del(.requested_attributes[0]["issuer_did"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+jq 'del(.requested_attributes[0]."restrictions"[]["issuer_did"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
 
-jq --arg ddid $DDID '."requested_attributes"[0] += {"issuer_did": $ddid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+jq --arg ddid $DDID '."requested_attributes"[0]."restrictions"[] += {"issuer_did": $ddid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
 
-jq 'del(.requested_attributes[]["softwareDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+jq 'del(.requested_attributes[]."restrictions"[]["softwareDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
 
-jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+jq --arg sdid $SDID '."requested_attributes"[]."restrictions"[] += {"softwareDid": $sdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
 
-jq 'del(.requested_attributes[1]["testerDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
+jq 'del(.requested_attributes[1]."restrictions"[]["testerDid"])' ./V5.json > tmp.$$.json && mv tmp.$$.json ./V5.json
 
-jq --arg tdid $TDID '."requested_attributes"[1] += {"testerDid": $tdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
+jq --arg tdid $TDID '."requested_attributes"[1]."restrictions"[] += {"testerDid": $tdid}' ./V5.json> tmp.$$.json && mv tmp.$$.json ./V5.json
 
 vsw verify -p ./V5.json
 
 echo "${bold}test13${normal}"
 #test13: verify software and test vsw 0.0.11, and ranking >= 3
 
-jq 'del(.requested_attributes[0]["issuer_did"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+jq 'del(.requested_attributes[0]."restrictions"[]["issuer_did"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
 
-jq --arg ddid $DDID '."requested_attributes"[0] += {"issuer_did": $ddid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+jq --arg ddid $DDID '."requested_attributes"[0]."restrictions"[] += {"issuer_did": $ddid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
 
-jq 'del(.requested_attributes[]["softwareDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+jq 'del(.requested_attributes[]."restrictions"[]["softwareDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
 
-jq --arg sdid $SDID '."requested_attributes"[] += {"softwareDid": $sdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+jq --arg sdid $SDID '."requested_attributes"[]."restrictions"[] += {"softwareDid": $sdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
 
-jq 'del(.requested_attributes[1]["testerDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+jq 'del(.requested_attributes[1]."restrictions"[]["testerDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
 
-jq --arg tdid $TDID '."requested_attributes"[1] += {"testerDid": $tdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+jq --arg tdid $TDID '."requested_attributes"[1]."restrictions"[] += {"testerDid": $tdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
 
 jq 'del(."requested_predicates"."1_ranking_GE_uuid"."restrictions"[]["issuer_did"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
 
 jq --arg tdid $TDID '."requested_predicates"."1_ranking_GE_uuid"."restrictions"[] += {"issuer_did": $tdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq 'del(."requested_predicates"."1_ranking_GE_uuid"."restrictions"[]["softwareDid"])' ./V6.json > tmp.$$.json && mv tmp.$$.json ./V6.json
+
+jq --arg sdid $SDID '."requested_predicates"."1_ranking_GE_uuid"."restrictions"[] += {"softwareDid": $sdid}' ./V6.json> tmp.$$.json && mv tmp.$$.json ./V6.json
+
 vsw verify -p ./V6.json
 
 echo "${bold}Skipping test14-19${normal}"
@@ -200,8 +205,8 @@ echo "Opening wallet1 (developer)..."
 
 #read rev_reg_id and cred_rev_id
 vsw setup wallet wallet1 -k 12345
-echo "Revoking -reg $REV_REG_ID  -rev $CRED_REV_ID"
-vsw revoke -reg $REV_REG_ID  -rev $CRED_REV_ID
+echo "Revoking -rev $REV_REG_ID  -cred $CRED_REV_ID"
+vsw revoke -rev $REV_REG_ID  -cred $CRED_REV_ID
 echo "Closing wallet1 ..."
 vsw exit
 
