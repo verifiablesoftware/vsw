@@ -1,6 +1,20 @@
 
 The scripts are for testing vsw using the client tool in Ubuntu Bionic.
 If you wish to run it in a Docker container, "start" shows how to start the container.
-"test1-install" installs everything you need for a Ubuntu Bionic container, which is also test1.
-"alltests" runs all the actual test cases.
 
+"test1-install" installs everything you need for a Ubuntu Bionic container, which is also test1.
+"alltests" runs all the actual test cases using fresh set of 3 new wallets.
+"repeattests" run a few simple sanity tests for an existing wallet.
+
+To preserve wallets (and other useful info) across containers, you can tar and save these 3 directories in $HOME:
+
+% tar cvf vswsave.tar .indy_client vsw_logs vsw_tools
+% cp vswsave to-persistent-store
+
+and recover by:
+
+% cp from-persistent-store/vswsave $HOME
+% cd $HOME
+% untar xvf vswsave.tar
+
+Now, run "repeattests" to sanity check.

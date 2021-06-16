@@ -1,0 +1,30 @@
+#!/bin/bash
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+echo "Repeat Tests: Opening old wallet1..."
+vsw setup wallet wallet1 -k 12345
+vsw list -w
+vsw list -c
+
+echo "${bold}test23${normal}"
+#test23: retest publish
+echo "Re-issuing a software credential..."
+
+vsw publish -c ./P1.json -s softwareCertificate
+
+#test24: retest verify
+echo "${bold}test24${normal}"
+echo "Retesting verify..."
+vsw verify -p ./V1.json
+vsw verify -p ./V2.json
+vsw verify -p ./V3.json
+vsw verify -p ./V4.json
+vsw verify -p ./V5.json
+vsw verify -p ./V6.json
+
+echo "Repeat tests done."
+echo "Closing wallet1..."
+vsw exit
+
+#end
