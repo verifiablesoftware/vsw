@@ -1,18 +1,54 @@
 {
   "requested_attributes": [
     {
-      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
-      "softwareName": "vsw",
-      "softwareVersion": "0.0.11",
-      "issuer_did": "MXNhcPST626WSqAj5pMorh",
-      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h"
+      "names": [
+        "softwareName",
+        "softwareVersion",
+        "developerDid",
+        "softwareDid",
+        "softwareHash",
+        "softwareUrl",
+        "mediaType",
+        "sourceDid",
+        "sourceUrl",
+        "sourceHash",
+        "builderToolDidList",
+        "dependencyDidList",
+        "buildLog",
+        "builderDid"
+      ],
+      "restrictions": [
+        {
+          "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:softwareCertificate:0.3",
+          "softwareName": "vsw",
+          "softwareVersion": "0.0.11",
+          "issuer_did": "SYzPAV7MYqVcj9NGd81TeM",
+          "softwareDid": "8gaKPGRxukBaFcqey1n218"
+        }
+      ]
     },
     {
-      "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-      "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
-      "testResult": "Pass",
-      "softwareDid": "VLZG9YMNWzDb9wtf8wKF7h",
-      "testerDid": "9BsvDaG1at5auNiYbDqmDF"
+      "names": [
+        "testerDid",
+        "testSpecDid",
+        "testSpecUrl",
+        "testSpecHash",
+        "testResult",
+        "testResultDetailDid",
+        "testResultDetailUrl",
+        "testResultDetailHash",
+        "comments",
+        "softwareDid"
+      ],
+      "restrictions": [
+        {
+          "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
+          "testspecUrl": "https://github.com/verifiablesoftware/vsw-repo/tree/master/tests",
+          "testResult": "Pass",
+          "softwareDid": "8gaKPGRxukBaFcqey1n218",
+          "testerDid": "2Bi6tsLd6djb6XxGgfrbye"
+        }
+      ]
     }
   ],
   "requested_predicates": {
@@ -23,7 +59,8 @@
       "restrictions": [
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
-          "issuer_did": "9BsvDaG1at5auNiYbDqmDF"
+          "issuer_did": "2Bi6tsLd6djb6XxGgfrbye",
+          "softwareDid": "8gaKPGRxukBaFcqey1n218"
         }
       ]
     }
