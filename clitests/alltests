@@ -8,7 +8,7 @@ echo "Creating newwallet: wallet1 (developer)..."
 vsw setup newwallet wallet1 -k 12345
 echo "Opening wallet1..."
 vsw setup wallet wallet1 -k 12345
-DDID=$(vsw list -w|jq '.results[].did')
+DDID=$(vsw list -w|tr -d '\r\n'|jq '.results[].did')
 DDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$DDID")
 echo "Developer's DID is $DDID"
 
@@ -31,11 +31,11 @@ echo "Issuing 2 software credentials..."
 
 vsw publish -c ./P1.json -s softwareCertificate
 #I need the softwareDid and rec_reg_is and cred_rev_id
-SDID=$(vsw list -cs|jq '.results[]["attrs"].softwareDid')
+SDID=$(vsw list -cs|tr -d '\r\n'|jq '.results[]["attrs"].softwareDid')
 SDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$SDID")
 echo "SDID = $SDID"
-REV_REG_ID=$(vsw list -cs|jq '.results[0].rev_reg_id')
-CRED_REV_ID=$(vsw list -cs|jq '.results[0].cred_rev_id')
+REV_REG_ID=$(vsw list -cs|tr -d '\r\n'|jq '.results[0].rev_reg_id')
+CRED_REV_ID=$(vsw list -cs|tr -d '\r\n'|jq '.results[0].cred_rev_id')
 REV_REG_ID=$(sed -e 's/^"//' -e 's/"$//' <<<"$REV_REG_ID")
 CRED_REV_ID=$(sed -e 's/^"//' -e 's/"$//' <<<"$CRED_REV_ID")
 
@@ -57,7 +57,7 @@ vsw setup newwallet wallet2 -k 12345
 echo "Opening wallet2..."
 vsw setup wallet wallet2 -k 12345
 
-TDID=$(vsw list -w|jq '.results[].did')
+TDID=$(vsw list -w|tr -d '\r\n'|jq '.results[].did')
 TDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$TDID")
 echo "TDID = $TDID"
 
@@ -97,7 +97,7 @@ vsw setup newwallet wallet3 -k 12345
 echo "Opening wallet3..."
 vsw setup wallet wallet3 -k 12345
 
-VDID=$(vsw list -w|jq '.results[].did')
+VDID=$(vsw list -w|tr -d '\r\n'|jq '.results[].did')
 VDID=$(sed -e 's/^"//' -e 's/"$//' <<<"$VDID")
 echo "VDID = $VDID"
 
@@ -207,7 +207,6 @@ echo "Opening wallet1 (developer)..."
 vsw setup wallet wallet1 -k 12345
 echo "Revoking -rev $REV_REG_ID  -cred $CRED_REV_ID"
 vsw revoke -rev $REV_REG_ID  -cred $CRED_REV_ID
-
 echo "Closing wallet1 ..."
 vsw exit
 
