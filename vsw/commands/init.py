@@ -68,6 +68,7 @@ def do_credential_definition(schema_name):
         "schema_id": schema_id,
         "tag": "default"
     }, headers=client_header)
+    logger.info(res.__dict__)
     credential_definition_res = json.loads(res.text)
     logger.info(credential_definition_res)
     print(f'Created credential definition id: {credential_definition_res["credential_definition_id"]}')
@@ -86,14 +87,13 @@ def connection_repo():
     address = ('localhost', Constant.PORT_NUMBER)
     listener = Listener(address)
     listener._listener._socket.settimeout(Constant.TIMEOUT)
-    vsw_config = vsw.utils.get_vsw_agent()
     remove_history_connection(vsw_config)
     vsw_repo_url = f'{vsw_repo_config.get("host")}/controller/invitation'
     logger.info(f'Create invitation to: {vsw_repo_url}')
     response = requests.get(url=vsw_repo_url)
+    logger.info(response.__dict__)
     res = json.loads(response.text)
-    logger.info(res)
-
+    logger.info(res.__dict__)
     local_url = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/connections/receive-invitation?alias={vsw_config.get("label")}'
     logger.info(f'Receive invitation {local_url}')
     invitation = res["invitation"]
@@ -104,8 +104,8 @@ def connection_repo():
         "@id": invitation["@id"]
     }
     ss = requests.post(url=local_url, json=body, headers=client_header)
+    logger.info(ss.__dict__)
     invitation_response = json.loads(ss.text)
-    logger.info(invitation_response)
 
     connection_id = invitation_response["connection_id"]
     while True:

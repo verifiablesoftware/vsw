@@ -77,7 +77,7 @@
         {
           "schema_id": "UyDtaEFuTySAV9VZDykHkh:2:testCertificate:0.1",
           "issuer_did": "15aw2quRZJio3jn358Spsd",
-          "testerDid": "7YUEmNNbto94Lu3jsar6JD"
+          "softwareDid": "7YUEmNNbto94Lu3jsar6JD"
         }
       ]
     }

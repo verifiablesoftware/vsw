@@ -1,9 +1,87 @@
-# How to package vsw?
+# Developer's Read Me for VSW Client - Python <!-- omit in toc -->
+
+This project consists of the code for the client command line interface for interacting with that a [VSW repo](https://github.com/verifiablesoftware/vsw-repo).
+
+For informal discussions, we use slack : vswhq.slack.com
+Anyone is welcome to join the slack channel using this invitation link:https://join.slack.com/t/vswhq/shared_invite/zt-rcme6kt2-l08LWW_HdF0DVvwYeQIsbg
+Slack invitation link is timed. The above link is going to expired on July 7, 2021. We will try to watch and update the link timely. In case we missed it, or it isn't working for you, please file a github issue to alert us. Welcome to the vsw project.
+
+
+## Table of Contents <!-- omit in toc -->
+
+- [Developing](#Developing)
+  - [Prerequisites](#Prerequisites)
+  - [Virtual Environment Installation](#Virtual Environment Installation)
+  - [Component](#Components)
+  - [Storage](#Database)
+  - [Logger](#Logger)
+- [How to package vsw](#How to package vsw?)
+- [How to upload to pypi.org](#How to upload to pypi.org)
+- [How to install vsw](#How to install vsw with pip)
+- [How to run vsw](#How to run vsw)
+
+
+## Developing
+### Prerequisites
+[`Python: >= 3.6`](https://www.python.org/downloads/)
+
+[`NodeJS: >= 14.15`](https://nodejs.org/en/)
+
+[`Recommend IDE: Pycharm`](https://www.jetbrains.com/pycharm/download/#section=mac)
+
+### Virtual Environment Installation
+
+```
+git clone https://github.com/verifiablesoftware/vsw.git
+pip3 install virtualenv
+cd project root directory
+virtualenv --no-site-packages venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+### Components
+There are also 3 daemon processes are running at the same time when vsw is running.
+You can check them with command
+
+```ps -ef|grep vsw```
+#### aca-py 
+This is used to communicate with aca-py in repo
+#### vsw-controller
+This is used to receive the notification of webhook from aca-py, also save credential in the local.
+#### [localtunnel](https://github.com/localtunnel/localtunnel)
+This is used to exposes your localhost to the world for easy testing and sharing! No need to mess with DNS or deploy just to have others test out your changes.
+
+The localtunnel is installed in the following folder when 'pip3 install vsw'  
+```~/vsw_tools/localtunnel-master```
+
+
+### Storage
+The wallet information and credential information are saved in the local sqlite database.
+The sqlite database file is saved in the following path.
+
+```~/.indy_client```
+
+
+### Logger
+The logger file is placed in the the following folder.
+
+```~/vsw_logs```
+
+There are four logger files in this folder.  
+aries-cloud-agent.log (for aca-py)     
+lt.log (for localtunnel)  
+vsw-controller.log (for vsw controller)     
+vsw.log (for vsw)
+
+
+
+## How to package vsw?
 cd vsw project root directory, then execute the following command.
 
 `python setup.py sdist bdist_wheel`
 
-# How to upload to pypi.org
+## How to upload to pypi.org
 For production: 
 
 `twine upload dist/*`
@@ -12,7 +90,7 @@ For test:
 
 `twine upload --repository testpypi dist/*`
 
-# How to install vsw with pip
+## How to install vsw with pip
 For production: 
 
 `pip install vsw`
@@ -31,7 +109,7 @@ If you have already locally installed it before, need to uninstall it firstly.
 
 `pip uninstall vsw-x.x.x-py3-none-any.whl`
 
-# How to run vsw
+## How to run vsw
 1. `vsw setup`
 
     **newwallet:** create new wallet
@@ -88,10 +166,4 @@ If you have already locally installed it before, need to uninstall it firstly.
     Exit aca-py agent, close vsw controller, localtunnel etc.
     
 
-# Verifiable Software
 
-This project consists of the code for the client command line interface for interacting with that a [VSW repo](https://github.com/verifiablesoftware/vsw-repo).
-
-For informal discussions, we use slack : vswhq.slack.com
-Anyone is welcome to join the slack channel using this invitation link:https://join.slack.com/t/vswhq/shared_invite/zt-rcme6kt2-l08LWW_HdF0DVvwYeQIsbg
-Slack invitation link is timed. The above link is going to expired on July 7, 2021. We will try to watch and update the link timely. In case we missed it, or it isn't working for you, please file a github issue to alert us. Welcome to the vsw project.
