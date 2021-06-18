@@ -237,14 +237,14 @@ def send_request(client_conn_id, software_request_attribute, test_request_attrib
     }
     logger.info(json.dumps(proof_request_web_request))
     res = requests.post(url=vsw_url, json=proof_request_web_request, headers=client_header)
-    logger.info(res.__dict__)
+    logger.info(res)
     return json.loads(res.text)
 
 
 def get_client_connection():
     connection_response = requests.get(url=f'{vsw_url_host}/connections?state=active', headers=client_header)
     res = json.loads(connection_response.text)
-    logger.info(res.__dict__)
+    logger.info(res)
     connections = res["results"]
     if len(connections) > 0:
         return connections[-1]

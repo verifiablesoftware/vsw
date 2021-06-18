@@ -14,6 +14,7 @@ Slack invitation link is timed. The above link is going to expired on July 7, 20
   - [Virtual Environment Installation](#virtual-environment-installation)
   - [Component](#components)
   - [Storage](#storage)
+  - [Configuration](#configuration)
   - [Logger](#logger)
 - [How to package vsw](#how-to-package-vsw?)
 - [How to upload to pypi.org](#how-to-upload-to-pypi.org)
@@ -23,11 +24,20 @@ Slack invitation link is timed. The above link is going to expired on July 7, 20
 
 ## Developing
 ### Prerequisites
-[`Python: >= 3.6`](https://www.python.org/downloads/)
+#### `Python: >= 3.6`
 
-[`NodeJS: >= 14.15`](https://nodejs.org/en/)
+See https://www.python.org/downloads/ to install
 
-[`Recommend IDE: Pycharm`](https://www.jetbrains.com/pycharm/download/#section=mac)
+
+#### `NodeJS: >= 14.15`
+
+See https://nodejs.org/en/ to install
+
+
+#### `Recommend IDE: Pycharm`
+
+See https://www.jetbrains.com/pycharm/download/#section=mac to install
+
 
 ### Virtual Environment Installation
 
@@ -49,18 +59,28 @@ You can check them with command below.
 This is used to communicate with aca-py in repo
 #### vsw-controller
 This is used to receive the notification of webhook from aca-py, also save credential in the local.
-#### [localtunnel](https://github.com/localtunnel/localtunnel)
+#### localtunnel
 This is used to exposes your localhost to the world for easy testing and sharing! No need to mess with DNS or deploy just to have others test out your changes.
+see https://github.com/localtunnel/localtunnel to get the detail.
+The localtunnel is installed in the following folder when 'pip3 install vsw'
 
-The localtunnel is installed in the following folder when 'pip3 install vsw'  
 ```~/vsw_tools/localtunnel-master```
 
+The script file how to install localtunnel is placed in the file below.  
+
+```<project root dir>/vsw/conf/local_tunnel.sh```
 
 ### Storage
 The wallet information and credential information are saved in the local sqlite database.
 The sqlite database file is saved in the following path.
 
 ```~/.indy_client```
+
+
+### Configuration
+The vsw configuration file is in the following path. it includes tails server and repo server address, also includes aca-py related configuration and schema info.
+ 
+```<project root dir>vsw/conf/vsw.ini```
 
 
 ### Logger
