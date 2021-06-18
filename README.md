@@ -9,16 +9,16 @@ Slack invitation link is timed. The above link is going to expired on July 7, 20
 
 ## Table of Contents <!-- omit in toc -->
 
-- [Developing](#Developing)
-  - [Prerequisites](#Prerequisites)
-  - [Virtual Environment Installation](#Virtual Environment Installation)
-  - [Component](#Components)
-  - [Storage](#Database)
-  - [Logger](#Logger)
-- [How to package vsw](#How to package vsw?)
-- [How to upload to pypi.org](#How to upload to pypi.org)
-- [How to install vsw](#How to install vsw with pip)
-- [How to run vsw](#How to run vsw)
+- [Developing](#developing)
+  - [Prerequisites](#prerequisites)
+  - [Virtual Environment Installation](#virtual-environment-installation)
+  - [Component](#components)
+  - [Storage](#storage)
+  - [Logger](#logger)
+- [How to package vsw](#how-to-package-vsw?)
+- [How to upload to pypi.org](#how-to-upload-to-pypi.org)
+- [How to install vsw](#how-to-install-vsw-with-pip)
+- [How to run vsw](#how-to-run-vsw)
 
 
 ## Developing
@@ -35,14 +35,14 @@ Slack invitation link is timed. The above link is going to expired on July 7, 20
 git clone https://github.com/verifiablesoftware/vsw.git
 pip3 install virtualenv
 cd project root directory
-virtualenv --no-site-packages venv
+virtualenv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
 ### Components
 There are also 3 daemon processes are running at the same time when vsw is running.
-You can check them with command
+You can check them with command below.
 
 ```ps -ef|grep vsw```
 #### aca-py 
