@@ -29,7 +29,7 @@ Slack invitation link is timed. The above link is going to expired on July 7, 20
 See https://www.python.org/downloads/ to install
 
 
-#### `NodeJS: >= 14.15`
+#### `NodeJS: >= 12.22`
 
 See https://nodejs.org/en/ to install
 

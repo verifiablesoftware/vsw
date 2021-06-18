@@ -34,8 +34,8 @@ def main(args: List[str]) -> bool:
 def print_help():
     print('Usage:')
     print('vsw revoke [options]')
-    print('-reg, --rev_reg_id       Revocation registry identifier')
-    print('-rev, --cred_rev_id      The Credential Revocation identifier')
+    print('-rev, --rev-reg-id        Revocation registry identifier')
+    print('-cred, --cred-rev-id      The Credential Revocation identifier')
 
 
 def parse_args(args):

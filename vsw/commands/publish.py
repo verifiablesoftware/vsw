@@ -288,5 +288,5 @@ def send_offer(data):
             ]
         },
     })
-    logger.info(res)
+    logger.info(res.text)
     return json.loads(res.text)

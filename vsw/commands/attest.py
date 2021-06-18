@@ -65,7 +65,7 @@ def parse_args(args):
 def get_credential_definition_id():
     local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/credential-definitions/created?schema_id={vsw_config.get("test_schema_id")}'
     response = requests.get(url=local, headers=client_header)
-    logger.info(response)
+    logger.info(response.text)
     res = json.loads(response.text)
     if len(res["credential_definition_ids"]) == 0:
         raise ValueError('vsw: error: Not found attest credential definition id!')
@@ -188,5 +188,5 @@ def send_offer(data):
             ]
         },
     })
-    logger.info(res)
+    logger.info(res.text)
     return json.loads(res.text)

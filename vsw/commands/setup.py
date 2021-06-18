@@ -173,8 +173,8 @@ def check_status(seed):
             local = f'http://{vsw_config.get("admin_host")}:{str(vsw_config.get("admin_port"))}/status/ready'
             client_header = {"x-api-key": seed}
             response = requests.get(url=local, headers=client_header)
+            logger.info(response.text)
             res = json.loads(response.text)
-            logger.info(res)
             if res["ready"]:
                 return True;
             else:
